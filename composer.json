@@ -1,0 +1,24 @@
+{
+    "name": "potatoplank/spudbot",
+    "description": "A discord bot built on top of DiscordPHP",
+    "authors": [
+        {
+            "name": "PotatoPlank",
+            "email": "potatoplank@protonmail.com"
+        }
+    ],
+    "require": {
+        "team-reflex/discord-php": "^7.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Spudbot\\": "src/Spudbot"
+        }
+    },
+    "suggest": {
+        "ext-uv": ""
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.1"
+    }
+}
