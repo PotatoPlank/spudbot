@@ -4,7 +4,7 @@ namespace Spudbot\Repository\SQL;
 
 use Spudbot\Repository\RepositoryInterface;
 
-class UserRepository implements RepositoryInterface
+class MemberRepository implements RepositoryInterface
 {
 
     public function find(string $id)
