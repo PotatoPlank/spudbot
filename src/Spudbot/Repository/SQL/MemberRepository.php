@@ -7,7 +7,7 @@ use Discord\Parts\Part;
 use Spudbot\Collection;
 use Spudbot\Model;
 use Spudbot\Model\Member;
-use Spudbot\Repository;
+use Spudbot\Repository\SQLRepository;
 
 class MemberRepository extends SQLRepository
 {

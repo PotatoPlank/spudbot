@@ -1,6 +1,6 @@
 <?php
 
-namespace Spudbot\Repository\SQL;
+namespace Spudbot\Repository;
 
 use Doctrine\DBAL\Connection;
 use Spudbot\Repository;

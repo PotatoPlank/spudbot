@@ -10,7 +10,7 @@ use OutOfBoundsException;
 use Spudbot\Collection;
 use Spudbot\Model;
 use Spudbot\Model\Guild;
-use Spudbot\Repository;
+use Spudbot\Repository\SQLRepository;
 
 class GuildRepository extends SQLRepository
 {
