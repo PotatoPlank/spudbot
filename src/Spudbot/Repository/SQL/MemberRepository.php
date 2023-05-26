@@ -1,24 +1,33 @@
 <?php
+declare(strict_types=1);
 
 namespace Spudbot\Repository\SQL;
 
-use Spudbot\Repository\RepositoryInterface;
+use Discord\Parts\Part;
+use Spudbot\Model;
+use Spudbot\Model\Member;
+use Spudbot\Repository;
 
-class MemberRepository implements RepositoryInterface
+class MemberRepository extends Repository
 {
 
-    public function find(string $id)
+    public function findById(string $id): Model
     {
         // TODO: Implement find() method.
     }
 
-    public function save(): bool
+    public function save(Member|Model $model): bool
     {
         // TODO: Implement save() method.
     }
 
-    public function remove(): bool
+    public function remove(Member|Model $model): bool
     {
         // TODO: Implement remove() method.
+    }
+
+    public function findByPart(Part $part): Model
+    {
+        // TODO: Implement findByPart() method.
     }
 }
