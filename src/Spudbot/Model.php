@@ -8,10 +8,8 @@ use Carbon\Carbon;
 abstract class Model
 {
     private ?int $id;
-
-    public function __construct(private Carbon $createdAt, private Carbon $modifiedAt){
-
-    }
+    private Carbon $createdAt;
+    private Carbon $modifiedAt;
 
     public function getCreatedAt(): Carbon
     {

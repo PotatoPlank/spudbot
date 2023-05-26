@@ -8,18 +8,33 @@ use Spudbot\Model;
 
 class Guild extends Model
 {
+    private string $discordId;
+    private ?string $outputChannelId;
     private ?string $outputThreadId;
 
-    public function __construct(
-        private string $discordId,
-        private string $outputChannelId,
-        Carbon $createdAt,
-        Carbon $modifiedAt
-    ) {
-        parent::__construct($createdAt, $modifiedAt);
+    public function setDiscordId(string $discordId){
+        $this->discordId = $discordId;
     }
 
-    public function setOutputThreadId(?string $outputThreadId){
-        $this->outputThreadId = $outputThreadId;
+    public function setOutputChannelId(?string $channelId){
+        $this->outputChannelId = $channelId;
+    }
+    public function setOutputThreadId(?string $threadId){
+        $this->outputThreadId = $threadId;
+    }
+
+    public function getDiscordId(): string
+    {
+        return $this->discordId;
+    }
+
+    public function getOutputChannelId(): ?string
+    {
+        return $this->outputChannelId;
+    }
+
+    public function getOutputThreadId(): ?string
+    {
+        return $this->outputThreadId;
     }
 }
