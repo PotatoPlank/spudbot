@@ -9,7 +9,7 @@ use Spudbot\Model;
 use Spudbot\Model\Member;
 use Spudbot\Repository;
 
-class MemberRepository extends Repository
+class MemberRepository extends SQLRepository
 {
 
     public function findById(string $id): Model

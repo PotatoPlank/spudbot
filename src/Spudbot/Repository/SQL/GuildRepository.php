@@ -12,7 +12,7 @@ use Spudbot\Model;
 use Spudbot\Model\Guild;
 use Spudbot\Repository;
 
-class GuildRepository extends Repository
+class GuildRepository extends SQLRepository
 {
     public function findById(string $id): Guild
     {
