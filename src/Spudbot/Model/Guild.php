@@ -12,14 +12,17 @@ class Guild extends Model
     private ?string $outputChannelId;
     private ?string $outputThreadId;
 
-    public function setDiscordId(string $discordId){
+    public function setDiscordId(string $discordId): void
+    {
         $this->discordId = $discordId;
     }
 
-    public function setOutputChannelId(?string $channelId){
+    public function setOutputChannelId(?string $channelId): void
+    {
         $this->outputChannelId = $channelId;
     }
-    public function setOutputThreadId(?string $threadId){
+    public function setOutputThreadId(?string $threadId): void
+    {
         $this->outputThreadId = $threadId;
     }
 
