@@ -8,7 +8,6 @@ use Discord\Parts\Part;
 use OutOfBoundsException;
 use Spudbot\Collection;
 use Spudbot\Model;
-use Spudbot\Model\Guild;
 use Spudbot\Model\Member;
 use Spudbot\Repository\SQLRepository;
 
