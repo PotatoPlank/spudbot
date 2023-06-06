@@ -46,7 +46,7 @@ class MemberRepository extends SQLRepository
             ->fetchAssociative();
 
         if(!$response){
-            throw new OutOfBoundsException("Guild with id {$part->id} does not exist.");
+            throw new OutOfBoundsException("Member with id {$part->id} does not exist.");
         }
 
         $guild = new GuildRepository($this->dbal);
