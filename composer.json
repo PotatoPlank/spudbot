@@ -8,7 +8,10 @@
         }
     ],
     "require": {
-        "team-reflex/discord-php": "^7.3"
+        "team-reflex/discord-php": "^7.3",
+        "nesbot/carbon": "^2.66",
+        "doctrine/dbal": "^3.6",
+        "vlucas/phpdotenv": "^5.5"
     },
     "autoload": {
         "psr-4": {
