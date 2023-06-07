@@ -8,7 +8,7 @@ use Spudbot\Model;
 
 class Event extends Model
 {
-    private string $guildId;
+    private Guild $guild;
     private string $channelId;
     private string $name;
     private \Spudbot\Type\Event $type;
@@ -16,14 +16,14 @@ class Event extends Model
     private ?string $nativeId;
     private Carbon $scheduledAt;
 
-    public function setGuildId(string $guildId): void
+    public function setGuild(Guild $guild): void
     {
-        $this->guildId = $guildId;
+        $this->guild = $guild;
     }
 
-    public function getGuildId(): string
+    public function getGuild(): Guild
     {
-        return $this->guildId;
+        return $this->guild;
     }
 
 

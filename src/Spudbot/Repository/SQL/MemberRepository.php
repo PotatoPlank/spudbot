@@ -88,6 +88,34 @@ class MemberRepository extends SQLRepository
         return $collection;
     }
 
+    public function getEventAttendance(Member $member): Collection
+    {
+        $collection = new Collection();
+        $event = new EventRepository($this->dbal);
+        $queryBuilder = $this->dbal->createQueryBuilder();
+
+        $response = $queryBuilder->select('*')->from('event_attendance')
+            ->where('member_id = ?')->setParameters([$member->getId()])
+            ->fetchAllAssociative();
+
+        if(!empty($response)){
+            foreach ($response as $row) {
+                $attendance = new Model\EventAttendance();
+                $attendance->setId($row['id']);
+                $attendance->setEvent($event->findById($row['event_id']));
+                $attendance->setMember($member);
+                $attendance->setStatus($row['status']);
+                $attendance->wasNoShow((bool) $row['no_show']);
+                $attendance->setCreatedAt(Carbon::parse($row['created_at']));
+                $attendance->setModifiedAt(Carbon::parse($row['modified_at']));
+
+                $collection->push($attendance);
+            }
+        }
+
+        return $collection;
+    }
+
     public function save(Member|Model $model): bool
     {
         // TODO: Implement save() method.
