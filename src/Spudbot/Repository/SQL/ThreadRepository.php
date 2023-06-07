@@ -14,7 +14,7 @@ use Spudbot\Repository\SQLRepository;
 class ThreadRepository extends SQLRepository
 {
 
-    public function findById(string $id): Model
+    public function findById(string $id): Thread
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('threads')
@@ -37,7 +37,7 @@ class ThreadRepository extends SQLRepository
         return $thread;
     }
 
-    public function findByPart(\Discord\Parts\Thread\Thread|Part $part): Model
+    public function findByPart(\Discord\Parts\Thread\Thread|Part $part): Thread
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('threads')

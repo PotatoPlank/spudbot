@@ -36,7 +36,7 @@ class GuildRepository extends SQLRepository
         return $guild;
     }
 
-    public function findByPart(\Discord\Parts\Guild\Guild|Part $part): Model
+    public function findByPart(\Discord\Parts\Guild\Guild|Part $part): Guild
     {
         if(!$part instanceof \Discord\Parts\Guild\Guild){
             throw new InvalidArgumentException("Part is not an instance of Guild.");

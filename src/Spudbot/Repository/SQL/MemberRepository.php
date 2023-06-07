@@ -14,7 +14,7 @@ use Spudbot\Repository\SQLRepository;
 class MemberRepository extends SQLRepository
 {
 
-    public function findById(string $id): Model
+    public function findById(string $id): Member
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('members')
@@ -38,7 +38,7 @@ class MemberRepository extends SQLRepository
         return $member;
     }
 
-    public function findByPart(\Discord\Parts\Thread\Member|\Discord\Parts\User\Member|Part $part): Model
+    public function findByPart(\Discord\Parts\Thread\Member|\Discord\Parts\User\Member|Part $part): Member
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('members')
