@@ -14,7 +14,7 @@ use Spudbot\Repository\SQLRepository;
 class ThreadRepository extends SQLRepository
 {
 
-    public function findById(string $id): Thread
+    public function findById(string|int $id): Thread
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('threads')

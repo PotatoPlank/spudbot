@@ -10,7 +10,7 @@ abstract class Repository
 {
     abstract public  function getAll(): Collection;
     abstract public function findByPart(Part $part): Model;
-    abstract public function findById(string $id): Model;
+    abstract public function findById(string|int $id): Model;
     abstract public function save(Model $model): bool;
     abstract public function remove(Model $model): bool;
 }

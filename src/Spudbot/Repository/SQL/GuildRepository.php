@@ -14,7 +14,7 @@ use Spudbot\Repository\SQLRepository;
 
 class GuildRepository extends SQLRepository
 {
-    public function findById(string $id): Guild
+    public function findById(string|int $id): Guild
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('guilds')

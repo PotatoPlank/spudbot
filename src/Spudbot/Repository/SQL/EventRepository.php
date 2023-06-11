@@ -16,9 +16,10 @@ use Spudbot\Type\Event;
 
 class EventRepository extends SQLRepository
 {
-    public function findById(string $id): Model\Event
+    public function findById(string|int $id): Model\Event
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
+        $guild = new GuildRepository($this->dbal);
         $response = $queryBuilder->select('*')->from('events')
             ->where('id = ?')->setParameters([$id])
             ->fetchAssociative();
@@ -29,7 +30,7 @@ class EventRepository extends SQLRepository
 
         $event = new Model\Event();
         $event->setId($response['id']);
-        $event->setGuild($response['guild_id']);
+        $event->setGuild($guild->findById($response['guild_id']));
         $event->setChannelId($response['channel_id']);
         $event->setName($response['name']);
         $event->setType(Event::from($response['type']));
@@ -48,6 +49,7 @@ class EventRepository extends SQLRepository
             throw new InvalidArgumentException("Part is not an instance with an Event Id.");
         }
         $queryBuilder = $this->dbal->createQueryBuilder();
+        $guild = new GuildRepository($this->dbal);
 
         $response = $queryBuilder->select('*')->from('events')
             ->where('native_id = ?')
@@ -60,7 +62,7 @@ class EventRepository extends SQLRepository
 
         $event = new Model\Event();
         $event->setId($response['id']);
-        $event->setGuild($response['guild_id']);
+        $event->setGuild($guild->findById($response['guild_id']));
         $event->setChannelId($response['channel_id']);
         $event->setName($response['name']);
         $event->setType(Event::from($response['type']));
@@ -79,7 +81,7 @@ class EventRepository extends SQLRepository
         $guild = new GuildRepository($this->dbal);
         $queryBuilder = $this->dbal->createQueryBuilder();
 
-        $response = $queryBuilder->select('*')->from('guilds')
+        $response = $queryBuilder->select('*')->from('events')
             ->fetchAllAssociative();
 
         if(!empty($response)){
