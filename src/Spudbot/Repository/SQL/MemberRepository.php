@@ -68,7 +68,7 @@ class MemberRepository extends SQLRepository
         $guild = new GuildRepository($this->dbal);
         $queryBuilder = $this->dbal->createQueryBuilder();
 
-        $response = $queryBuilder->select('*')->from('guilds')
+        $response = $queryBuilder->select('*')->from('members')
             ->fetchAllAssociative();
 
         if(!empty($response)){

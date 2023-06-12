@@ -28,6 +28,11 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
         $this->collection[] = $value;
     }
 
+    public function clear(): void
+    {
+        $this->collection = [];
+    }
+
     public function offsetExists(mixed $offset): bool
     {
         return isset($this->collection[$offset]);

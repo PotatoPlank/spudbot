@@ -8,12 +8,12 @@ use Doctrine\DBAL\DriverManager;
 use Dotenv\Dotenv;
 use OutOfBoundsException;
 use PHPUnit\Framework\TestCase;
-use Spudbot\Model\Guild;
-use Spudbot\Repository\SQL\GuildRepository;
+use Spudbot\Model\Thread;
+use Spudbot\Repository\SQL\ThreadRepository;
 
-class GuildTest extends TestCase
+class ThreadTest extends TestCase
 {
-    public GuildRepository $repository;
+    public ThreadRepository $repository;
 
     public function setUp(): void
     {
@@ -28,65 +28,68 @@ class GuildTest extends TestCase
             'driver' => $_ENV['DATABASE_DRIVER'],
         ];
         $connection = DriverManager::getConnection($parameters);
-        $this->repository = new GuildRepository($connection);
+        $this->repository = new ThreadRepository($connection);
     }
 
     /**
      * @test
-     * @covers \Spudbot\Repository\SQL\GuildRepository
+     * @covers \Spudbot\Repository\SQL\ThreadRepository
      * @uses \Spudbot\Collection
      * @uses \Spudbot\Model
-     * @uses \Spudbot\Model\Guild
+     * @uses \Spudbot\Model\Thread
      * @uses \Spudbot\Repository\SQLRepository
+     * @uses \Spudbot\Repository\SQL\GuildRepository
+     * @uses \Spudbot\Model\Guild
      */
     public function successfullyGetAllRepositoryRecords(): void
     {
         $collection = $this->repository->getAll();
 
         $this->assertNotCount(0, $collection);
-        $this->assertInstanceOf(Guild::class, $collection->get(0));
+        $this->assertInstanceOf(Thread::class, $collection->get(0));
     }
 
     /**
      * @test
-     * @covers \Spudbot\Repository\SQL\GuildRepository
+     * @covers \Spudbot\Repository\SQL\ThreadRepository
      * @uses \Spudbot\Model
-     * @uses \Spudbot\Model\Guild
+     * @uses \Spudbot\Model\Thread
      * @uses \Spudbot\Collection
+     * @uses \Spudbot\Model\Guild
      * @uses \Spudbot\Repository\SQLRepository
+     * @uses \Spudbot\Repository\SQL\GuildRepository
      * @doesNotPerformAssertions
      */
-    public function successfullyFindGuildById(): void
+    public function successfullyFindThreadById(): void
     {
-        $testGuild = 3;
+        $testThread = 59;
 
-        $this->repository->findById($testGuild);
+        $this->repository->findById($testThread);
     }
 
     /**
      * @test
-     * @covers \Spudbot\Repository\SQL\GuildRepository
+     * @covers \Spudbot\Repository\SQL\ThreadRepository
      * @uses \Spudbot\Model
-     * @uses \Spudbot\Model\Guild
-     * @uses  \Spudbot\Collection
+     * @uses \Spudbot\Model\Thread
      * @uses \Spudbot\Repository\SQLRepository
      */
-    public function cannotRetrieveInvalidGuildId(): void
+    public function cannotRetrieveInvalidThreadId(): void
     {
-        $testGuild = 0;
+        $testThread = 0;
 
         $this->expectException(OutOfBoundsException::class);
 
-        $this->repository->findById($testGuild);
+        $this->repository->findById($testThread);
     }
 
     /**
      * @test
-     * @covers \Spudbot\Repository\SQL\GuildRepository
+     * @covers \Spudbot\Repository\SQL\ThreadRepository
      * @doesNotPerformAssertions
      * @todo
      */
-//    public function successfullyFindGuildByPart(): void
+//    public function successfullyFindThreadByPart(): void
 //    {
 //
 //    }

@@ -41,6 +41,7 @@ class EventTest extends TestCase
      * @uses \Spudbot\Model\Event
      * @uses \Spudbot\Model\Guild
      * @uses \Spudbot\Repository\SQL\GuildRepository
+     * @uses \Spudbot\Repository\SQLRepository
      */
     public function successfullyGetAllRepositoryRecords(): void
     {
@@ -57,6 +58,8 @@ class EventTest extends TestCase
      * @uses \Spudbot\Model
      * @uses \Spudbot\Model\Event
      * @uses \Spudbot\Model\Guild
+     * @uses \Spudbot\Collection
+     * @uses \Spudbot\Repository\SQLRepository
      * @doesNotPerformAssertions
      */
     public function successfullyFindEventById(): void
@@ -71,6 +74,7 @@ class EventTest extends TestCase
      * @covers \Spudbot\Repository\SQL\EventRepository
      * @uses \Spudbot\Model
      * @uses \Spudbot\Model\Event
+     * @uses \Spudbot\Repository\SQLRepository
      */
     public function cannotRetrieveInvalidEventId(): void
     {
@@ -92,6 +96,7 @@ class EventTest extends TestCase
      * @uses \Spudbot\Model\Event
      * @uses \Spudbot\Model\Guild
      * @uses \Spudbot\Repository\SQL\GuildRepository
+     * @uses \Spudbot\Repository\SQLRepository
      * @doesNotPerformAssertions
      */
     public function successfullyRetrievesAttendanceByEvent(): void
@@ -112,6 +117,7 @@ class EventTest extends TestCase
      * @uses \Spudbot\Model\Event
      * @uses \Spudbot\Model\Guild
      * @uses \Spudbot\Repository\SQL\GuildRepository
+     * @uses \Spudbot\Repository\SQLRepository
      * @doesNotPerformAssertions
      */
     public function successfullyRetrievesAttendanceByEventAndMember(): void

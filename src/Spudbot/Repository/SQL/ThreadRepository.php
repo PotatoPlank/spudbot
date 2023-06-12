@@ -66,7 +66,7 @@ class ThreadRepository extends SQLRepository
         $guild = new GuildRepository($this->dbal);
         $queryBuilder = $this->dbal->createQueryBuilder();
 
-        $response = $queryBuilder->select('*')->from('guilds')
+        $response = $queryBuilder->select('*')->from('threads')
             ->fetchAllAssociative();
 
         if(!empty($response)){
