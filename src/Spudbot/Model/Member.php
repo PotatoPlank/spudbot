@@ -37,7 +37,7 @@ class Member extends Model
         $this->totalComments = $totalComments;
     }
 
-    public function getTotalComments(int $totalComments): int
+    public function getTotalComments(): int
     {
         return $this->totalComments;
     }

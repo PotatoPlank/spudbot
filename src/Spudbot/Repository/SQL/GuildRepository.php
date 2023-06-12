@@ -14,8 +14,11 @@ use Spudbot\Repository\SQLRepository;
 
 class GuildRepository extends SQLRepository
 {
-    public function findById(string $id): Guild
+    public function findById(string|int $id): Guild
     {
+        if($this->isCached($id)){
+            return $this->getCache($id);
+        }
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('guilds')
             ->where('id = ?')->setParameters([$id])
@@ -33,6 +36,8 @@ class GuildRepository extends SQLRepository
         $guild->setCreatedAt(Carbon::parse($response['created_at']));
         $guild->setModifiedAt(Carbon::parse($response['modified_at']));
 
+        $this->setCache($guild->getId(), $guild);
+
         return $guild;
     }
 
@@ -40,6 +45,9 @@ class GuildRepository extends SQLRepository
     {
         if(!$part instanceof \Discord\Parts\Guild\Guild){
             throw new InvalidArgumentException("Part is not an instance of Guild.");
+        }
+        if($this->isCached($part->id)){
+            return $this->getCache($part->id);
         }
         $queryBuilder = $this->dbal->createQueryBuilder();
 
@@ -59,6 +67,8 @@ class GuildRepository extends SQLRepository
         $guild->setOutputThreadId($response['output_thread_id']);
         $guild->setCreatedAt(Carbon::parse($response['created_at']));
         $guild->setModifiedAt(Carbon::parse($response['modified_at']));
+
+        $this->setCache($guild->getId(), $guild);
 
         return $guild;
     }
@@ -80,6 +90,10 @@ class GuildRepository extends SQLRepository
                 $guild->setOutputThreadId($row['output_thread_id']);
                 $guild->setCreatedAt(Carbon::parse($row['created_at']));
                 $guild->setModifiedAt(Carbon::parse($row['modified_at']));
+
+                if(!$this->isCached($guild->getId())){
+                    $this->setCache($guild->getId(), $guild);
+                }
 
                 $collection->push($guild);
             }

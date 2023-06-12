@@ -9,7 +9,7 @@ use Spudbot\Model;
 class Event extends Model
 {
     private Guild $guild;
-    private string $channelId;
+    private ?string $channelId;
     private string $name;
     private \Spudbot\Type\Event $type;
     private ?string $seshId;
@@ -27,7 +27,7 @@ class Event extends Model
     }
 
 
-    public function setChannelId(string $channelId): void
+    public function setChannelId(?string $channelId): void
     {
         $this->channelId = $channelId;
     }

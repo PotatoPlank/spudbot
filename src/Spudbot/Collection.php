@@ -6,7 +6,7 @@ use Traversable;
 
 class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
 {
-    private array $collection;
+    private array $collection = [];
 
     public function set(string|int $key, mixed $value): void
     {
@@ -18,9 +18,19 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
         return $this->collection[$key];
     }
 
+    public function getAll(): array
+    {
+        return $this->collection;
+    }
+
     public function push(mixed $value)
     {
         $this->collection[] = $value;
+    }
+
+    public function clear(): void
+    {
+        $this->collection = [];
     }
 
     public function offsetExists(mixed $offset): bool
