@@ -7,15 +7,19 @@ use Spudbot\Collection;
 
 final class CollectionsTest extends TestCase
 {
+    public Collection $collection;
+    public function setUp(): void
+    {
+        $this->collection = new Collection();
+    }
+
     /**
      * @test
      * @covers \Spudbot\Collection
      */
     public function successfullyCreatesAnEmptyCollection(): void
     {
-        $collection = new Collection();
-
-        $items = $collection->getAll();
+        $items = $this->collection->getAll();
 
         $this->assertEmpty($items);
     }
@@ -26,13 +30,12 @@ final class CollectionsTest extends TestCase
      */
     public function successfullySetsAndGetsAnItemInACollection(): void
     {
-        $collection = new Collection();
         $value = md5((string)random_int(1, 999999));
 
-        $collection->set('key', $value);
+        $this->collection->set('key', $value);
 
-        $this->assertEquals($value, $collection->get('key'));
-        $this->assertCount(1, $collection->getAll());
+        $this->assertEquals($value, $this->collection->get('key'));
+        $this->assertCount(1, $this->collection->getAll());
     }
 
     /**
@@ -41,12 +44,10 @@ final class CollectionsTest extends TestCase
      */
     public function successfullyPushesAnItemInACollection(): void
     {
-        $collection = new Collection();
+        $this->collection->push('push');
 
-        $collection->push('push');
-
-        $this->assertEquals('push', $collection->get(0));
-        $this->assertCount(1, $collection->getAll());
+        $this->assertEquals('push', $this->collection->get(0));
+        $this->assertCount(1, $this->collection->getAll());
     }
 
     /**
@@ -55,13 +56,12 @@ final class CollectionsTest extends TestCase
      */
     public function collectionIsCountable(): void
     {
-        $collection = new Collection();
 
-        $collection->push(1);
-        $collection->push(2);
-        $collection->push(3);
+        $this->collection->push(1);
+        $this->collection->push(2);
+        $this->collection->push(3);
 
-        $this->assertCount(3, $collection);
+        $this->assertCount(3, $this->collection);
     }
 
     /**
@@ -70,18 +70,16 @@ final class CollectionsTest extends TestCase
      */
     public function collectionIsIterable(): void
     {
-        $collection = new Collection();
+        $this->collection->push(0);
+        $this->collection->push(1);
+        $this->collection->push(2);
+        $this->collection->push(3);
 
-        $collection->push(0);
-        $collection->push(1);
-        $collection->push(2);
-        $collection->push(3);
-
-        foreach($collection as $i => $item){
+        foreach($this->collection as $i => $item){
             $this->assertEquals($i, $item);
         }
 
-        $this->assertCount(4, $collection);
+        $this->assertCount(4, $this->collection);
     }
 
     /**
@@ -90,19 +88,36 @@ final class CollectionsTest extends TestCase
      */
     public function collectionImplementsArrayAccess(): void
     {
-        $collection = new Collection();
-        $collection->set('removed', 'value');
-        $collection->set('kept', 'value');
+        $this->collection->set('removed', 'value');
+        $this->collection->set('kept', 'value');
 
-        $collection['key'] = 'value';
-        unset($collection['removed']);
+        $this->collection['key'] = 'value';
+        unset($this->collection['removed']);
 
-        $this->assertEquals('value', $collection->get('key'));
-        $this->assertEquals('value', $collection['key']);
-        $this->assertEquals('value', $collection['kept']);
-        $this->assertTrue(isset($collection['key']));
-        $this->assertTrue(isset($collection['kept']));
-        $this->assertFalse(isset($collection['removed']));
+        $this->assertEquals('value', $this->collection->get('key'));
+        $this->assertEquals('value', $this->collection['key']);
+        $this->assertEquals('value', $this->collection['kept']);
+        $this->assertTrue(isset($this->collection['key']));
+        $this->assertTrue(isset($this->collection['kept']));
+        $this->assertFalse(isset($this->collection['removed']));
 
+    }
+
+    /**
+     * @test
+     * @covers \Spudbot\Collection
+     */
+    public function successfullyClearsCollection(): void
+    {
+        for ($i=0; $i < 100; $i++)
+        {
+            $this->collection->push($i);
+        }
+
+        $this->assertCount(100, $this->collection);
+
+        $this->collection->clear();
+
+        $this->assertCount(0, $this->collection);
     }
 }
