@@ -2,6 +2,9 @@
 
 namespace Spudbot\Bot;
 
+use Discord\Discord;
+use Discord\WebSockets\Intents;
+
 class SpudOptions
 {
     private array $options;
@@ -29,5 +32,10 @@ class SpudOptions
     public function shouldLoadAllMembers($boolean = true): void
     {
         $this->options['loadAllMembers'] = $boolean;
+    }
+
+    public function setRawOption(string $key, string $value): void
+    {
+        $this->options[$key] = $value;
     }
 }
