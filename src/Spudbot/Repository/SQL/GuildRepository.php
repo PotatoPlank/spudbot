@@ -119,7 +119,6 @@ class GuildRepository extends IGuildRepository
         }
 
         $parameters = [
-            $guild->getDiscordId(),
             $guild->getOutputChannelId(),
             $guild->getOutputThreadId(),
             $guild->getModifiedAt()->toDateTimeString(),
@@ -128,7 +127,6 @@ class GuildRepository extends IGuildRepository
 
         $impactedRows = $this->dbal->createQueryBuilder()
             ->update('guilds')
-            ->set('discord_id', '?')
             ->set('output_channel_id', '?')
             ->set('output_thread_id', '?')
             ->set('modified_at', '?')
