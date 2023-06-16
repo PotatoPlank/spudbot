@@ -7,13 +7,15 @@ use Carbon\Carbon;
 use Discord\Parts\Part;
 use OutOfBoundsException;
 use Spudbot\Collection;
+use Spudbot\Interface\IThreadRepository;
 use Spudbot\Model;
 use Spudbot\Model\Thread;
 use Spudbot\Repository\SQLRepository;
+use Spudbot\Traits\UsesDoctrine;
 
-class ThreadRepository extends SQLRepository
+class ThreadRepository extends IThreadRepository
 {
-
+    use UsesDoctrine;
     public function findById(string|int $id): Thread
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
@@ -93,5 +95,10 @@ class ThreadRepository extends SQLRepository
     public function remove(Thread|Model $model): bool
     {
         // TODO: Implement remove() method.
+    }
+
+    public function findByDiscordId(string $discordId): Thread
+    {
+        // TODO: Implement findByDiscordId() method.
     }
 }

@@ -7,13 +7,15 @@ use Carbon\Carbon;
 use Discord\Parts\Part;
 use OutOfBoundsException;
 use Spudbot\Collection;
+use Spudbot\Interface\IMemberRepository;
 use Spudbot\Model;
 use Spudbot\Model\Member;
 use Spudbot\Repository\SQLRepository;
+use Spudbot\Traits\UsesDoctrine;
 
-class MemberRepository extends SQLRepository
+class MemberRepository extends IMemberRepository
 {
-
+    use UsesDoctrine;
     public function findById(string|int $id): Member
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
@@ -124,5 +126,15 @@ class MemberRepository extends SQLRepository
     public function remove(Member|Model $model): bool
     {
         // TODO: Implement remove() method.
+    }
+
+    public function findByDiscordId(string $discordId): Member
+    {
+        // TODO: Implement findByDiscordId() method.
+    }
+
+    public function saveEventAttendance(Member $member): bool
+    {
+        // TODO: Implement saveEventAttendance() method.
     }
 }

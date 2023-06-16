@@ -5,6 +5,7 @@ namespace Spudbot\Model;
 
 use Carbon\Carbon;
 use Spudbot\Model;
+use Spudbot\Repository\SQL\GuildRepository;
 
 class Event extends Model
 {
@@ -15,6 +16,24 @@ class Event extends Model
     private ?string $seshId;
     private ?string $nativeId;
     private Carbon $scheduledAt;
+
+    public static function withDatabaseRow(array $row, Guild $guild): self
+    {
+        $event = new self();
+
+        $event->setId($row['id']);
+        $event->setGuild($guild);
+        $event->setChannelId($row['channel_id']);
+        $event->setName($row['name']);
+        $event->setType(\Spudbot\Type\Event::from($row['type']));
+        $event->setSeshId($row['sesh_id']);
+        $event->setNativeId($row['native_id']);
+        $event->setScheduledAt(Carbon::parse($row['scheduled_at']));
+        $event->setCreatedAt(Carbon::parse($row['created_at']));
+        $event->setModifiedAt(Carbon::parse($row['modified_at']));
+
+        return $event;
+    }
 
     public function setGuild(Guild $guild): void
     {

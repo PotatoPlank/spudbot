@@ -8,12 +8,15 @@ use Discord\Parts\Part;
 use InvalidArgumentException;
 use OutOfBoundsException;
 use Spudbot\Collection;
+use Spudbot\Interface\IGuildRepository;
 use Spudbot\Model;
 use Spudbot\Model\Guild;
 use Spudbot\Repository\SQLRepository;
+use Spudbot\Traits\UsesDoctrine;
 
-class GuildRepository extends SQLRepository
+class GuildRepository extends IGuildRepository
 {
+    use UsesDoctrine;
     public function findById(string|int $id): Guild
     {
         if($this->isCached($id)){
@@ -111,5 +114,10 @@ class GuildRepository extends SQLRepository
     public function remove(Guild|Model $model): bool
     {
         // TODO: Implement remove() method.
+    }
+
+    public function findByDiscordId(string $discordId): Guild
+    {
+        // TODO: Implement findByDiscordId() method.
     }
 }

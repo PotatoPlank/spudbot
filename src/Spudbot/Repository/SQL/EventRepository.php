@@ -8,18 +8,22 @@ use Discord\Parts\Part;
 use InvalidArgumentException;
 use OutOfBoundsException;
 use Spudbot\Collection;
+use Spudbot\Interface\IEventRepository;
 use Spudbot\Model;
 use Spudbot\Model\Guild;
 use Spudbot\Model\Member;
 use Spudbot\Repository\SQLRepository;
+use Spudbot\Traits\UsesDoctrine;
 use Spudbot\Type\Event;
 
-class EventRepository extends SQLRepository
+class EventRepository extends IEventRepository
 {
+    use UsesDoctrine;
     public function findById(string|int $id): Model\Event
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $guild = new GuildRepository($this->dbal);
+
         $response = $queryBuilder->select('*')->from('events')
             ->where('id = ?')->setParameters([$id])
             ->fetchAssociative();
@@ -28,19 +32,7 @@ class EventRepository extends SQLRepository
             throw new OutOfBoundsException("Event with id {$id} does not exist.");
         }
 
-        $event = new Model\Event();
-        $event->setId($response['id']);
-        $event->setGuild($guild->findById($response['guild_id']));
-        $event->setChannelId($response['channel_id']);
-        $event->setName($response['name']);
-        $event->setType(Event::from($response['type']));
-        $event->setSeshId($response['sesh_id']);
-        $event->setNativeId($response['native_id']);
-        $event->setScheduledAt(Carbon::parse($response['scheduled_at']));
-        $event->setCreatedAt(Carbon::parse($response['created_at']));
-        $event->setModifiedAt(Carbon::parse($response['modified_at']));
-
-        return $event;
+        return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
     }
 
     public function findByPart(\stdClass|Part $part): Model\Event
@@ -60,19 +52,7 @@ class EventRepository extends SQLRepository
             throw new OutOfBoundsException("Event with id {$part->guild_scheduled_event_id} does not exist.");
         }
 
-        $event = new Model\Event();
-        $event->setId($response['id']);
-        $event->setGuild($guild->findById($response['guild_id']));
-        $event->setChannelId($response['channel_id']);
-        $event->setName($response['name']);
-        $event->setType(Event::from($response['type']));
-        $event->setSeshId($response['sesh_id']);
-        $event->setNativeId($response['native_id']);
-        $event->setScheduledAt(Carbon::parse($response['scheduled_at']));
-        $event->setCreatedAt(Carbon::parse($response['created_at']));
-        $event->setModifiedAt(Carbon::parse($response['modified_at']));
-
-        return $event;
+        return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
     }
 
     public function getAll(): Collection
@@ -86,17 +66,7 @@ class EventRepository extends SQLRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $event = new Model\Event();
-                $event->setId($row['id']);
-                $event->setGuild($guild->findById($row['guild_id']));
-                $event->setChannelId($row['channel_id']);
-                $event->setName($row['name']);
-                $event->setType(Event::from($row['type']));
-                $event->setSeshId($row['sesh_id']);
-                $event->setNativeId($row['native_id']);
-                $event->setScheduledAt(Carbon::parse($row['scheduled_at']));
-                $event->setCreatedAt(Carbon::parse($row['created_at']));
-                $event->setModifiedAt(Carbon::parse($row['modified_at']));
+                $event = Model\Event::withDatabaseRow($row, $guild->findById($row['guild_id']));
 
                 $collection->push($event);
             }
@@ -168,5 +138,15 @@ class EventRepository extends SQLRepository
     public function remove(Guild|Model $model): bool
     {
         // TODO: Implement remove() method.
+    }
+
+    public function findByDiscordId(string $discordId): \Spudbot\Model\Event
+    {
+        // TODO: Implement findByDiscordId() method.
+    }
+
+    public function findByGuild(Guild $guild): Collection
+    {
+        // TODO: Implement findByGuild() method.
     }
 }
