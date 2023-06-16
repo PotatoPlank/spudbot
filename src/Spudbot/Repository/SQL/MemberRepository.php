@@ -5,6 +5,7 @@ namespace Spudbot\Repository\SQL;
 
 use Carbon\Carbon;
 use Discord\Parts\Part;
+use Doctrine\DBAL\Cache\QueryCacheProfile;
 use OutOfBoundsException;
 use Spudbot\Collection;
 use Spudbot\Interface\IMemberRepository;
@@ -21,6 +22,7 @@ class MemberRepository extends IMemberRepository
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('members')
             ->where('id = ?')->setParameters([$id])
+            ->enableResultCache(new QueryCacheProfile('10', "member_{$id}"))
             ->fetchAssociative();
 
         if(!$response){
@@ -45,6 +47,7 @@ class MemberRepository extends IMemberRepository
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('members')
             ->where('discord_id = ?')->setParameters([$part->id])
+            ->enableResultCache(new QueryCacheProfile('10', "member_{$part->id}"))
             ->fetchAssociative();
 
         if(!$response){
@@ -71,6 +74,7 @@ class MemberRepository extends IMemberRepository
         $queryBuilder = $this->dbal->createQueryBuilder();
 
         $response = $queryBuilder->select('*')->from('members')
+            ->enableResultCache(new QueryCacheProfile('10', "member_list"))
             ->fetchAllAssociative();
 
         if(!empty($response)){
