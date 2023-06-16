@@ -2,12 +2,13 @@
 
 namespace Spudbot\Bindable\Command;
 
-use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\IBindableCommand;
 
 class PurgeCommands extends IBindableCommand
 {
+    protected string $name = 'purge_commands';
+    protected string $description = 'Purges bound commands within the bot.';
     public function getListener(): callable
     {
         return function (Interaction $interaction){
@@ -32,25 +33,5 @@ class PurgeCommands extends IBindableCommand
                 $interaction->respondWithMessage($builder->getEmbeddedMessage());
             }
         };
-    }
-
-    public function getCommand(): Command
-    {
-        $attributes = [
-            'name' => $this->getName(),
-            'description' => $this->getDescription(),
-        ];
-
-        return new Command($this->discord, $attributes);
-    }
-
-    public function getName(): string
-    {
-        return 'purge_commands';
-    }
-
-    public function getDescription(): string
-    {
-        return 'Purges bound commands within the bot.';
     }
 }

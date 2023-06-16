@@ -3,8 +3,6 @@
 namespace Spudbot\Bindable\Command;
 
 use Discord\Parts\Channel\Channel;
-use Discord\Parts\Interactions\Command\Command;
-use Discord\Parts\Interactions\Command\Command as CommandPart;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\IBindableCommand;
 use Spudbot\Model\Guild;
@@ -12,6 +10,8 @@ use Spudbot\Repository\SQL\GuildRepository;
 
 class Setup extends IBindableCommand
 {
+    protected string $name = 'setup';
+    protected string $description = 'Setup the guild and the selected channel as the log output location.';
     public function getListener(): callable
     {
         if(empty($this->dbal)){
@@ -44,7 +44,7 @@ class Setup extends IBindableCommand
                     if($isThread){
                         $guild->setOutputThreadId($threadId);
                     }
-                    $repository->save($guild);
+                    //$repository->save($guild);
 
                     $builder->setTitle('Setup complete');
                     $builder->setDescription("Set the guild output location to <#{$guild->getOutputLocationId()}>.");
@@ -58,25 +58,5 @@ class Setup extends IBindableCommand
                 $interaction->respondWithMessage($builder->getEmbeddedMessage());
             });
         };
-    }
-
-    public function getCommand(): CommandPart
-    {
-        $attributes = [
-            'name' => $this->getName(),
-            'description' => $this->getDescription(),
-        ];
-
-        return new Command($this->discord, $attributes);
-    }
-
-    public function getName(): string
-    {
-        return 'setup';
-    }
-
-    public function getDescription(): string
-    {
-        return 'Setup the guild and the selected channel as the log output location.';
     }
 }

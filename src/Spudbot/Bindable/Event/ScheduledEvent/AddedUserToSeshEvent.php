@@ -44,7 +44,7 @@ class AddedUserToSeshEvent extends IBindableEvent
                         $event->setSeshId($message->id);
                         $event->setChannelId($message->channel_id);
                     }
-                    $spud->getEventRepository()->save($event);
+//                    $spud->getEventRepository()->save($event);
                     /**
                      * TODO: Finish updating attendance
                      */

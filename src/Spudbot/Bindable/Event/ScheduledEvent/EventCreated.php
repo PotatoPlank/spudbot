@@ -35,7 +35,7 @@ class EventCreated extends IBindableEvent
                 $event->setType(EventType::Native);
                 $event->setNativeId($event->guild_scheduled_event_id);
 
-                $eventRepository->save($event);
+                //$eventRepository->save($event);
             }
         };
     }

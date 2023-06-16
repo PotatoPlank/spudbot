@@ -37,7 +37,7 @@ class ApplyMemberRoleUpgrades extends IBindableEvent
                     $member->setGuild($message->guild);
                     $member->setDiscordId($message->member->id);
                     $member->setTotalComments(0);
-                    $memberRepository->save($member);
+//                    $memberRepository->save($member);
                 }
 
                 $levelOneRole = $message->guild->roles->get('id', 1114365923730665481);

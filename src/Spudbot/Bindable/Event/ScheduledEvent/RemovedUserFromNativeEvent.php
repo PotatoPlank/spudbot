@@ -40,7 +40,7 @@ class RemovedUserFromNativeEvent extends IBindableEvent
                     $eventModel->setName($eventPart->name);
                     $eventModel->setScheduledAt($eventPart->scheduled_start_time);
 
-                    $eventRepository->save($eventModel);
+//                    $eventRepository->save($eventModel);
                 }
                 $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
                 if($guild->isOutputLocationThread()){

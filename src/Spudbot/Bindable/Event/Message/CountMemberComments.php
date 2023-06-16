@@ -32,7 +32,7 @@ class CountMemberComments extends IBindableEvent
                     $member->setDiscordId($message->member->id);
                     $member->setTotalComments(1);
                 }
-                $memberRepository->save($member);
+//                $memberRepository->save($member);
             }
         };
     }

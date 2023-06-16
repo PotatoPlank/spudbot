@@ -2,7 +2,8 @@
 
 namespace Spudbot\Interface;
 
-use Discord\Parts\Interactions\Command\Command as CommandPart;
+use Discord\Builders\CommandBuilder;
+use Discord\Parts\Interactions\Command\Command;
 use Spudbot\Bindable\CommandObserver;
 use Spudbot\Bot\Spud;
 
@@ -19,7 +20,17 @@ abstract class IBindableCommand extends IBindable
     }
     abstract public function getListener(): callable;
 
-    abstract public function getCommand(): CommandPart;
+    public function getCommand(): Command
+    {
+        if(empty($this->getName()) || empty($this->getDescription())){
+            throw new \RuntimeException('A name and description must be provided for a command to be bound.');
+        }
+        $command = CommandBuilder::new();
+        $command->setName($this->getName());
+        $command->setDescription($this->getDescription());
+
+        return new Command($this->discord, $command->toArray());
+    }
 
     public function getName(): string
     {
