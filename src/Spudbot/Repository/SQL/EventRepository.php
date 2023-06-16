@@ -137,14 +137,7 @@ class EventRepository extends IEventRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $attendance = new Model\EventAttendance();
-                $attendance->setId($row['id']);
-                $attendance->setEvent($event);
-                $attendance->setMember($member->findById($row['member_id']));
-                $attendance->setStatus($row['status']);
-                $attendance->wasNoShow((bool) $row['no_show']);
-                $attendance->setCreatedAt(Carbon::parse($row['created_at']));
-                $attendance->setModifiedAt(Carbon::parse($row['modified_at']));
+                $attendance = Model\EventAttendance::withDatabaseRow($row, $event, $member->findById($row['member_id']));
 
                 $collection->push($attendance);
             }
@@ -155,11 +148,10 @@ class EventRepository extends IEventRepository
 
     public function getAttendanceByMemberAndEvent(Member $member, Model\Event $event): Model\EventAttendance
     {
-        $collection = new Collection();
         $queryBuilder = $this->dbal->createQueryBuilder();
 
-        $response = $queryBuilder->select('*')->from('event_attendance')
-            ->where('event_id = ?')->andWhere('member_id = ?')
+        $response = $queryBuilder->select('*')
+            ->from('event_attendance')->where('event_id = ?')->andWhere('member_id = ?')
             ->setParameters([$event->getId(), $member->getId()])
             ->fetchAssociative();
 
@@ -167,16 +159,7 @@ class EventRepository extends IEventRepository
             throw new OutOfBoundsException("Event data associated with specified user and event does not exist.");
         }
 
-        $attendance = new Model\EventAttendance();
-        $attendance->setId($response['id']);
-        $attendance->setEvent($event);
-        $attendance->setMember($member);
-        $attendance->setStatus($response['status']);
-        $attendance->wasNoShow((bool) $response['no_show']);
-        $attendance->setCreatedAt(Carbon::parse($response['created_at']));
-        $attendance->setModifiedAt(Carbon::parse($response['modified_at']));
-
-        return $attendance;
+        return Model\EventAttendance::withDatabaseRow($response, $event, $member);
     }
 
     public function save(Model\Event $event): bool
