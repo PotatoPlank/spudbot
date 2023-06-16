@@ -12,9 +12,7 @@ use Spudbot\Interface\IEventRepository;
 use Spudbot\Model;
 use Spudbot\Model\Guild;
 use Spudbot\Model\Member;
-use Spudbot\Repository\SQLRepository;
 use Spudbot\Traits\UsesDoctrine;
-use Spudbot\Type\Event;
 
 class EventRepository extends IEventRepository
 {
@@ -53,6 +51,58 @@ class EventRepository extends IEventRepository
         }
 
         return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
+    }
+
+    public function findByDiscordId(string $discordId): Model\Event
+    {
+        $queryBuilder = $this->dbal->createQueryBuilder();
+        $guild = new GuildRepository($this->dbal);
+
+        $response = $queryBuilder->select('*')->from('events')
+            ->where('native_id = ?')->setParameters([$discordId])
+            ->fetchAssociative();
+
+        if(!$response){
+            throw new OutOfBoundsException("Event with id {$discordId} does not exist.");
+        }
+
+        return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
+    }
+
+    public function findBySeshId(string $seshId): Model\Event
+    {
+        $queryBuilder = $this->dbal->createQueryBuilder();
+        $guild = new GuildRepository($this->dbal);
+
+        $response = $queryBuilder->select('*')->from('events')
+            ->where('sesh_id = ?')->setParameters([$seshId])
+            ->fetchAssociative();
+
+        if(!$response){
+            throw new OutOfBoundsException("Event with id {$seshId} does not exist.");
+        }
+
+        return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
+    }
+
+    public function findByGuild(Guild $guild): Collection
+    {
+        $collection = new Collection();
+        $queryBuilder = $this->dbal->createQueryBuilder();
+
+        $response = $queryBuilder->select('*')->from('events')
+            ->where('guild_id = ?')->setParameters([$guild->getId()])
+            ->fetchAllAssociative();
+
+        if(!empty($response)){
+            foreach ($response as $row) {
+                $event = Model\Event::withDatabaseRow($row, $guild);
+
+                $collection->push($event);
+            }
+        }
+
+        return $collection;
     }
 
     public function getAll(): Collection
@@ -129,24 +179,89 @@ class EventRepository extends IEventRepository
         return $attendance;
     }
 
-    public function save(Guild|Model $model): bool
+    public function save(Model\Event $event): bool
     {
-        $model->setModifiedAt(Carbon::now());
-        // TODO: implemented the save() method.
+        $event->setModifiedAt(Carbon::now());
+
+        if(!$event->getId()){
+            $event->setCreatedAt(Carbon::now());
+
+            $columns = [
+                'guild_id' => '?',
+                'channel_id' => '?',
+                'name' => '?',
+                'type' => '?',
+                'sesh_id' => '?',
+                'native_id' => '?',
+                'scheduled_at' => '?',
+                'created_at' => '?',
+                'modified_at' => '?',
+            ];
+
+            $parameters = [
+                $event->getGuild()->getId(),
+                $event->getChannelId(),
+                $event->getName(),
+                $event->getType()->value,
+                $event->getSeshId(),
+                $event->getNativeId(),
+                $event->getScheduledAt(),
+                $event->getCreatedAt()->toDateTimeString(),
+                $event->getModifiedAt()->toDateTimeString(),
+            ];
+
+            $impactedRows = $this->dbal->createQueryBuilder()
+                ->insert('events')->values($columns)->setParameters($parameters)
+                ->executeStatement();
+            $event->setId($this->dbal->lastInsertId());
+
+            return $impactedRows > 0;
+        }
+
+        $parameters = [
+            $event->getChannelId(),
+            $event->getName(),
+            $event->getType()->value,
+            $event->getSeshId(),
+            $event->getNativeId(),
+            $event->getScheduledAt(),
+            $event->getModifiedAt()->toDateTimeString(),
+            $event->getId(),
+        ];
+
+        $impactedRows = $this->dbal->createQueryBuilder()
+            ->update('events')
+            ->set('channel_id', '?')
+            ->set('name', '?')
+            ->set('type', '?')
+            ->set('sesh_id', '?')
+            ->set('native_id', '?')
+            ->set('scheduled_at', '?')
+            ->set('modified_at', '?')
+            ->where('id = ?')
+            ->setParameters($parameters)
+            ->executeStatement();
+
+        return $impactedRows > 0;
     }
 
-    public function remove(Guild|Model $model): bool
+    public function remove(Model\Event $event): bool
     {
-        // TODO: Implement remove() method.
-    }
+        if(!$event->getId()){
+            Throw New OutOfBoundsException("Event is unable to be removed without a proper id.");
+        }
 
-    public function findByDiscordId(string $discordId): \Spudbot\Model\Event
-    {
-        // TODO: Implement findByDiscordId() method.
-    }
+        $impactedRows = $this->dbal->createQueryBuilder()
+            ->delete('events')->where('id = ?')->setParameter(0, $event->getId())
+            ->executeStatement();
+        if($impactedRows === 0){
+            Throw New \RuntimeException("Removing event #{$event->getId()} was unsuccessful");
+        }
 
-    public function findByGuild(Guild $guild): Collection
-    {
-        // TODO: Implement findByGuild() method.
+        $this->dbal->createQueryBuilder()
+            ->delete('event_attendance')->where('event_id = ?')->setParameter(0, $event->getId())
+            ->executeStatement();
+
+        return true;
     }
 }

@@ -14,6 +14,7 @@ abstract class IEventRepository
 {
     abstract public function findById(string|int $id): Event;
     abstract public function findByDiscordId(string $discordId): Event;
+    abstract public function findBySeshId(string $seshId): Event;
     abstract public function findByPart(stdClass|ScheduledEvent $part): Event;
     abstract public function findByGuild(Guild $guild): Collection;
     abstract public function getAll(): Collection;
