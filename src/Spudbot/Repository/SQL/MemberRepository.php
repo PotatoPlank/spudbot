@@ -42,7 +42,7 @@ class MemberRepository extends SQLRepository
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('members')
-            ->where('id = ?')->setParameters([$part->id])
+            ->where('discord_id = ?')->setParameters([$part->id])
             ->fetchAssociative();
 
         if(!$response){
