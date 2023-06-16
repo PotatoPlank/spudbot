@@ -12,6 +12,20 @@ class Guild extends Model
     private ?string $outputChannelId;
     private ?string $outputThreadId;
 
+    public static function withDatabaseRow(array $row): self
+    {
+        $guild = new self();
+
+        $guild->setId($row['g_id'] ?? $row['id']);
+        $guild->setDiscordId($row['g_discord_id'] ?? $row['discord_id']);
+        $guild->setOutputChannelId($row['g_output_channel_id'] ?? $row['output_channel_id']);
+        $guild->setOutputThreadId($row['g_output_thread_id'] ?? $row['output_thread_id']);
+        $guild->setCreatedAt(Carbon::parse($row['g_created_at'] ?? $row['created_at']));
+        $guild->setModifiedAt(Carbon::parse($row['g_modified_at'] ?? $row['modified_at']));
+
+        return $guild;
+    }
+
     public function setDiscordId(string $discordId): void
     {
         $this->discordId = $discordId;

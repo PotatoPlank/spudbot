@@ -10,8 +10,9 @@ use InvalidArgumentException;
 use OutOfBoundsException;
 use Spudbot\Collection;
 use Spudbot\Interface\IGuildRepository;
-use Spudbot\Model;
+use Spudbot\Model\Event;
 use Spudbot\Model\Guild;
+use Spudbot\Model\Member;
 use Spudbot\Traits\UsesDoctrine;
 
 class GuildRepository extends IGuildRepository
@@ -29,15 +30,22 @@ class GuildRepository extends IGuildRepository
             throw new OutOfBoundsException("Guild with id {$id} does not exist.");
         }
 
-        $guild = new Guild();
-        $guild->setId($response['id']);
-        $guild->setDiscordId($response['discord_id']);
-        $guild->setOutputChannelId($response['output_channel_id']);
-        $guild->setOutputThreadId($response['output_thread_id']);
-        $guild->setCreatedAt(Carbon::parse($response['created_at']));
-        $guild->setModifiedAt(Carbon::parse($response['modified_at']));
+        return Guild::withDatabaseRow($response);
+    }
 
-        return $guild;
+    public function findByDiscordId(string $discordId): Guild
+    {
+        $queryBuilder = $this->dbal->createQueryBuilder();
+        $response = $queryBuilder->select('*')->from('guilds')
+            ->where('discord_id = ?')->setParameters([$discordId])
+            ->enableResultCache(new QueryCacheProfile('300', "guild_{$discordId}"))
+            ->fetchAssociative();
+
+        if(!$response){
+            throw new OutOfBoundsException("Guild with id {$discordId} does not exist.");
+        }
+
+        return Guild::withDatabaseRow($response);
     }
 
     public function findByPart(\Discord\Parts\Guild\Guild|Part $part): Guild
@@ -57,15 +65,7 @@ class GuildRepository extends IGuildRepository
             throw new OutOfBoundsException("Guild with id {$part->id} does not exist.");
         }
 
-        $guild = new Guild();
-        $guild->setId($response['id']);
-        $guild->setDiscordId($response['discord_id']);
-        $guild->setOutputChannelId($response['output_channel_id']);
-        $guild->setOutputThreadId($response['output_thread_id']);
-        $guild->setCreatedAt(Carbon::parse($response['created_at']));
-        $guild->setModifiedAt(Carbon::parse($response['modified_at']));
-
-        return $guild;
+        return Guild::withDatabaseRow($response);
     }
 
     public function getAll(): Collection
@@ -79,13 +79,7 @@ class GuildRepository extends IGuildRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $guild = new Guild();
-                $guild->setId($row['id']);
-                $guild->setDiscordId($row['discord_id']);
-                $guild->setOutputChannelId($row['output_channel_id']);
-                $guild->setOutputThreadId($row['output_thread_id']);
-                $guild->setCreatedAt(Carbon::parse($row['created_at']));
-                $guild->setModifiedAt(Carbon::parse($row['modified_at']));
+                $guild = Guild::withDatabaseRow($row);
 
                 $collection->push($guild);
             }
@@ -94,19 +88,89 @@ class GuildRepository extends IGuildRepository
         return $collection;
     }
 
-    public function save(Guild|Model $model): bool
+    public function save(Guild $guild): bool
     {
-        $model->setModifiedAt(Carbon::now());
-        // TODO: implemented the save() method.
+        $guild->setModifiedAt(Carbon::now());
+
+        if(!$guild->getId()){
+            $guild->setCreatedAt(Carbon::now());
+
+            $columns = [
+                'discord_id' => '?',
+                'output_channel_id' => '?',
+                'output_thread_id' => '?',
+                'created_at' => '?',
+                'modified_at' => '?',
+            ];
+
+            $parameters = [
+                $guild->getDiscordId(),
+                $guild->getOutputChannelId(),
+                $guild->getOutputThreadId(),
+                $guild->getCreatedAt()->toDateTimeString(),
+                $guild->getModifiedAt()->toDateTimeString(),
+            ];
+
+            $impactedRows = $this->dbal->createQueryBuilder()
+                ->insert('guilds')->values($columns)->setParameters($parameters)
+                ->executeStatement();
+            $guild->setId($this->dbal->lastInsertId());
+
+            return $impactedRows > 0;
+        }
+
+        $parameters = [
+            $guild->getDiscordId(),
+            $guild->getOutputChannelId(),
+            $guild->getOutputThreadId(),
+            $guild->getModifiedAt()->toDateTimeString(),
+            $guild->getId(),
+        ];
+
+        $impactedRows = $this->dbal->createQueryBuilder()
+            ->update('guilds')
+            ->set('discord_id', '?')
+            ->set('output_channel_id', '?')
+            ->set('output_thread_id', '?')
+            ->set('modified_at', '?')
+            ->where('id = ?')
+            ->setParameters($parameters)
+            ->executeStatement();
+
+        return $impactedRows > 0;
     }
 
-    public function remove(Guild|Model $model): bool
+    public function remove(Guild $guild): bool
     {
-        // TODO: Implement remove() method.
-    }
+        if(!$guild->getId()){
+            Throw New OutOfBoundsException("Event is unable to be removed without a proper id.");
+        }
 
-    public function findByDiscordId(string $discordId): Guild
-    {
-        // TODO: Implement findByDiscordId() method.
+        $impactedRows = $this->dbal->createQueryBuilder()
+            ->delete('guilds')->where('id = ?')->setParameter(0, $guild->getId())
+            ->executeStatement();
+        if($impactedRows === 0){
+            Throw New \RuntimeException("Removing guild #{$guild->getId()} was unsuccessful");
+        }
+
+        $eventRepository = new EventRepository($this->dbal);
+        $events = $eventRepository->findByGuild($guild);
+
+        if(!empty($events)){
+            /* @var Event $event */
+            foreach ($events as $event) {
+                $eventRepository->remove($event);
+            }
+        }
+
+        $this->dbal->createQueryBuilder()
+            ->delete('members')->where('guild_id = ?')->setParameter(0, $guild->getId())
+            ->executeStatement();
+
+        $this->dbal->createQueryBuilder()
+            ->delete('threads')->where('guild_id = ?')->setParameter(0, $guild->getId())
+            ->executeStatement();
+
+        return true;
     }
 }
