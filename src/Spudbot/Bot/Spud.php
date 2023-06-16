@@ -10,7 +10,10 @@ use Spudbot\Bindable\Event\BindableEvent;
 use Spudbot\Bindable\Event\OnReadyExecuteBinds;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Collection;
-use Spudbot\Repository;
+use Spudbot\Interface\IEventRepository;
+use Spudbot\Interface\IGuildRepository;
+use Spudbot\Interface\IMemberRepository;
+use Spudbot\Interface\IThreadRepository;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
@@ -20,10 +23,10 @@ class Spud
     private Collection $events;
     private Collection $commands;
     private ?Connection $dbal;
-    private Repository $memberRepository;
-    private Repository $eventRepository;
-    private Repository $guildRepository;
-    private Repository $threadRepository;
+    private IMemberRepository $memberRepository;
+    private IEventRepository $eventRepository;
+    private IGuildRepository $guildRepository;
+    private IThreadRepository $threadRepository;
     private Environment $twig;
 
 
@@ -89,42 +92,42 @@ class Spud
             ->run();
     }
 
-    public function setMemberRepository(Repository $repository): void
+    public function setMemberRepository(IMemberRepository $repository): void
     {
         $this->memberRepository = $repository;
     }
 
-    public function setEventRepository(Repository $eventRepository): void
-    {
-        $this->eventRepository = $eventRepository;
-    }
-
-    public function getMemberRepository(): Repository
+    public function getMemberRepository(): IMemberRepository
     {
         return $this->memberRepository;
     }
 
-    public function getEventRepository(): Repository
+    public function setEventRepository(IEventRepository $eventRepository): void
+    {
+        $this->eventRepository = $eventRepository;
+    }
+
+    public function getEventRepository(): IEventRepository
     {
         return $this->eventRepository;
     }
 
-    public function setGuildRepository(Repository $guildRepository): void
+    public function setGuildRepository(IGuildRepository $guildRepository): void
     {
         $this->guildRepository = $guildRepository;
     }
 
-    public function getGuildRepository(): Repository
+    public function getGuildRepository(): IGuildRepository
     {
         return $this->guildRepository;
     }
 
-    public function setThreadRepository(Repository $threadRepository): void
+    public function setThreadRepository(IThreadRepository $threadRepository): void
     {
         $this->threadRepository = $threadRepository;
     }
 
-    public function getThreadRepository(): Repository
+    public function getThreadRepository(): IThreadRepository
     {
         return $this->threadRepository;
     }

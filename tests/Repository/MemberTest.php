@@ -38,7 +38,6 @@ class MemberTest extends TestCase
      * @uses \Spudbot\Model
      * @uses \Spudbot\Model\Member
      * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Repository\SQLRepository
      * @uses \Spudbot\Repository\SQL\GuildRepository
      */
     public function successfullyGetAllRepositoryRecords(): void
@@ -56,7 +55,6 @@ class MemberTest extends TestCase
      * @uses \Spudbot\Model\Member
      * @uses \Spudbot\Collection
      * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Repository\SQLRepository
      * @uses \Spudbot\Repository\SQL\GuildRepository
      * @doesNotPerformAssertions
      */
@@ -74,7 +72,6 @@ class MemberTest extends TestCase
      * @uses \Spudbot\Model
      * @uses \Spudbot\Model\Member
      * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Repository\SQLRepository
      */
     public function cannotRetrieveInvalidMemberId(): void
     {
