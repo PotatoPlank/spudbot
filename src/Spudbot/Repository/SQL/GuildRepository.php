@@ -47,21 +47,18 @@ class GuildRepository extends IGuildRepository
         return Guild::withDatabaseRow($response);
     }
 
-    public function findByPart(\Discord\Parts\Guild\Guild|Part $part): Guild
+    public function findByPart(\Discord\Parts\Guild\Guild $guild): Guild
     {
-        if(!$part instanceof \Discord\Parts\Guild\Guild){
-            throw new InvalidArgumentException("Part is not an instance of Guild.");
-        }
         $queryBuilder = $this->dbal->createQueryBuilder();
 
         $response = $queryBuilder->select('*')->from('guilds')
             ->where('discord_id = ?')
-            ->setParameters([$part->id])
-            ->enableResultCache(new QueryCacheProfile('300', "guild_{$part->id}"))
+            ->setParameters([$guild->id])
+            ->enableResultCache(new QueryCacheProfile('300', "guild_{$guild->id}"))
             ->fetchAssociative();
 
         if(!$response){
-            throw new OutOfBoundsException("Guild with id {$part->id} does not exist.");
+            throw new OutOfBoundsException("Guild with id {$guild->id} does not exist.");
         }
 
         return Guild::withDatabaseRow($response);

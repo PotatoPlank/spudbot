@@ -32,16 +32,16 @@ class MemberRepository extends IMemberRepository
         return Member::withDatabaseRow($response, $guild->findById($response['guild_id']));
     }
 
-    public function findByPart(\Discord\Parts\User\Member $part): Member
+    public function findByPart(\Discord\Parts\User\Member $member): Member
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('members')
-            ->where('discord_id = ?')->setParameters([$part->id])
-            ->enableResultCache(new QueryCacheProfile('10', "member_{$part->id}"))
+            ->where('discord_id = ?')->setParameters([$member->id])
+            ->enableResultCache(new QueryCacheProfile('10', "member_{$member->id}"))
             ->fetchAssociative();
 
         if(!$response){
-            throw new OutOfBoundsException("Member with id {$part->id} does not exist.");
+            throw new OutOfBoundsException("Member with id {$member->id} does not exist.");
         }
 
         $guild = new GuildRepository($this->dbal);

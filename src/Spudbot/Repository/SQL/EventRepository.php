@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Spudbot\Repository\SQL;
 
 use Carbon\Carbon;
+use Discord\Parts\Guild\ScheduledEvent;
 use Discord\Parts\Part;
 use InvalidArgumentException;
 use OutOfBoundsException;
@@ -33,21 +34,22 @@ class EventRepository extends IEventRepository
         return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
     }
 
-    public function findByPart(\stdClass|Part $part): Model\Event
+    public function findByPart(\stdClass|ScheduledEvent $event): Model\Event
     {
-        if(!isset($part->guild_scheduled_event_id)){
+        if(!($event instanceof ScheduledEvent) && !isset($event->guild_scheduled_event_id)){
             throw new InvalidArgumentException("Part is not an instance with an Event Id.");
         }
         $queryBuilder = $this->dbal->createQueryBuilder();
         $guild = new GuildRepository($this->dbal);
+        $id = $event instanceof ScheduledEvent ? $event->id : $event->guild_scheduled_event_id;
 
         $response = $queryBuilder->select('*')->from('events')
             ->where('native_id = ?')
-            ->setParameters([$part->guild_scheduled_event_id])
+            ->setParameters([$id])
             ->fetchAssociative();
 
         if(!$response){
-            throw new OutOfBoundsException("Event with id {$part->guild_scheduled_event_id} does not exist.");
+            throw new OutOfBoundsException("Event with id {$id} does not exist.");
         }
 
         return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));

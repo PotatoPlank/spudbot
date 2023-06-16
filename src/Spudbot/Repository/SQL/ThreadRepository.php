@@ -9,6 +9,7 @@ use OutOfBoundsException;
 use Spudbot\Collection;
 use Spudbot\Interface\IThreadRepository;
 use Spudbot\Model;
+use Spudbot\Model\Guild;
 use Spudbot\Model\Thread;
 use Spudbot\Repository\SQLRepository;
 use Spudbot\Traits\UsesDoctrine;
@@ -39,27 +40,37 @@ class ThreadRepository extends IThreadRepository
         return $thread;
     }
 
-    public function findByPart(\Discord\Parts\Thread\Thread|Part $part): Thread
+    public function findByPart(\Discord\Parts\Thread\Thread $thread): Thread
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('threads')
-            ->where('id = ?')->setParameters([$part->id])
+            ->where('id = ?')->setParameters([$thread->id])
             ->fetchAssociative();
 
         if(!$response){
-            throw new OutOfBoundsException("Thread with id {$part->id} does not exist.");
+            throw new OutOfBoundsException("Thread with id {$thread->id} does not exist.");
         }
 
         $guild = new GuildRepository($this->dbal);
 
-        $thread = new Thread();
-        $thread->setId($response['id']);
-        $thread->setDiscordId($response['discord_id']);
-        $thread->setGuild($guild->findById($response['guild_id']));
-        $thread->setCreatedAt(Carbon::parse($response['created_at']));
-        $thread->setModifiedAt(Carbon::parse($response['modified_at']));
+        $threadModel = new Thread();
+        $threadModel->setId($response['id']);
+        $threadModel->setDiscordId($response['discord_id']);
+        $threadModel->setGuild($guild->findById($response['guild_id']));
+        $threadModel->setCreatedAt(Carbon::parse($response['created_at']));
+        $threadModel->setModifiedAt(Carbon::parse($response['modified_at']));
 
-        return $thread;
+        return $threadModel;
+    }
+
+    public function findByDiscordId(string $discordId): Thread
+    {
+        // TODO: Implement findByDiscordId() method.
+    }
+
+    public function findByGuild(Guild $guild): Guild
+    {
+        // TODO: Implement findByGuild() method.
     }
 
     public function getAll(): Collection
@@ -87,18 +98,13 @@ class ThreadRepository extends IThreadRepository
         return $collection;
     }
 
-    public function save(Thread|Model $model): bool
+    public function save(Thread|Model $thread): bool
     {
         // TODO: Implement save() method.
     }
 
-    public function remove(Thread|Model $model): bool
+    public function remove(Thread|Model $thread): bool
     {
         // TODO: Implement remove() method.
-    }
-
-    public function findByDiscordId(string $discordId): Thread
-    {
-        // TODO: Implement findByDiscordId() method.
     }
 }
