@@ -5,9 +5,8 @@ namespace Spudbot\Bindable\Event;
 
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
-use Spudbot\Integration\SeshEmbedParser;
-use Spudbot\Model\EventAttendance;
-use Spudbot\Type\Event as EventType;
+use Spudbot\Helpers\SeshEmbedParser;
+use Spudbot\Types\EventType;
 
 class AddedUserToSeshEvent extends BindableEvent
 {

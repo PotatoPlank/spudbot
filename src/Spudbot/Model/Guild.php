@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Model;
+use Spudbot\Interface\IModel;
 
-class Guild extends Model
+class Guild extends IModel
 {
     private string $discordId;
     private ?string $outputChannelId;

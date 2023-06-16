@@ -5,7 +5,6 @@ namespace Spudbot\Bindable\Event;
 
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
-use Spudbot\Type\Event as EventType;
 
 class AddedUserToNativeSeshEvent extends BindableEvent
 {

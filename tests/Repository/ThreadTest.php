@@ -34,8 +34,8 @@ class ThreadTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\ThreadRepository
-     * @uses \Spudbot\Collection
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Helpers\Collection
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Thread
      * @uses \Spudbot\Repository\SQL\GuildRepository
      * @uses \Spudbot\Model\Guild
@@ -51,9 +51,9 @@ class ThreadTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\ThreadRepository
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Thread
-     * @uses \Spudbot\Collection
+     * @uses \Spudbot\Helpers\Collection
      * @uses \Spudbot\Model\Guild
      * @uses \Spudbot\Repository\SQL\GuildRepository
      * @doesNotPerformAssertions
@@ -68,7 +68,7 @@ class ThreadTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\ThreadRepository
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Thread
      */
     public function cannotRetrieveInvalidThreadId(): void

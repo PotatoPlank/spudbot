@@ -5,7 +5,6 @@ namespace Model;
 
 use Carbon\Carbon;
 use PHPUnit\Framework\TestCase;
-use Spudbot\Model\Guild;
 use Spudbot\Model\Thread;
 
 class ModelTest extends TestCase
@@ -19,7 +18,7 @@ class ModelTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Model
+     * @covers \Spudbot\Interface\IModel
      */
     public function successfullySetsAndGetsCreatedAt(): void
     {
@@ -32,7 +31,7 @@ class ModelTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Model
+     * @covers \Spudbot\Interface\IModel
      */
     public function successfullySetsAndGetsModifiedAt(): void
     {
@@ -45,7 +44,7 @@ class ModelTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Model
+     * @covers \Spudbot\Interface\IModel
      */
     public function successfullySetsAndGetsId(): void
     {

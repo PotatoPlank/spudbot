@@ -34,8 +34,8 @@ class GuildTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Collection
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Helpers\Collection
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Guild
      */
     public function successfullyGetAllRepositoryRecords(): void
@@ -49,9 +49,9 @@ class GuildTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Collection
+     * @uses \Spudbot\Helpers\Collection
      * @doesNotPerformAssertions
      */
     public function successfullyFindGuildById(): void
@@ -64,9 +64,9 @@ class GuildTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Guild
-     * @uses  \Spudbot\Collection
+     * @uses  \Spudbot\Helpers\Collection
      */
     public function cannotRetrieveInvalidGuildId(): void
     {

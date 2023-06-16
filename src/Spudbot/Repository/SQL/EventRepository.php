@@ -5,12 +5,12 @@ namespace Spudbot\Repository\SQL;
 
 use Carbon\Carbon;
 use Discord\Parts\Guild\ScheduledEvent;
-use Discord\Parts\Part;
 use InvalidArgumentException;
 use OutOfBoundsException;
-use Spudbot\Collection;
+use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IEventRepository;
-use Spudbot\Model;
+use Spudbot\Model\Event;
+use Spudbot\Model\EventAttendance;
 use Spudbot\Model\Guild;
 use Spudbot\Model\Member;
 use Spudbot\Traits\UsesDoctrine;
@@ -18,7 +18,7 @@ use Spudbot\Traits\UsesDoctrine;
 class EventRepository extends IEventRepository
 {
     use UsesDoctrine;
-    public function findById(string|int $id): Model\Event
+    public function findById(string|int $id): Event
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $guild = new GuildRepository($this->dbal);
@@ -31,10 +31,10 @@ class EventRepository extends IEventRepository
             throw new OutOfBoundsException("Event with id {$id} does not exist.");
         }
 
-        return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
+        return Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
     }
 
-    public function findByPart(\stdClass|ScheduledEvent $event): Model\Event
+    public function findByPart(\stdClass|ScheduledEvent $event): Event
     {
         if(!($event instanceof ScheduledEvent) && !isset($event->guild_scheduled_event_id)){
             throw new InvalidArgumentException("Part is not an instance with an Event Id.");
@@ -45,7 +45,7 @@ class EventRepository extends IEventRepository
         return $this->findByDiscordId($id);
     }
 
-    public function findByDiscordId(string $discordId): Model\Event
+    public function findByDiscordId(string $discordId): Event
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $guild = new GuildRepository($this->dbal);
@@ -58,10 +58,10 @@ class EventRepository extends IEventRepository
             throw new OutOfBoundsException("Event with id {$discordId} does not exist.");
         }
 
-        return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
+        return Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
     }
 
-    public function findBySeshId(string $seshId): Model\Event
+    public function findBySeshId(string $seshId): Event
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $guild = new GuildRepository($this->dbal);
@@ -74,7 +74,7 @@ class EventRepository extends IEventRepository
             throw new OutOfBoundsException("Event with id {$seshId} does not exist.");
         }
 
-        return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
+        return Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
     }
 
     public function findByGuild(Guild $guild): Collection
@@ -88,7 +88,7 @@ class EventRepository extends IEventRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $event = Model\Event::withDatabaseRow($row, $guild);
+                $event = Event::withDatabaseRow($row, $guild);
 
                 $collection->push($event);
             }
@@ -108,7 +108,7 @@ class EventRepository extends IEventRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $event = Model\Event::withDatabaseRow($row, $guild->findById($row['guild_id']));
+                $event = Event::withDatabaseRow($row, $guild->findById($row['guild_id']));
 
                 $collection->push($event);
             }
@@ -117,7 +117,7 @@ class EventRepository extends IEventRepository
         return $collection;
     }
 
-    public function getAttendanceByEvent(Model\Event $event): Collection
+    public function getAttendanceByEvent(Event $event): Collection
     {
         $collection = new Collection();
         $member = new MemberRepository($this->dbal);
@@ -129,7 +129,7 @@ class EventRepository extends IEventRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $attendance = Model\EventAttendance::withDatabaseRow($row, $event, $member->findById($row['member_id']));
+                $attendance = EventAttendance::withDatabaseRow($row, $event, $member->findById($row['member_id']));
 
                 $collection->push($attendance);
             }
@@ -138,7 +138,7 @@ class EventRepository extends IEventRepository
         return $collection;
     }
 
-    public function getAttendanceByMemberAndEvent(Member $member, Model\Event $event): Model\EventAttendance
+    public function getAttendanceByMemberAndEvent(Member $member, Event $event): EventAttendance
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
 
@@ -151,10 +151,10 @@ class EventRepository extends IEventRepository
             throw new OutOfBoundsException("Event data associated with specified user and event does not exist.");
         }
 
-        return Model\EventAttendance::withDatabaseRow($response, $event, $member);
+        return EventAttendance::withDatabaseRow($response, $event, $member);
     }
 
-    public function save(Model\Event $event): bool
+    public function save(Event $event): bool
     {
         $event->setModifiedAt(Carbon::now());
 
@@ -220,7 +220,7 @@ class EventRepository extends IEventRepository
         return $impactedRows > 0;
     }
 
-    public function remove(Model\Event $event): bool
+    public function remove(Event $event): bool
     {
         if(!$event->getId()){
             Throw New OutOfBoundsException("Event is unable to be removed without a proper id.");

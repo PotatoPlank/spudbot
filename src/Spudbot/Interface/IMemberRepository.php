@@ -2,7 +2,7 @@
 
 namespace Spudbot\Interface;
 
-use Spudbot\Collection;
+use Spudbot\Helpers\Collection;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Model\Guild;
 use Spudbot\Model\Member;

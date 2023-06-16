@@ -7,7 +7,7 @@ use Carbon\Carbon;
 use PHPUnit\Framework\TestCase;
 use Spudbot\Model\Event;
 use Spudbot\Model\Guild;
-use Spudbot\Type\Event as EventType;
+use Spudbot\Types\EventType;
 
 class EventTest extends TestCase
 {

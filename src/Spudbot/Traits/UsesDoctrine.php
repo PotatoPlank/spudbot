@@ -3,7 +3,6 @@
 namespace Spudbot\Traits;
 
 use Doctrine\DBAL\Connection;
-use Spudbot\Collection;
 
 trait UsesDoctrine
 {

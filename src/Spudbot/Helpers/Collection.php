@@ -1,6 +1,6 @@
 <?php
 
-namespace Spudbot;
+namespace Spudbot\Helpers;
 
 use Traversable;
 

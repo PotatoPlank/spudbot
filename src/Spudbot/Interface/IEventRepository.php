@@ -3,7 +3,7 @@
 namespace Spudbot\Interface;
 
 use Discord\Parts\Guild\ScheduledEvent;
-use Spudbot\Collection;
+use Spudbot\Helpers\Collection;
 use Spudbot\Model\Event;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Model\Guild;

@@ -2,14 +2,13 @@
 
 namespace Spudbot\Bot;
 
-use Carbon\Carbon;
 use Discord\Discord;
 use Doctrine\DBAL\Connection;
 use Spudbot\Bindable\Command\BindableCommand;
 use Spudbot\Bindable\Event\BindableEvent;
 use Spudbot\Bindable\Event\OnReadyExecuteBinds;
 use Spudbot\Builder\EmbeddedResponse;
-use Spudbot\Collection;
+use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IEventRepository;
 use Spudbot\Interface\IGuildRepository;
 use Spudbot\Interface\IMemberRepository;

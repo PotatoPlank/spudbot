@@ -4,11 +4,9 @@ declare(strict_types=1);
 namespace Spudbot\Repository\SQL;
 
 use Carbon\Carbon;
-use Discord\Parts\Part;
 use Doctrine\DBAL\Cache\QueryCacheProfile;
-use InvalidArgumentException;
 use OutOfBoundsException;
-use Spudbot\Collection;
+use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IGuildRepository;
 use Spudbot\Model\Event;
 use Spudbot\Model\Guild;

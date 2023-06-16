@@ -6,9 +6,10 @@ namespace Spudbot\Repository\SQL;
 use Carbon\Carbon;
 use Doctrine\DBAL\Cache\QueryCacheProfile;
 use OutOfBoundsException;
-use Spudbot\Collection;
+use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IMemberRepository;
-use Spudbot\Model;
+use Spudbot\Model\EventAttendance;
+use Spudbot\Model\Guild;
 use Spudbot\Model\Member;
 use Spudbot\Traits\UsesDoctrine;
 
@@ -54,7 +55,7 @@ class MemberRepository extends IMemberRepository
         return Member::withDatabaseRow($response, $guild->findById($response['guild_id']));
     }
 
-    public function findByGuild(Model\Guild $guild): Collection
+    public function findByGuild(Guild $guild): Collection
     {
         $collection = new Collection();
         $queryBuilder = $this->dbal->createQueryBuilder();
@@ -66,7 +67,7 @@ class MemberRepository extends IMemberRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $member = Member::withDatabaseRow($response, $guild);
+                $member = Member::withDatabaseRow($row, $guild);
 
                 $collection->push($member);
             }
@@ -87,7 +88,7 @@ class MemberRepository extends IMemberRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $member = Member::withDatabaseRow($response, $guild->findById($row['guild_id']));
+                $member = Member::withDatabaseRow($row, $guild->findById($row['guild_id']));
 
                 $collection->push($member);
             }
@@ -108,7 +109,7 @@ class MemberRepository extends IMemberRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $attendance = Model\EventAttendance::withDatabaseRow($row, $event->findById($row['event_id']), $member);
+                $attendance = EventAttendance::withDatabaseRow($row, $event->findById($row['event_id']), $member);
 
                 $collection->push($attendance);
             }
@@ -185,7 +186,7 @@ class MemberRepository extends IMemberRepository
         return true;
     }
 
-    public function saveMemberEventAttendance(Model\EventAttendance $eventAttendance): bool
+    public function saveMemberEventAttendance(EventAttendance $eventAttendance): bool
     {
         $eventAttendance->setModifiedAt(Carbon::now());
 

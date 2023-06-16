@@ -34,8 +34,8 @@ class MemberTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\MemberRepository
-     * @uses \Spudbot\Collection
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Helpers\Collection
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Member
      * @uses \Spudbot\Model\Guild
      * @uses \Spudbot\Repository\SQL\GuildRepository
@@ -51,9 +51,9 @@ class MemberTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\MemberRepository
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Member
-     * @uses \Spudbot\Collection
+     * @uses \Spudbot\Helpers\Collection
      * @uses \Spudbot\Model\Guild
      * @uses \Spudbot\Repository\SQL\GuildRepository
      * @doesNotPerformAssertions
@@ -69,7 +69,7 @@ class MemberTest extends TestCase
      * @test
      * @covers \Spudbot\Repository\SQL\MemberRepository
      * @uses \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Member
      * @uses \Spudbot\Model\Guild
      */

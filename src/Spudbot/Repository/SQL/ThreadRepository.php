@@ -5,9 +5,8 @@ namespace Spudbot\Repository\SQL;
 
 use Carbon\Carbon;
 use OutOfBoundsException;
-use Spudbot\Collection;
+use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IThreadRepository;
-use Spudbot\Model;
 use Spudbot\Model\Guild;
 use Spudbot\Model\Thread;
 use Spudbot\Traits\UsesDoctrine;

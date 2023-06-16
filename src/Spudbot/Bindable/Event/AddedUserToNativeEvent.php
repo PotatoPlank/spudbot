@@ -3,10 +3,9 @@
 namespace Spudbot\Bindable\Event;
 
 
-use Discord\Helpers\Collection;
 use Discord\WebSockets\Event;
 use Spudbot\Model\EventAttendance;
-use Spudbot\Type\Event as EventType;
+use Spudbot\Types\EventType;
 
 class AddedUserToNativeEvent extends BindableEvent
 {

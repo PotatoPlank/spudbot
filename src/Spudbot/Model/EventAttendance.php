@@ -3,9 +3,9 @@
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Model;
+use Spudbot\Interface\IModel;
 
-class EventAttendance extends Model
+class EventAttendance extends IModel
 {
     private Event $event;
     private Member $member;

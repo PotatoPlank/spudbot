@@ -1,11 +1,9 @@
 <?php
 
-namespace Spudbot\Type;
+namespace Spudbot\Types;
 
-enum Event: string
+enum EventType: string
 {
     case Sesh = 'SESH';
     case Native = 'NATIVE';
-
-
 }

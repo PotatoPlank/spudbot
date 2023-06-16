@@ -5,7 +5,7 @@ namespace Spudbot\Bindable;
 use Discord\Repository\Interaction\OptionRepository;
 use Spudbot\Bindable\Command\Sub\SubCommand;
 use Spudbot\Bot\Spud;
-use Spudbot\Collection;
+use Spudbot\Helpers\Collection;
 
 class CommandObserver
 {

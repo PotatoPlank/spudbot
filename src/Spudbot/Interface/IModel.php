@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Spudbot;
+namespace Spudbot\Interface;
 
 use Carbon\Carbon;
 
-abstract class Model
+abstract class IModel
 {
     private ?int $id;
     private Carbon $createdAt;
