@@ -31,15 +31,7 @@ class MemberRepository extends IMemberRepository
 
         $guild = new GuildRepository($this->dbal);
 
-        $member = new Member();
-        $member->setId($response['id']);
-        $member->setDiscordId($response['discord_id']);
-        $member->setGuild($guild->findById($response['guild_id']));
-        $member->setTotalComments($response['total_comments']);
-        $member->setCreatedAt(Carbon::parse($response['created_at']));
-        $member->setModifiedAt(Carbon::parse($response['modified_at']));
-
-        return $member;
+        return Member::withDatabaseRow($response, $guild->findById($response['guild_id']));
     }
 
     public function findByPart(\Discord\Parts\Thread\Member|\Discord\Parts\User\Member|Part $part): Member
@@ -56,15 +48,17 @@ class MemberRepository extends IMemberRepository
 
         $guild = new GuildRepository($this->dbal);
 
-        $member = new Member();
-        $member->setId($response['id']);
-        $member->setDiscordId($response['discord_id']);
-        $member->setGuild($guild->findById($response['guild_id']));
-        $member->setTotalComments($response['total_comments']);
-        $member->setCreatedAt(Carbon::parse($response['created_at']));
-        $member->setModifiedAt(Carbon::parse($response['modified_at']));
+        return Member::withDatabaseRow($response, $guild->findById($response['guild_id']));
+    }
 
-        return $member;
+    public function findByDiscordId(string $discordId): Member
+    {
+        // TODO: Implement findByDiscordId() method.
+    }
+
+    public function findByGuild(Model\Guild $guild): Collection
+    {
+        // TODO: Implement findByDiscordId() method.
     }
 
     public function getAll(): Collection
@@ -79,13 +73,7 @@ class MemberRepository extends IMemberRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $member = new Member();
-                $member->setId($row['id']);
-                $member->setDiscordId($row['discord_id']);
-                $member->setGuild($guild->findById($row['guild_id']));
-                $member->setTotalComments($row['total_comments']);
-                $member->setCreatedAt(Carbon::parse($row['created_at']));
-                $member->setModifiedAt(Carbon::parse($row['modified_at']));
+                $member = Member::withDatabaseRow($response, $guild->findById($row['guild_id']));
 
                 $collection->push($member);
             }
@@ -106,14 +94,7 @@ class MemberRepository extends IMemberRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $attendance = new Model\EventAttendance();
-                $attendance->setId($row['id']);
-                $attendance->setEvent($event->findById($row['event_id']));
-                $attendance->setMember($member);
-                $attendance->setStatus($row['status']);
-                $attendance->wasNoShow((bool) $row['no_show']);
-                $attendance->setCreatedAt(Carbon::parse($row['created_at']));
-                $attendance->setModifiedAt(Carbon::parse($row['modified_at']));
+                $attendance = Model\EventAttendance::withDatabaseRow($row, $event->findById($row['event_id']), $member);
 
                 $collection->push($attendance);
             }
@@ -130,11 +111,6 @@ class MemberRepository extends IMemberRepository
     public function remove(Member|Model $model): bool
     {
         // TODO: Implement remove() method.
-    }
-
-    public function findByDiscordId(string $discordId): Member
-    {
-        // TODO: Implement findByDiscordId() method.
     }
 
     public function saveEventAttendance(Member $member): bool

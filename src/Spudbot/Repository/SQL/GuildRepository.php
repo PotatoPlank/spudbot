@@ -12,7 +12,6 @@ use Spudbot\Collection;
 use Spudbot\Interface\IGuildRepository;
 use Spudbot\Model\Event;
 use Spudbot\Model\Guild;
-use Spudbot\Model\Member;
 use Spudbot\Traits\UsesDoctrine;
 
 class GuildRepository extends IGuildRepository
