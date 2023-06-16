@@ -1,8 +1,0 @@
-User Permissions
-User permissions on the discord work in tiers. The first tier (Yuengling) allows people to comment in all public channels that are not read-only. These users can not upload any media.
-
-The second tier is the Philadelphian role provides media and nickname change permissions and is automatically assigned once you are a member of the discord for 10 days and have at least 10 comments.
-
-The third tier are verified members (IRLVerified) which allows members to participate in community run events and gives members the ability to comment in <#1114365925601325101>.
-
-The last tier are volunteer staff members that have unique permissions.
