@@ -3,6 +3,7 @@
 namespace Spudbot\Interface;
 
 use Spudbot\Collection;
+use Spudbot\Model\EventAttendance;
 use Spudbot\Model\Guild;
 use Spudbot\Model\Member;
 
@@ -16,6 +17,6 @@ abstract class IMemberRepository
     abstract public function getEventAttendance(Member $member): Collection;
 
     abstract public function save(Member $member): bool;
-    abstract public function saveEventAttendance(Member $member): bool;
+    abstract public function saveMemberEventAttendance(EventAttendance $eventAttendance): bool;
     abstract public function remove(Member $member): bool;
 }
