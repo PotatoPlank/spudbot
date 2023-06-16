@@ -33,18 +33,7 @@ class ThreadRepository extends IThreadRepository
 
     public function findByPart(\Discord\Parts\Thread\Thread $thread): Thread
     {
-        $queryBuilder = $this->dbal->createQueryBuilder();
-        $response = $queryBuilder->select('*')->from('threads')
-            ->where('discord_id = ?')->setParameters([$thread->id])
-            ->fetchAssociative();
-
-        if(!$response){
-            throw new OutOfBoundsException("Thread with id {$thread->id} does not exist.");
-        }
-
-        $guild = new GuildRepository($this->dbal);
-
-        return Thread::withDatabaseRow($response, $guild->findById($response['guild_id']));
+        return $this->findByDiscordId($thread->id);
     }
 
     public function findByDiscordId(string $discordId): Thread

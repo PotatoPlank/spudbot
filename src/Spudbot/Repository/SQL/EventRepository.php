@@ -39,20 +39,10 @@ class EventRepository extends IEventRepository
         if(!($event instanceof ScheduledEvent) && !isset($event->guild_scheduled_event_id)){
             throw new InvalidArgumentException("Part is not an instance with an Event Id.");
         }
-        $queryBuilder = $this->dbal->createQueryBuilder();
-        $guild = new GuildRepository($this->dbal);
+
         $id = $event instanceof ScheduledEvent ? $event->id : $event->guild_scheduled_event_id;
 
-        $response = $queryBuilder->select('*')->from('events')
-            ->where('native_id = ?')
-            ->setParameters([$id])
-            ->fetchAssociative();
-
-        if(!$response){
-            throw new OutOfBoundsException("Event with id {$id} does not exist.");
-        }
-
-        return Model\Event::withDatabaseRow($response, $guild->findById($response['guild_id']));
+        return $this->findByDiscordId($id);
     }
 
     public function findByDiscordId(string $discordId): Model\Event
