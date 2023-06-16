@@ -5,13 +5,13 @@ namespace Spudbot\Repository\SQL;
 
 use Carbon\Carbon;
 use Discord\Parts\Part;
+use Doctrine\DBAL\Cache\QueryCacheProfile;
 use InvalidArgumentException;
 use OutOfBoundsException;
 use Spudbot\Collection;
 use Spudbot\Interface\IGuildRepository;
 use Spudbot\Model;
 use Spudbot\Model\Guild;
-use Spudbot\Repository\SQLRepository;
 use Spudbot\Traits\UsesDoctrine;
 
 class GuildRepository extends IGuildRepository
@@ -19,12 +19,10 @@ class GuildRepository extends IGuildRepository
     use UsesDoctrine;
     public function findById(string|int $id): Guild
     {
-        if($this->isCached($id)){
-            return $this->getCache($id);
-        }
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('guilds')
             ->where('id = ?')->setParameters([$id])
+            ->enableResultCache(new QueryCacheProfile('300', "guild_{$id}"))
             ->fetchAssociative();
 
         if(!$response){
@@ -39,8 +37,6 @@ class GuildRepository extends IGuildRepository
         $guild->setCreatedAt(Carbon::parse($response['created_at']));
         $guild->setModifiedAt(Carbon::parse($response['modified_at']));
 
-        $this->setCache($guild->getId(), $guild);
-
         return $guild;
     }
 
@@ -49,14 +45,12 @@ class GuildRepository extends IGuildRepository
         if(!$part instanceof \Discord\Parts\Guild\Guild){
             throw new InvalidArgumentException("Part is not an instance of Guild.");
         }
-        if($this->isCached($part->id)){
-            return $this->getCache($part->id);
-        }
         $queryBuilder = $this->dbal->createQueryBuilder();
 
         $response = $queryBuilder->select('*')->from('guilds')
             ->where('discord_id = ?')
             ->setParameters([$part->id])
+            ->enableResultCache(new QueryCacheProfile('300', "guild_{$part->id}"))
             ->fetchAssociative();
 
         if(!$response){
@@ -71,8 +65,6 @@ class GuildRepository extends IGuildRepository
         $guild->setCreatedAt(Carbon::parse($response['created_at']));
         $guild->setModifiedAt(Carbon::parse($response['modified_at']));
 
-        $this->setCache($guild->getId(), $guild);
-
         return $guild;
     }
 
@@ -82,6 +74,7 @@ class GuildRepository extends IGuildRepository
         $queryBuilder = $this->dbal->createQueryBuilder();
 
         $response = $queryBuilder->select('*')->from('guilds')
+            ->enableResultCache(new QueryCacheProfile('60', "guild_list"))
             ->fetchAllAssociative();
 
         if(!empty($response)){
@@ -93,10 +86,6 @@ class GuildRepository extends IGuildRepository
                 $guild->setOutputThreadId($row['output_thread_id']);
                 $guild->setCreatedAt(Carbon::parse($row['created_at']));
                 $guild->setModifiedAt(Carbon::parse($row['modified_at']));
-
-                if(!$this->isCached($guild->getId())){
-                    $this->setCache($guild->getId(), $guild);
-                }
 
                 $collection->push($guild);
             }
