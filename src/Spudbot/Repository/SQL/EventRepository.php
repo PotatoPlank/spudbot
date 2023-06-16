@@ -133,7 +133,7 @@ class EventRepository extends SQLRepository
         return $collection;
     }
 
-    public function getAttendanceByMemberAndEvent(Member $member, Model\Event $event): Collection
+    public function getAttendanceByMemberAndEvent(Member $member, Model\Event $event): Model\EventAttendance
     {
         $collection = new Collection();
         $queryBuilder = $this->dbal->createQueryBuilder();
@@ -141,24 +141,22 @@ class EventRepository extends SQLRepository
         $response = $queryBuilder->select('*')->from('event_attendance')
             ->where('event_id = ?')->andWhere('member_id = ?')
             ->setParameters([$event->getId(), $member->getId()])
-            ->fetchAllAssociative();
+            ->fetchAssociative();
 
-        if(!empty($response)){
-            foreach ($response as $row) {
-                $attendance = new Model\EventAttendance();
-                $attendance->setId($row['id']);
-                $attendance->setEvent($event);
-                $attendance->setMember($member);
-                $attendance->setStatus($row['status']);
-                $attendance->wasNoShow((bool) $row['no_show']);
-                $attendance->setCreatedAt(Carbon::parse($row['created_at']));
-                $attendance->setModifiedAt(Carbon::parse($row['modified_at']));
-
-                $collection->push($attendance);
-            }
+        if(!$response){
+            throw new OutOfBoundsException("Event data associated with specified user and event does not exist.");
         }
 
-        return $collection;
+        $attendance = new Model\EventAttendance();
+        $attendance->setId($response['id']);
+        $attendance->setEvent($event);
+        $attendance->setMember($member);
+        $attendance->setStatus($response['status']);
+        $attendance->wasNoShow((bool) $response['no_show']);
+        $attendance->setCreatedAt(Carbon::parse($response['created_at']));
+        $attendance->setModifiedAt(Carbon::parse($response['modified_at']));
+
+        return $attendance;
     }
 
     public function save(Guild|Model $model): bool

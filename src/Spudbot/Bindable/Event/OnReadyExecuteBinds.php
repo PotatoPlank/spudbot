@@ -31,6 +31,8 @@ class OnReadyExecuteBinds extends BindableEvent
                 foreach ($this->events as $eventType => $eventCollection) {
                     foreach ($eventCollection as $event) {
                         $this->discord->on($event->getBoundEvent(), $event->getListener());
+                        $this->discord->getLogger()
+                            ->info("Event listening to '{$event->getBoundEvent()}'.");
                     }
                 }
             }

@@ -40,4 +40,18 @@ class Guild extends Model
     {
         return $this->outputThreadId;
     }
+
+    public function getOutputLocationId(): ?string
+    {
+        if(!empty($this->getOutputThreadId()))
+        {
+            return $this->getOutputThreadId();
+        }
+        return $this->getOutputChannelId();
+    }
+
+    public function isOutputLocationThread(): bool
+    {
+        return !empty($this->getOutputThreadId());
+    }
 }

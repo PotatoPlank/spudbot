@@ -34,7 +34,9 @@ class EmbeddedResponse
         $options = $this->options;
 
         $options['title'] = $this->title;
-        $options['description'] = $this->description;
+        if(!empty($this->description)){
+            $options['description'] = $this->description;
+        }
 
         $embed = $this->discord->factory(Embed::class, $options);
 

@@ -10,6 +10,9 @@ use Spudbot\Bindable\Event\BindableEvent;
 use Spudbot\Bindable\Event\OnReadyExecuteBinds;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Collection;
+use Spudbot\Repository;
+use Twig\Environment;
+use Twig\Loader\FilesystemLoader;
 
 class Spud
 {
@@ -17,12 +20,20 @@ class Spud
     private Collection $events;
     private Collection $commands;
     private ?Connection $dbal;
+    private Repository $memberRepository;
+    private Repository $eventRepository;
+    private Repository $guildRepository;
+    private Repository $threadRepository;
+    private Environment $twig;
+
 
     public function __construct(SpudOptions $options)
     {
         $this->discord = new Discord($options->getOptions());
         $this->events = new Collection();
         $this->commands = new Collection();
+        $loader = new FilesystemLoader(dirname(__DIR__, 2) . '/views');
+        $this->twig = new Environment($loader);
     }
 
     public function setDoctrineClient(?Connection $dbal): void
@@ -76,5 +87,50 @@ class Spud
 
         $this->discord->on($onReadyEvent->getBoundEvent(), $onReadyEvent->getListener())
             ->run();
+    }
+
+    public function setMemberRepository(Repository $repository): void
+    {
+        $this->memberRepository = $repository;
+    }
+
+    public function setEventRepository(Repository $eventRepository): void
+    {
+        $this->eventRepository = $eventRepository;
+    }
+
+    public function getMemberRepository(): Repository
+    {
+        return $this->memberRepository;
+    }
+
+    public function getEventRepository(): Repository
+    {
+        return $this->eventRepository;
+    }
+
+    public function setGuildRepository(Repository $guildRepository): void
+    {
+        $this->guildRepository = $guildRepository;
+    }
+
+    public function getGuildRepository(): Repository
+    {
+        return $this->guildRepository;
+    }
+
+    public function setThreadRepository(Repository $threadRepository): void
+    {
+        $this->threadRepository = $threadRepository;
+    }
+
+    public function getThreadRepository(): Repository
+    {
+        return $this->threadRepository;
+    }
+
+    public function getTwig(): Environment
+    {
+        return $this->twig;
     }
 }

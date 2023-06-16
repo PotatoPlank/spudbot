@@ -19,6 +19,7 @@ class Setup extends BindableCommand
         }
         return function (Interaction $interaction){
             $interaction->guild->channels->fetch($interaction->channel_id)->done(function (Channel $channel) use ($interaction){
+                $builder = $this->spud->getSimpleResponseBuilder();
                 if($interaction->member->permissions->manage_guild)
                 {
                     $channelId = $channel->id;
@@ -34,28 +35,27 @@ class Setup extends BindableCommand
                     $repository = new GuildRepository($this->dbal);
                     try{
                         $guild = $repository->findByPart($interaction->guild);
-
-                        $guild->setOutputChannelId($channelId);
-                        if($isThread){
-                            $guild->setOutputThreadId($threadId);
-                        }
-
-                        $repository->save($guild);
                     }catch (\OutOfBoundsException $exception){
                         $guild = new Guild();
                         $guild->setDiscordId($interaction->guild_id);
-                        $guild->setOutputChannelId($channelId);
-                        if($isThread){
-                            $guild->setOutputThreadId($threadId);
-                        }
-
-                        $repository->save($guild);
                     }
 
-                    $interaction->respondWithMessage(MessageBuilder::new()->setContent('Established the guild output location.'), true);
+                    $guild->setOutputChannelId($channelId);
+                    if($isThread){
+                        $guild->setOutputThreadId($threadId);
+                    }
+                    $repository->save($guild);
+
+                    $builder->setTitle('Setup complete');
+                    $builder->setDescription("Set the guild output location to <#{$guild->getOutputLocationId()}>.");
+
+                    $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
                 }
 
-                $interaction->respondWithMessage(MessageBuilder::new()->setContent('You don\'t have permission to run that.'));
+                $builder->setTitle('Invalid Permissions for Setup');
+                $builder->setDescription('You don\'t have the necessary permissions to run this command.');
+
+                $interaction->respondWithMessage($builder->getEmbeddedMessage());
             });
         };
     }
