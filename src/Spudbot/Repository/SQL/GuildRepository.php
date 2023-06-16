@@ -142,7 +142,7 @@ class GuildRepository extends IGuildRepository
     public function remove(Guild $guild): bool
     {
         if(!$guild->getId()){
-            Throw New OutOfBoundsException("Event is unable to be removed without a proper id.");
+            Throw New OutOfBoundsException("Guild is unable to be removed without a proper id.");
         }
 
         $impactedRows = $this->dbal->createQueryBuilder()
