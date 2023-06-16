@@ -3,13 +3,12 @@
 namespace Spudbot\Bindable\Command;
 
 use Carbon\Carbon;
-use Discord\Builders\MessageBuilder;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Command as CommandPart;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Bot\Spud;
+use Spudbot\Interface\IBindableCommand;
 
-class Version extends BindableCommand
+class Version extends IBindableCommand
 {
     public function getListener(): callable
     {

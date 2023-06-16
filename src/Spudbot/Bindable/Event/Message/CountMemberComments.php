@@ -1,13 +1,14 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\Message;
 
 
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 use Spudbot\Model\Member;
 
-class CountMemberComments extends BindableEvent
+class CountMemberComments extends IBindableEvent
 {
 
     public function getBoundEvent(): string

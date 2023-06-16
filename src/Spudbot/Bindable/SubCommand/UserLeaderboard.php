@@ -1,13 +1,13 @@
 <?php
 
-namespace Spudbot\Bindable\Command\Sub;
+namespace Spudbot\Bindable\Sub;
 
 
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Model\Member;
 use Spudbot\Repository\SQL\MemberRepository;
 
-class UserLeaderboard extends SubCommand
+class UserLeaderboard extends ISubCommand
 {
     protected string $subCommand = 'leaderboard';
     public function execute(?Interaction $interaction): void

@@ -1,12 +1,13 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\ScheduledEvents;
 
 
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 
-class AddedUserToNativeSeshEvent extends BindableEvent
+class AddedUserToNativeSeshEvent extends IBindableEvent
 {
 
     public function getBoundEvent(): string

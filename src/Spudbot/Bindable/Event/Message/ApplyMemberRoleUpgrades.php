@@ -1,14 +1,15 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\Message;
 
 
 use Carbon\Carbon;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 use Spudbot\Model\Member;
 
-class ApplyMemberRoleUpgrades extends BindableEvent
+class ApplyMemberRoleUpgrades extends IBindableEvent
 {
 
     public function getBoundEvent(): string

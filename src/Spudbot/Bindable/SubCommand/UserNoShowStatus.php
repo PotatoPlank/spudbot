@@ -1,13 +1,13 @@
 <?php
 
-namespace Spudbot\Bindable\Command\Sub;
+namespace Spudbot\Bindable\Sub;
 
 
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Repository\SQL\EventRepository;
 use Spudbot\Repository\SQL\MemberRepository;
 
-class UserNoShowStatus extends SubCommand
+class UserNoShowStatus extends ISubCommand
 {
     protected string $subCommand = 'no_show';
     public function execute(?Interaction $interaction): void

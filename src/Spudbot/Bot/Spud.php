@@ -4,11 +4,11 @@ namespace Spudbot\Bot;
 
 use Discord\Discord;
 use Doctrine\DBAL\Connection;
-use Spudbot\Bindable\Command\BindableCommand;
-use Spudbot\Bindable\Event\BindableEvent;
 use Spudbot\Bindable\Event\OnReadyExecuteBinds;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Helpers\Collection;
+use Spudbot\Interface\IBindableCommand;
+use Spudbot\Interface\IBindableEvent;
 use Spudbot\Interface\IEventRepository;
 use Spudbot\Interface\IGuildRepository;
 use Spudbot\Interface\IMemberRepository;
@@ -43,7 +43,7 @@ class Spud
         $this->dbal = $dbal;
     }
 
-    public function loadBindableCommand(BindableCommand $command): void
+    public function loadBindableCommand(IBindableCommand $command): void
     {
         $command->setDiscordClient($this->discord);
         $command->setSpudClient($this);
@@ -54,7 +54,7 @@ class Spud
         $this->commands->push($command);
     }
 
-    public function loadBindableEvent(BindableEvent $event): void
+    public function loadBindableEvent(IBindableEvent $event): void
     {
         $event->setDiscordClient($this->discord);
         $event->setSpudClient($this);

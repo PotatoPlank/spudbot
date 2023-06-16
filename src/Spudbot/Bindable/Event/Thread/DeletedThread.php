@@ -1,13 +1,14 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\Thread;
 
 
 
 use Discord\Parts\Thread\Thread;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 
-class DeletedThread extends BindableEvent
+class DeletedThread extends IBindableEvent
 {
 
     public function getBoundEvent(): string

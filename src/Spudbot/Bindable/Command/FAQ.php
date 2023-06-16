@@ -7,8 +7,9 @@ use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use RuntimeException;
+use Spudbot\Interface\IBindableCommand;
 
-class FAQ extends BindableCommand
+class FAQ extends IBindableCommand
 {
     protected string $name = 'faq';
     protected string $description = 'A list of frequently asked questions.';

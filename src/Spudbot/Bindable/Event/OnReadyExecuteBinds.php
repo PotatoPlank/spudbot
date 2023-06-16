@@ -3,8 +3,9 @@
 namespace Spudbot\Bindable\Event;
 
 use Spudbot\Helpers\Collection;
+use Spudbot\Interface\IBindableEvent;
 
-class OnReadyExecuteBinds extends BindableEvent
+class OnReadyExecuteBinds extends IBindableEvent
 {
     private Collection $commands;
     private Collection $events;

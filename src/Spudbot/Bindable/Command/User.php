@@ -3,21 +3,17 @@
 namespace Spudbot\Bindable\Command;
 
 use Discord\Builders\CommandBuilder;
-use Discord\Builders\MessageBuilder;
-use Discord\Parts\Channel\Channel;
 use Discord\Parts\Interactions\Command\Command;
-use Discord\Parts\Interactions\Command\Command as CommandPart;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Bindable\Command\Sub\TotalUserComments;
-use Spudbot\Bindable\Command\Sub\UserEventReputation;
-use Spudbot\Bindable\Command\Sub\UserInformation;
-use Spudbot\Bindable\Command\Sub\UserLeaderboard;
-use Spudbot\Bindable\Command\Sub\UserNoShowStatus;
-use Spudbot\Model\Guild;
-use Spudbot\Repository\SQL\GuildRepository;
+use Spudbot\Bindable\Sub\TotalUserComments;
+use Spudbot\Bindable\Sub\UserEventReputation;
+use Spudbot\Bindable\Sub\UserInformation;
+use Spudbot\Bindable\Sub\UserLeaderboard;
+use Spudbot\Bindable\Sub\UserNoShowStatus;
+use Spudbot\Interface\IBindableCommand;
 
-class User extends BindableCommand
+class User extends IBindableCommand
 {
     protected string $name = 'user';
     protected string $description = 'Gets user associated user data.';

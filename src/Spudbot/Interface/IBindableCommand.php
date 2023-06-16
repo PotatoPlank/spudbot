@@ -1,13 +1,12 @@
 <?php
 
-namespace Spudbot\Bindable\Command;
+namespace Spudbot\Interface;
 
 use Discord\Parts\Interactions\Command\Command as CommandPart;
-use Spudbot\Bindable\Bindable;
 use Spudbot\Bindable\CommandObserver;
 use Spudbot\Bot\Spud;
 
-abstract class BindableCommand extends Bindable
+abstract class IBindableCommand extends IBindable
 {
 
     protected string $name;

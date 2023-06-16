@@ -1,14 +1,15 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\ScheduledEvents;
 
 
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Helpers\SeshEmbedParser;
+use Spudbot\Interface\IBindableEvent;
 use Spudbot\Types\EventType;
 
-class AddedUserToSeshEvent extends BindableEvent
+class AddedUserToSeshEvent extends IBindableEvent
 {
 
     public function getBoundEvent(): string

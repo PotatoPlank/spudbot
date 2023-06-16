@@ -1,12 +1,12 @@
 <?php
 
-namespace Spudbot\Bindable\Command\Sub;
+namespace Spudbot\Bindable\Sub;
 
 
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Repository\SQL\MemberRepository;
 
-class TotalUserComments extends SubCommand
+class TotalUserComments extends ISubCommand
 {
     protected string $subCommand = 'total_comments';
     public function execute(?Interaction $interaction): void

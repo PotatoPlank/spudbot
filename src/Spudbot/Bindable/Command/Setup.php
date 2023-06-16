@@ -2,15 +2,15 @@
 
 namespace Spudbot\Bindable\Command;
 
-use Discord\Builders\MessageBuilder;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Command as CommandPart;
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Interface\IBindableCommand;
 use Spudbot\Model\Guild;
 use Spudbot\Repository\SQL\GuildRepository;
 
-class Setup extends BindableCommand
+class Setup extends IBindableCommand
 {
     public function getListener(): callable
     {

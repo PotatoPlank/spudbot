@@ -3,7 +3,7 @@
 namespace Spudbot\Bindable;
 
 use Discord\Repository\Interaction\OptionRepository;
-use Spudbot\Bindable\Command\Sub\SubCommand;
+use Spudbot\Bindable\Sub\ISubCommand;
 use Spudbot\Bot\Spud;
 use Spudbot\Helpers\Collection;
 
@@ -16,7 +16,7 @@ class CommandObserver
         $this->subscribers = new Collection();
     }
 
-    public function subscribe(SubCommand $command): void
+    public function subscribe(ISubCommand $command): void
     {
         $this->subscribers->set($command->getSubCommand(), $command);
     }

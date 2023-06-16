@@ -1,6 +1,6 @@
 <?php
 
-namespace Spudbot\Bindable\Command\Sub;
+namespace Spudbot\Bindable\Sub;
 
 
 use Carbon\Carbon;
@@ -8,7 +8,7 @@ use Discord\Parts\Interactions\Interaction;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Repository\SQL\MemberRepository;
 
-class UserEventReputation extends SubCommand
+class UserEventReputation extends ISubCommand
 {
     protected string $subCommand = 'reputation';
 

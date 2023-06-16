@@ -1,19 +1,19 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\ScheduledEvents;
 
 
-use Carbon\Carbon;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Types\EventType;
 
-class RemovedUserFromNativeEvent extends BindableEvent
+class AddedUserToNativeEvent extends IBindableEvent
 {
 
     public function getBoundEvent(): string
     {
-        return Event::GUILD_SCHEDULED_EVENT_USER_REMOVE;
+        return Event::GUILD_SCHEDULED_EVENT_USER_ADD;
     }
 
     public function getListener(): callable
@@ -24,13 +24,17 @@ class RemovedUserFromNativeEvent extends BindableEvent
             $memberRepository = $this->spud->getMemberRepository();
             $builder = $this->spud->getSimpleResponseBuilder();
             $guildPart = $this->discord->guilds->get('id', $event->guild_id);
+            $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
+            if($guild->isOutputLocationThread()){
+                $output = $output->threads->get('id', $guild->getOutputThreadId());
+            }
             $eventPart = $guildPart->guild_scheduled_events->get('id', $event->guild_scheduled_event_id);
 
             if($eventPart && $eventPart->creator->id !== '616754792965865495'){
-                $guild = $guildRepository->findByPart($guildPart);
                 try{
                     $eventModel = $eventRepository->findByPart($eventPart);
                 }catch(\Exception $exception){
+                    $guild = $guildRepository->findByPart($guildPart);
 
                     $eventModel = new \Spudbot\Model\Event();
                     $eventModel->setNativeId($eventPart->id);
@@ -41,35 +45,24 @@ class RemovedUserFromNativeEvent extends BindableEvent
 
                     $eventRepository->save($eventModel);
                 }
-                $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
-                if($guild->isOutputLocationThread()){
-                    $output = $output->threads->get('id', $guild->getOutputThreadId());
-                }
 
                 $memberPart = $guildPart->members->get('id', $event->user_id);
                 $member = $memberRepository->findByPart($memberPart);
                 try{
                     $eventAttendance = $eventRepository->getAttendanceByMemberAndEvent($member, $eventModel);
-                    $eventAttendance->setStatus('No');
+                    $eventAttendance->setStatus('Attendees');
                 }catch (\Exception $exception){
                     $eventAttendance = new EventAttendance();
                     $eventAttendance->setEvent($eventModel);
                     $eventAttendance->setMember($member);
-                    $eventAttendance->setStatus('No');
+                    $eventAttendance->setStatus('Attendees');
                 }
-
-                $noShowDateTime = $eventPart->scheduled_start_time->modify('-8 hours');
-                if($noShowDateTime->lte(Carbon::now()))
-                {
-                    $eventAttendance->wasNoShow(true);
-                }
-
                 /**
                  * TODO save event attendance
                  */
 
-                $builder->setTitle('Native Event Attendee Removed');
-                $builder->setDescription("<@{$member->getDiscordId()}> removed their RSVP to {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}");
+                $builder->setTitle('Native Event Attendee');
+                $builder->setDescription("<@{$member->getDiscordId()}> marked they were interested in {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}");
                 $output->sendMessage($builder->getEmbeddedMessage());
             }
         };

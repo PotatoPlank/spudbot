@@ -1,12 +1,13 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\Message;
 
 
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 
-class BotMentioned extends BindableEvent
+class BotMentioned extends IBindableEvent
 {
 
     public function getBoundEvent(): string

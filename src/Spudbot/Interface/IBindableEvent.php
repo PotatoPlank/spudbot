@@ -1,10 +1,8 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Interface;
 
-use Spudbot\Bindable\Bindable;
-
-abstract class BindableEvent extends Bindable
+abstract class IBindableEvent extends IBindable
 {
     abstract public function getBoundEvent(): string;
 
