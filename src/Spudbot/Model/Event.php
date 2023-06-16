@@ -4,17 +4,35 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Model;
+use Spudbot\Interface\IModel;
 
-class Event extends Model
+class Event extends IModel
 {
     private Guild $guild;
     private ?string $channelId;
     private string $name;
-    private \Spudbot\Type\Event $type;
+    private \Spudbot\Type\EventType $type;
     private ?string $seshId;
     private ?string $nativeId;
     private Carbon $scheduledAt;
+
+    public static function withDatabaseRow(array $row, Guild $guild): self
+    {
+        $event = new self();
+
+        $event->setId($row['id']);
+        $event->setGuild($guild);
+        $event->setChannelId($row['channel_id']);
+        $event->setName($row['name']);
+        $event->setType(\Spudbot\Type\EventType::from($row['type']));
+        $event->setSeshId($row['sesh_id']);
+        $event->setNativeId($row['native_id']);
+        $event->setScheduledAt(Carbon::parse($row['scheduled_at']));
+        $event->setCreatedAt(Carbon::parse($row['created_at']));
+        $event->setModifiedAt(Carbon::parse($row['modified_at']));
+
+        return $event;
+    }
 
     public function setGuild(Guild $guild): void
     {
@@ -47,12 +65,12 @@ class Event extends Model
         return $this->name;
     }
 
-    public function setType(\Spudbot\Type\Event $type): void
+    public function setType(\Spudbot\Type\EventType $type): void
     {
         $this->type = $type;
     }
 
-    public function getType(): \Spudbot\Type\Event
+    public function getType(): \Spudbot\Type\EventType
     {
         return $this->type;
     }

@@ -4,16 +4,16 @@ declare(strict_types=1);
 namespace Spudbot\Repository\SQL;
 
 use Carbon\Carbon;
-use Discord\Parts\Part;
 use OutOfBoundsException;
-use Spudbot\Collection;
-use Spudbot\Model;
+use Spudbot\Helpers\Collection;
+use Spudbot\Interface\IThreadRepository;
+use Spudbot\Model\Guild;
 use Spudbot\Model\Thread;
-use Spudbot\Repository\SQLRepository;
+use Spudbot\Traits\UsesDoctrine;
 
-class ThreadRepository extends SQLRepository
+class ThreadRepository extends IThreadRepository
 {
-
+    use UsesDoctrine;
     public function findById(string|int $id): Thread
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
@@ -27,37 +27,48 @@ class ThreadRepository extends SQLRepository
 
         $guild = new GuildRepository($this->dbal);
 
-        $thread = new Thread();
-        $thread->setId($response['id']);
-        $thread->setDiscordId($response['discord_id']);
-        $thread->setGuild($guild->findById($response['guild_id']));
-        $thread->setCreatedAt(Carbon::parse($response['created_at']));
-        $thread->setModifiedAt(Carbon::parse($response['modified_at']));
-
-        return $thread;
+        return Thread::withDatabaseRow($response, $guild->findById($response['guild_id']));
     }
 
-    public function findByPart(\Discord\Parts\Thread\Thread|Part $part): Thread
+    public function findByPart(\Discord\Parts\Thread\Thread $thread): Thread
+    {
+        return $this->findByDiscordId($thread->id);
+    }
+
+    public function findByDiscordId(string $discordId): Thread
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('threads')
-            ->where('id = ?')->setParameters([$part->id])
+            ->where('discord_id = ?')->setParameters([$discordId])
             ->fetchAssociative();
 
         if(!$response){
-            throw new OutOfBoundsException("Thread with id {$part->id} does not exist.");
+            throw new OutOfBoundsException("Thread with id {$discordId} does not exist.");
         }
 
         $guild = new GuildRepository($this->dbal);
 
-        $thread = new Thread();
-        $thread->setId($response['id']);
-        $thread->setDiscordId($response['discord_id']);
-        $thread->setGuild($guild->findById($response['guild_id']));
-        $thread->setCreatedAt(Carbon::parse($response['created_at']));
-        $thread->setModifiedAt(Carbon::parse($response['modified_at']));
+        return Thread::withDatabaseRow($response, $guild->findById($response['guild_id']));
+    }
 
-        return $thread;
+    public function findByGuild(Guild $guild): Collection
+    {
+        $collection = new Collection();
+        $queryBuilder = $this->dbal->createQueryBuilder();
+
+        $response = $queryBuilder->select('*')->from('threads')
+            ->where('guild_id = ?')->setParameters([$guild->getId()])
+            ->fetchAllAssociative();
+
+        if(!empty($response)){
+            foreach ($response as $row) {
+                $thread = Thread::withDatabaseRow($row, $guild);
+
+                $collection->push($thread);
+            }
+        }
+
+        return $collection;
     }
 
     public function getAll(): Collection
@@ -71,12 +82,7 @@ class ThreadRepository extends SQLRepository
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $thread = new Thread();
-                $thread->setId($row['id']);
-                $thread->setDiscordId($row['discord_id']);
-                $thread->setGuild($guild->findById($row['guild_id']));
-                $thread->setCreatedAt(Carbon::parse($row['created_at']));
-                $thread->setModifiedAt(Carbon::parse($row['modified_at']));
+                $thread = Thread::withDatabaseRow($row, $guild->findById($row['guild_id']));
 
                 $collection->push($thread);
             }
@@ -85,13 +91,64 @@ class ThreadRepository extends SQLRepository
         return $collection;
     }
 
-    public function save(Thread|Model $model): bool
+    public function save(Thread $thread): bool
     {
-        // TODO: Implement save() method.
+        $thread->setModifiedAt(Carbon::now());
+
+        if(!$thread->getId()){
+            $thread->setCreatedAt(Carbon::now());
+
+            $columns = [
+                'discord_id' => '?',
+                'guild_id' => '?',
+                'created_at' => '?',
+                'modified_at' => '?',
+            ];
+
+            $parameters = [
+                $thread->getDiscordId(),
+                $thread->getGuild()->getId(),
+                $thread->getCreatedAt()->toDateTimeString(),
+                $thread->getModifiedAt()->toDateTimeString(),
+            ];
+
+            $impactedRows = $this->dbal->createQueryBuilder()
+                ->insert('threads')->values($columns)->setParameters($parameters)
+                ->executeStatement();
+            $thread->setId($this->dbal->lastInsertId());
+
+            return $impactedRows > 0;
+        }
+
+        $parameters = [
+            $thread->getModifiedAt()->toDateTimeString(),
+            $thread->getId(),
+        ];
+
+        $impactedRows = $this->dbal->createQueryBuilder()
+            ->update('threads')
+            ->set('modified_at', '?')
+            ->where('id = ?')
+            ->setParameters($parameters)
+            ->executeStatement();
+
+        return $impactedRows > 0;
     }
 
-    public function remove(Thread|Model $model): bool
+    public function remove(Thread $thread): bool
     {
-        // TODO: Implement remove() method.
+        if(!$thread->getId()){
+            Throw New OutOfBoundsException("Thread is unable to be removed without a proper id.");
+        }
+
+        $impactedRows = $this->dbal->createQueryBuilder()
+            ->delete('threads')->where('id = ?')->setParameter(0, $thread->getId())
+            ->executeStatement();
+
+        if($impactedRows === 0){
+            Throw New \RuntimeException("Removing thread #{$thread->getId()} was unsuccessful");
+        }
+
+        return true;
     }
 }

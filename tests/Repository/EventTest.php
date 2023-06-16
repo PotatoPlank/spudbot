@@ -36,12 +36,11 @@ class EventTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\EventRepository
-     * @uses \Spudbot\Collection
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Helpers\Collection
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Event
      * @uses \Spudbot\Model\Guild
      * @uses \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Repository\SQLRepository
      */
     public function successfullyGetAllRepositoryRecords(): void
     {
@@ -55,11 +54,10 @@ class EventTest extends TestCase
      * @test
      * @covers \Spudbot\Repository\SQL\EventRepository
      * @uses \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Event
      * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Collection
-     * @uses \Spudbot\Repository\SQLRepository
+     * @uses \Spudbot\Helpers\Collection
      * @doesNotPerformAssertions
      */
     public function successfullyFindEventById(): void
@@ -72,9 +70,8 @@ class EventTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\EventRepository
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Event
-     * @uses \Spudbot\Repository\SQLRepository
      */
     public function cannotRetrieveInvalidEventId(): void
     {
@@ -89,14 +86,13 @@ class EventTest extends TestCase
      * @test
      * @covers \Spudbot\Repository\SQL\EventRepository
      * @uses \Spudbot\Model\EventAttendance
-     * @uses \Spudbot\Collection
+     * @uses \Spudbot\Helpers\Collection
      * @uses \Spudbot\Repository\SQL\MemberRepository
      * @uses \Spudbot\Model\Member
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Event
      * @uses \Spudbot\Model\Guild
      * @uses \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Repository\SQLRepository
      * @doesNotPerformAssertions
      */
     public function successfullyRetrievesAttendanceByEvent(): void
@@ -110,14 +106,13 @@ class EventTest extends TestCase
      * @test
      * @covers \Spudbot\Repository\SQL\EventRepository
      * @uses \Spudbot\Model\EventAttendance
-     * @uses \Spudbot\Collection
+     * @uses \Spudbot\Helpers\Collection
      * @uses \Spudbot\Repository\SQL\MemberRepository
      * @uses \Spudbot\Model\Member
-     * @uses \Spudbot\Model
+     * @uses \Spudbot\Interface\IModel
      * @uses \Spudbot\Model\Event
      * @uses \Spudbot\Model\Guild
      * @uses \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Repository\SQLRepository
      * @doesNotPerformAssertions
      */
     public function successfullyRetrievesAttendanceByEventAndMember(): void

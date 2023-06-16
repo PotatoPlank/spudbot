@@ -1,10 +1,9 @@
 <?php
 
-namespace Spudbot\Integration;
+namespace Spudbot\Helpers;
 
 use Carbon\Carbon;
 use Discord\Parts\Channel\Message;
-use Spudbot\Collection;
 use Spudbot\Exception\InvalidSeshEmbed;
 
 class SeshEmbedParser

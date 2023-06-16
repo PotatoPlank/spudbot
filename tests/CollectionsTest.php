@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use PHPUnit\Framework\TestCase;
-use Spudbot\Collection;
+use Spudbot\Helpers\Collection;
 
 final class CollectionsTest extends TestCase
 {
@@ -15,7 +15,7 @@ final class CollectionsTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Collection
+     * @covers \Spudbot\Helpers\Collection
      */
     public function successfullyCreatesAnEmptyCollection(): void
     {
@@ -26,7 +26,7 @@ final class CollectionsTest extends TestCase
 
     /**
      * @test
-     * @covers  \Spudbot\Collection
+     * @covers  \Spudbot\Helpers\Collection
      */
     public function successfullySetsAndGetsAnItemInACollection(): void
     {
@@ -40,7 +40,7 @@ final class CollectionsTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Collection
+     * @covers \Spudbot\Helpers\Collection
      */
     public function successfullyPushesAnItemInACollection(): void
     {
@@ -52,7 +52,7 @@ final class CollectionsTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Collection
+     * @covers \Spudbot\Helpers\Collection
      */
     public function collectionIsCountable(): void
     {
@@ -66,7 +66,7 @@ final class CollectionsTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Collection
+     * @covers \Spudbot\Helpers\Collection
      */
     public function collectionIsIterable(): void
     {
@@ -84,7 +84,7 @@ final class CollectionsTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Collection
+     * @covers \Spudbot\Helpers\Collection
      */
     public function collectionImplementsArrayAccess(): void
     {
@@ -105,7 +105,7 @@ final class CollectionsTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Collection
+     * @covers \Spudbot\Helpers\Collection
      */
     public function successfullyClearsCollection(): void
     {

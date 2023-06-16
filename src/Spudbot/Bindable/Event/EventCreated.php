@@ -4,7 +4,7 @@ namespace Spudbot\Bindable\Event;
 
 
 use Discord\WebSockets\Event;
-use Spudbot\Type\Event as EventType;
+use Spudbot\Types\EventType;
 
 class EventCreated extends BindableEvent
 {

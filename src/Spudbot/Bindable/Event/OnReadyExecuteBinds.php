@@ -2,7 +2,7 @@
 
 namespace Spudbot\Bindable\Event;
 
-use Spudbot\Collection;
+use Spudbot\Helpers\Collection;
 
 class OnReadyExecuteBinds extends BindableEvent
 {

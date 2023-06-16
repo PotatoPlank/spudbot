@@ -2,14 +2,30 @@
 
 namespace Spudbot\Model;
 
-use Spudbot\Model;
+use Carbon\Carbon;
+use Spudbot\Interface\IModel;
 
-class EventAttendance extends Model
+class EventAttendance extends IModel
 {
     private Event $event;
     private Member $member;
     private string $status;
     private bool $wasNoShow;
+
+    public static function withDatabaseRow(array $row, Event $event, Member $member): self
+    {
+        $eventAttendance = new self();
+
+        $eventAttendance->setId($row['id']);
+        $eventAttendance->setEvent($event);
+        $eventAttendance->setMember($member);
+        $eventAttendance->setStatus($row['status']);
+        $eventAttendance->wasNoShow((bool) $row['no_show']);
+        $eventAttendance->setCreatedAt(Carbon::parse($row['created_at']));
+        $eventAttendance->setModifiedAt(Carbon::parse($row['modified_at']));
+
+        return $eventAttendance;
+    }
 
     public function setEvent(Event $event): void
     {

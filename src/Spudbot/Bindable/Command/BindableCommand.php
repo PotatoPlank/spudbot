@@ -6,7 +6,6 @@ use Discord\Parts\Interactions\Command\Command as CommandPart;
 use Spudbot\Bindable\Bindable;
 use Spudbot\Bindable\CommandObserver;
 use Spudbot\Bot\Spud;
-use Spudbot\Collection;
 
 abstract class BindableCommand extends Bindable
 {
