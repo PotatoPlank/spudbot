@@ -6,11 +6,11 @@ use Discord\Builders\CommandBuilder;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Bindable\Sub\TotalUserComments;
-use Spudbot\Bindable\Sub\UserEventReputation;
-use Spudbot\Bindable\Sub\UserInformation;
-use Spudbot\Bindable\Sub\UserLeaderboard;
-use Spudbot\Bindable\Sub\UserNoShowStatus;
+use Spudbot\Bindable\SubCommand\TotalUserComments;
+use Spudbot\Bindable\SubCommand\UserEventReputation;
+use Spudbot\Bindable\SubCommand\UserInformation;
+use Spudbot\Bindable\SubCommand\UserLeaderboard;
+use Spudbot\Bindable\SubCommand\UserNoShowStatus;
 use Spudbot\Interface\IBindableCommand;
 
 class User extends IBindableCommand
