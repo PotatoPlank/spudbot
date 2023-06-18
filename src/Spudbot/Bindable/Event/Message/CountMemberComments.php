@@ -28,7 +28,7 @@ class CountMemberComments extends IBindableEvent
                     $member->setTotalComments($member->getTotalComments() + 1);
                 }catch(\Exception){
                     $member = new Member();
-                    $member->setGuild($message->guild);
+                    $member->setGuild($this->spud->getGuildRepository()->findByPart($message->guild));
                     $member->setDiscordId($message->member->id);
                     $member->setTotalComments(1);
                 }
