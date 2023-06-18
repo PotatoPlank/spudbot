@@ -29,7 +29,7 @@ class UserInformation extends ISubCommand
         $isLevelOne = $memberPart->roles->isset($levelOneRole->id);
         $isVerified = $memberPart->roles->isset($verificationRole->id);
         $hasMetMembershipLength = $memberLength >= $_ENV['MEMBER_TENURE'];
-        $hasEnoughComments = $member->getTotalComments() >= $_ENV['MEMBER_COMMENT_THRESHOLD'];
+        $hasEnoughComments = $member->hasMetCommentThreshold();
         $isEligible = $hasMetMembershipLength && $hasEnoughComments;
 
         $context = [

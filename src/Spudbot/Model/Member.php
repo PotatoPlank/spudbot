@@ -56,4 +56,9 @@ class Member extends IModel
         return $this->totalComments;
     }
 
+    public function hasMetCommentThreshold(): bool
+    {
+        return $this->totalComments >= $_ENV['MEMBER_COMMENT_THRESHOLD'];
+    }
+
 }
