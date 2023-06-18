@@ -22,7 +22,6 @@ class UserNoShowStatus extends ISubCommand
         $memberRepository = $this->spud->getMemberRepository();
         $builder = $this->spud->getSimpleResponseBuilder();
         $title = 'Event No Show';
-        $message = '';
 
         $userId = $this->options['user']->value;
         $eventId = $this->options['internal_id']->value;

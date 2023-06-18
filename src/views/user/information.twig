@@ -1,0 +1,17 @@
+{{ memberId }} has been a member for {{ tenureDays }} of the {{ requiredTenureDays }} required days.
+They have posted {{ totalComments }} of the {{ requiredCommentCount }} comments required.
+{% if isLevelOne %}
+    They are {{ levelOneRoleName }}.
+{% else %}
+    They are not {{ levelOneRoleName }}.
+{% endif %}
+{% if isVerified %}
+    They are {{ verifiedRoleName }}.
+{% else %}
+    They are not {{ verifiedRoleName }}.
+{% endif %}
+{% if isEligible %}
+    They are eligible for automatic assignment to {{ levelOneRoleName }}.
+{% else %}
+    They are not eligible for automatic assignment to {{ levelOneRoleName }}.
+{% endif %}

@@ -32,14 +32,21 @@ class UserInformation extends ISubCommand
         $hasEnoughComments = $member->getTotalComments() >= $_ENV['MEMBER_COMMENT_THRESHOLD'];
         $isEligible = $hasMetMembershipLength && $hasEnoughComments;
 
-        $message = "<@{$member->getDiscordId()}> has been a member for {$memberLength->days}/{$_ENV['MEMBER_TENURE']} days." . PHP_EOL;
-        $message .= "They have posted {$member->getTotalComments()}/{$_ENV['MEMBER_COMMENT_THRESHOLD']} comments." . PHP_EOL;
-        $message .= $isLevelOne ? "They are {$levelOneRole->name}." . PHP_EOL : "They are not {$levelOneRole->name}." . PHP_EOL;
-        $message .= $isVerified ? "They are {$verificationRole->name}." . PHP_EOL : "They are not {$verificationRole->name}." . PHP_EOL;
-        $message .= $isEligible ? "They are eligible for {$levelOneRole->name}." . PHP_EOL : "They are not eligible for {$levelOneRole->name}." . PHP_EOL;
+        $context = [
+            'memberId' => $member->getDiscordId(),
+            'tenureDays' => $memberLength->days,
+            'requiredTenureDays' => $_ENV['MEMBER_TENURE'],
+            'totalComments' => $member->getTotalComments(),
+            'requiredCommentCount' => $_ENV['MEMBER_COMMENT_THRESHOLD'],
+            'isLevelOne' => $isLevelOne,
+            'isVerified' => $isVerified,
+            'isEligible' => $isEligible,
+            'levelOneRoleName' => $levelOneRole->name,
+            'verifiedRoleName' => $verificationRole->name,
+        ];
 
         $builder->setTitle($title);
-        $builder->setDescription($message);
+        $builder->setDescription($this->spud->getTwig()->render('user/information.twig', $context));
 
         $interaction->respondWithMessage($builder->getEmbeddedMessage());
     }

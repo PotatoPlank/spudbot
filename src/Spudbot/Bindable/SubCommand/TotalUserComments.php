@@ -23,8 +23,13 @@ class TotalUserComments extends ISubCommand
 
         $member = $repository->findByPart($memberPart);
 
+        $context = [
+          'memberId' => $memberPart->user->id,
+          'totalComments' => $member->getTotalComments(),
+        ];
+
         $builder->setTitle("{$memberPart->user->displayname} Comment Count");
-        $builder->setDescription("<@{$memberPart->user->id}> posted {$member->getTotalComments()} times.");
+        $builder->setDescription($this->spud->getTwig()->render('user/comment_count.twig', $context));
 
         $interaction->respondWithMessage($builder->getEmbeddedMessage());
     }
