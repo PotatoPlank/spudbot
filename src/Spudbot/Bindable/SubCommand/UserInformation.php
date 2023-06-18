@@ -1,10 +1,11 @@
 <?php
 
-namespace Spudbot\Bindable\Sub;
+namespace Spudbot\Bindable\SubCommand;
 
 
 use Carbon\Carbon;
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Interface\ISubCommand;
 use Spudbot\Repository\SQL\MemberRepository;
 
 class UserInformation extends ISubCommand

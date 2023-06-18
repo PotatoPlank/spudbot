@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
 
-namespace Spudbot\Bindable\Sub;
+namespace Spudbot\Bindable\SubCommand;
 
 
 use Carbon\Carbon;
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Interface\ISubCommand;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Repository\SQL\MemberRepository;
 

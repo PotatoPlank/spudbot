@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
 
-namespace Spudbot\Bindable\Sub;
+namespace Spudbot\Bindable\SubCommand;
 
 
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Interface\ISubCommand;
 use Spudbot\Repository\SQL\EventRepository;
 use Spudbot\Repository\SQL\MemberRepository;
 

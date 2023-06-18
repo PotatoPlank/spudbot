@@ -1,11 +1,11 @@
 <?php
+declare(strict_types=1);
 
-namespace Spudbot\Bindable\Sub;
+namespace Spudbot\Interface;
 
 
 use Discord\Parts\Interactions\Interaction;
 use Discord\Repository\Interaction\OptionRepository;
-use Spudbot\Interface\IBindable;
 
 abstract class ISubCommand extends IBindable
 {
@@ -19,7 +19,7 @@ abstract class ISubCommand extends IBindable
         return $this->subCommand;
     }
 
-    public function setOptionRepository(OptionRepository $options)
+    public function setOptionRepository(OptionRepository $options): void
     {
         $this->options = $options;
     }

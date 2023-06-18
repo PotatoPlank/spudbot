@@ -3,9 +3,9 @@
 namespace Spudbot\Bindable;
 
 use Discord\Repository\Interaction\OptionRepository;
-use Spudbot\Bindable\Sub\ISubCommand;
 use Spudbot\Bot\Spud;
 use Spudbot\Helpers\Collection;
+use Spudbot\Interface\ISubCommand;
 
 class CommandObserver
 {
@@ -24,6 +24,9 @@ class CommandObserver
     public function notify(OptionRepository $options, mixed ...$arguments): void
     {
         $notified = false;
+        /**
+         * @var ISubCommand $subscriber
+         */
         foreach ($this->subscribers as $subCommand => $subscriber)
         {
             if($options->isset($subCommand)){
