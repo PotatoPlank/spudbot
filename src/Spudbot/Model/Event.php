@@ -6,12 +6,13 @@ namespace Spudbot\Model;
 use Carbon\Carbon;
 use Spudbot\Interface\IModel;
 
-class Event extends IModel
+class
+Event extends IModel
 {
     private Guild $guild;
     private ?string $channelId;
     private string $name;
-    private \Spudbot\Type\EventType $type;
+    private \Spudbot\Types\EventType $type;
     private ?string $seshId;
     private ?string $nativeId;
     private Carbon $scheduledAt;
@@ -24,7 +25,7 @@ class Event extends IModel
         $event->setGuild($guild);
         $event->setChannelId($row['channel_id']);
         $event->setName($row['name']);
-        $event->setType(\Spudbot\Type\EventType::from($row['type']));
+        $event->setType(\Spudbot\Types\EventType::from($row['type']));
         $event->setSeshId($row['sesh_id']);
         $event->setNativeId($row['native_id']);
         $event->setScheduledAt(Carbon::parse($row['scheduled_at']));
@@ -65,12 +66,12 @@ class Event extends IModel
         return $this->name;
     }
 
-    public function setType(\Spudbot\Type\EventType $type): void
+    public function setType(\Spudbot\Types\EventType $type): void
     {
         $this->type = $type;
     }
 
-    public function getType(): \Spudbot\Type\EventType
+    public function getType(): \Spudbot\Types\EventType
     {
         return $this->type;
     }
