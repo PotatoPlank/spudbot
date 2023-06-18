@@ -59,7 +59,7 @@ class RemovedUserFromNativeEvent extends IBindableEvent
                     $eventAttendance->setStatus('No');
                 }
 
-                $noShowDateTime = $eventPart->scheduled_start_time->modify('-8 hours');
+                $noShowDateTime = $eventPart->scheduled_start_time->modify($_ENV['EVENT_NO_SHOW_WINDOW']);
                 if($noShowDateTime->lte(Carbon::now()))
                 {
                     $eventAttendance->wasNoShow(true);

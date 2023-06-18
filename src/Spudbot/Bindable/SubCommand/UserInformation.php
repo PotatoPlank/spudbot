@@ -28,12 +28,12 @@ class UserInformation extends ISubCommand
         $verificationRole = $interaction->guild->roles->get('id', 1114365923730665482);
         $isLevelOne = $memberPart->roles->isset($levelOneRole->id);
         $isVerified = $memberPart->roles->isset($verificationRole->id);
-        $hasMetMembershipLength = $memberLength >= 10;
-        $hasEnoughComments = $member->getTotalComments() >= 10;
+        $hasMetMembershipLength = $memberLength >= $_ENV['MEMBER_TENURE'];
+        $hasEnoughComments = $member->getTotalComments() >= $_ENV['MEMBER_COMMENT_THRESHOLD'];
         $isEligible = $hasMetMembershipLength && $hasEnoughComments;
 
-        $message = "<@{$member->getDiscordId()}> has been a member for {$memberLength->days}/10 days." . PHP_EOL;
-        $message .= "They have posted {$member->getTotalComments()}/10 comments." . PHP_EOL;
+        $message = "<@{$member->getDiscordId()}> has been a member for {$memberLength->days}/{$_ENV['MEMBER_TENURE']} days." . PHP_EOL;
+        $message .= "They have posted {$member->getTotalComments()}/{$_ENV['MEMBER_COMMENT_THRESHOLD']} comments." . PHP_EOL;
         $message .= $isLevelOne ? "They are {$levelOneRole->name}." . PHP_EOL : "They are not {$levelOneRole->name}." . PHP_EOL;
         $message .= $isVerified ? "They are {$verificationRole->name}." . PHP_EOL : "They are not {$verificationRole->name}." . PHP_EOL;
         $message .= $isEligible ? "They are eligible for {$levelOneRole->name}." . PHP_EOL : "They are not eligible for {$levelOneRole->name}." . PHP_EOL;

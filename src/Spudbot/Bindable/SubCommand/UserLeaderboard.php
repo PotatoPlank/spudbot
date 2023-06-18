@@ -21,7 +21,7 @@ class UserLeaderboard extends ISubCommand
         $builder = $this->spud->getSimpleResponseBuilder();
         $members = $repository->getAll();
 
-        $maximumUsers = 10;
+        $maximumUsers = $_ENV['LEADERBOARD_LENGTH'];
         $leaderboard = [];
         /**
          * @var Member $member
@@ -39,7 +39,7 @@ class UserLeaderboard extends ISubCommand
                     }
                 }else{
                     $leaderboard[$member->getDiscordId()] = $member->getTotalComments();
-                    if(count($leaderboard) === 10){
+                    if(count($leaderboard) === $maximumUsers){
                         arsort($leaderboard);
                     }
                 }
