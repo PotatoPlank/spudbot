@@ -5,6 +5,7 @@ namespace Spudbot\Model;
 
 use Carbon\Carbon;
 use Spudbot\Interface\IModel;
+use Spudbot\Types\EventType;
 
 class
 Event extends IModel
@@ -12,7 +13,7 @@ Event extends IModel
     private Guild $guild;
     private ?string $channelId;
     private string $name;
-    private \Spudbot\Types\EventType $type;
+    private EventType $type;
     private ?string $seshId;
     private ?string $nativeId;
     private Carbon $scheduledAt;
@@ -21,16 +22,16 @@ Event extends IModel
     {
         $event = new self();
 
-        $event->setId($row['id']);
+        $event->setId($row['e_id'] ?? $row['id']);
         $event->setGuild($guild);
-        $event->setChannelId($row['channel_id']);
-        $event->setName($row['name']);
-        $event->setType(\Spudbot\Types\EventType::from($row['type']));
-        $event->setSeshId($row['sesh_id']);
-        $event->setNativeId($row['native_id']);
-        $event->setScheduledAt(Carbon::parse($row['scheduled_at']));
-        $event->setCreatedAt(Carbon::parse($row['created_at']));
-        $event->setModifiedAt(Carbon::parse($row['modified_at']));
+        $event->setChannelId($row['e_channel_id'] ?? $row['channel_id']);
+        $event->setName($row['e_name'] ?? $row['name']);
+        $event->setType(EventType::from($row['e_type'] ?? $row['type']));
+        $event->setSeshId($row['e_sesh_id'] ?? $row['sesh_id']);
+        $event->setNativeId($row['e_native_id'] ?? $row['native_id']);
+        $event->setScheduledAt(Carbon::parse($row['e_scheduled_at'] ?? $row['scheduled_at']));
+        $event->setCreatedAt(Carbon::parse($row['e_created_at'] ?? $row['created_at']));
+        $event->setModifiedAt(Carbon::parse($row['e_modified_at'] ?? $row['modified_at']));
 
         return $event;
     }
@@ -66,12 +67,12 @@ Event extends IModel
         return $this->name;
     }
 
-    public function setType(\Spudbot\Types\EventType $type): void
+    public function setType(EventType $type): void
     {
         $this->type = $type;
     }
 
-    public function getType(): \Spudbot\Types\EventType
+    public function getType(): EventType
     {
         return $this->type;
     }

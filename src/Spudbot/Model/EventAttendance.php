@@ -16,13 +16,13 @@ class EventAttendance extends IModel
     {
         $eventAttendance = new self();
 
-        $eventAttendance->setId($row['id']);
+        $eventAttendance->setId($row['ea_id'] ?? $row['id']);
         $eventAttendance->setEvent($event);
         $eventAttendance->setMember($member);
-        $eventAttendance->setStatus($row['status']);
-        $eventAttendance->wasNoShow((bool) $row['no_show']);
-        $eventAttendance->setCreatedAt(Carbon::parse($row['created_at']));
-        $eventAttendance->setModifiedAt(Carbon::parse($row['modified_at']));
+        $eventAttendance->setStatus($row['ea_status'] ?? $row['status']);
+        $eventAttendance->wasNoShow((bool) $row['ea_no_show'] ?? $row['no_show']);
+        $eventAttendance->setCreatedAt(Carbon::parse($row['ea_created_at'] ?? $row['created_at']));
+        $eventAttendance->setModifiedAt(Carbon::parse($row['ea_modified_at'] ?? $row['modified_at']));
 
         return $eventAttendance;
     }
