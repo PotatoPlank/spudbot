@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Spudbot\Repository\SQL;
 
 use Carbon\Carbon;
-use Doctrine\DBAL\Cache\QueryCacheProfile;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IGuildRepository;
@@ -20,7 +19,6 @@ class GuildRepository extends IGuildRepository
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('guilds')
             ->where('id = ?')->setParameters([$id])
-            ->enableResultCache(new QueryCacheProfile('300', "guild_{$id}"))
             ->fetchAssociative();
 
         if(!$response){
@@ -35,7 +33,6 @@ class GuildRepository extends IGuildRepository
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select('*')->from('guilds')
             ->where('discord_id = ?')->setParameters([$discordId])
-            ->enableResultCache(new QueryCacheProfile('300', "guild_{$discordId}"))
             ->fetchAssociative();
 
         if(!$response){
@@ -56,7 +53,6 @@ class GuildRepository extends IGuildRepository
         $queryBuilder = $this->dbal->createQueryBuilder();
 
         $response = $queryBuilder->select('*')->from('guilds')
-            ->enableResultCache(new QueryCacheProfile('60', "guild_list"))
             ->fetchAllAssociative();
 
         if(!empty($response)){

@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Spudbot\Repository\SQL;
 
 use Carbon\Carbon;
-use Doctrine\DBAL\Cache\QueryCacheProfile;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IMemberRepository;
@@ -16,24 +15,27 @@ use Spudbot\Traits\UsesDoctrine;
 class MemberRepository extends IMemberRepository
 {
     use UsesDoctrine;
+
+    private array $fields = [
+        'm.id as m_id',
+        'm.discord_id as m_discord_id',
+        'm.total_comments as m_total_comments',
+        'm.created_at as m_created_at',
+        'm.modified_at as m_modified_at',
+        'g.id as g_id',
+        'g.discord_id as g_discord_id',
+        'g.output_channel_id as g_output_channel_id',
+        'g.output_thread_id as g_output_thread_id',
+        'g.created_at as g_created_at',
+        'g.modified_at as g_modified_at',
+    ];
     public function findById(string|int $id): Member
     {
         $response = $this->dbal->createQueryBuilder()
-            ->select('m.id as m_id',
-                'm.discord_id as m_discord_id',
-                'm.total_comments as m_total_comments',
-                'm.created_at as m_created_at',
-                'm.modified_at as m_modified_at',
-                'g.id as g_id',
-                'g.discord_id as g_discord_id',
-                'g.output_channel_id as g_output_channel_id',
-                'g.output_thread_id as g_output_thread_id',
-                'g.created_at as g_created_at',
-                'g.modified_at as g_modified_at')
+            ->select(...$this->fields)
             ->from('members', 'm')
             ->innerJoin('m', 'guilds', 'g', 'm.guild_id = g.id')
-            ->where('id = ?')->setParameters([$id])
-            ->enableResultCache(new QueryCacheProfile('10', "member_{$id}"))
+            ->where('m.id = ?')->setParameters([$id])
             ->fetchAssociative();
 
         if(!$response){
@@ -51,9 +53,9 @@ class MemberRepository extends IMemberRepository
     public function findByDiscordId(string $discordId): Member
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
-        $response = $queryBuilder->select('*')->from('members')
-            ->where('discord_id = ?')->setParameters([$discordId])
-            ->enableResultCache(new QueryCacheProfile('10', "member_{$discordId}"))
+        $response = $queryBuilder->select(...$this->fields)->from('members', 'm')
+            ->innerJoin('m', 'guilds', 'g', 'm.guild_id = g.id')
+            ->where('m.discord_id = ?')->setParameters([$discordId])
             ->fetchAssociative();
 
         if(!$response){
@@ -62,7 +64,7 @@ class MemberRepository extends IMemberRepository
 
         $guild = new GuildRepository($this->dbal);
 
-        return Member::withDatabaseRow($response, $guild->findById($response['guild_id']));
+        return Member::withDatabaseRow($response);
     }
 
     public function findByGuild(Guild $guild): Collection
@@ -70,14 +72,14 @@ class MemberRepository extends IMemberRepository
         $collection = new Collection();
         $queryBuilder = $this->dbal->createQueryBuilder();
 
-        $response = $queryBuilder->select('*')->from('members')
-            ->enableResultCache(new QueryCacheProfile('10', "member_list"))
-            ->where('guild_id = ?')->setParameter(0, $guild->getId())
+        $response = $queryBuilder->select(...$this->fields)->from('members', 'm')
+            ->innerJoin('m', 'guilds', 'g', 'm.guild_id = g.id')
+            ->where('m.guild_id = ?')->setParameter(0, $guild->getId())
             ->fetchAllAssociative();
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $member = Member::withDatabaseRow($row, $guild);
+                $member = Member::withDatabaseRow($row);
 
                 $collection->push($member);
             }
@@ -92,13 +94,13 @@ class MemberRepository extends IMemberRepository
         $guild = new GuildRepository($this->dbal);
         $queryBuilder = $this->dbal->createQueryBuilder();
 
-        $response = $queryBuilder->select('*')->from('members')
-            ->enableResultCache(new QueryCacheProfile('10', "member_list"))
+        $response = $queryBuilder->select(...$this->fields)->from('members', 'm')
+            ->innerJoin('m', 'guilds', 'g', 'm.guild_id = g.id')
             ->fetchAllAssociative();
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $member = Member::withDatabaseRow($row, $guild->findById($row['guild_id']));
+                $member = Member::withDatabaseRow($row);
 
                 $collection->push($member);
             }
@@ -112,14 +114,35 @@ class MemberRepository extends IMemberRepository
         $collection = new Collection();
         $event = new EventRepository($this->dbal);
         $queryBuilder = $this->dbal->createQueryBuilder();
+        $fields = $this->fields;
+        $fields[] = 'ea.id as ea_id';
+        $fields[] = 'ea.event_id as ea_event_id';
+        $fields[] = 'ea.member_id as ea_member_id';
+        $fields[] = 'ea.status as ea_status';
+        $fields[] = 'ea.no_show as ea_no_show';
+        $fields[] = 'ea.created_at as ea_created_at';
+        $fields[] = 'ea.modified_at as ea_modified_at';
+        $fields[] = 'e.id as e_id';
+        $fields[] = 'e.guild_id as e_guild_id';
+        $fields[] = 'e.channel_id as e_channel_id';
+        $fields[] = 'e.name as e_name';
+        $fields[] = 'e.type as e_type';
+        $fields[] = 'e.sesh_id as e_sesh_id';
+        $fields[] = 'e.native_id as e_native_id';
+        $fields[] = 'e.scheduled_at as e_scheduled_at';
+        $fields[] = 'e.created_at as e_created_at';
+        $fields[] = 'e.modified_at as e_modified_at';
 
-        $response = $queryBuilder->select('*')->from('event_attendance')
-            ->where('member_id = ?')->setParameters([$member->getId()])
+        $response = $queryBuilder->select(...$fields)->from('members','m')
+            ->innerJoin('m', 'guilds', 'g', 'm.guild_id = g.id')
+            ->innerJoin('m', 'event_attendance', 'ea', 'm.id = ea.member_id')
+            ->innerJoin('ea', 'events', 'e', 'e.id = ea.event_id')
+            ->where('m.id = ?')->setParameters([$member->getId()])
             ->fetchAllAssociative();
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $attendance = EventAttendance::withDatabaseRow($row, $event->findById($row['event_id']), $member);
+                $attendance = EventAttendance::withDatabaseRow($row);
 
                 $collection->push($attendance);
             }

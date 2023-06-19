@@ -18,20 +18,36 @@ Event extends IModel
     private ?string $nativeId;
     private Carbon $scheduledAt;
 
-    public static function withDatabaseRow(array $row, Guild $guild): self
+    public static function withDatabaseRow(array $row, ?Guild $guild = null): self
     {
         $event = new self();
 
-        $event->setId($row['e_id'] ?? $row['id']);
-        $event->setGuild($guild);
-        $event->setChannelId($row['e_channel_id'] ?? $row['channel_id']);
-        $event->setName($row['e_name'] ?? $row['name']);
-        $event->setType(EventType::from($row['e_type'] ?? $row['type']));
-        $event->setSeshId($row['e_sesh_id'] ?? $row['sesh_id']);
-        $event->setNativeId($row['e_native_id'] ?? $row['native_id']);
-        $event->setScheduledAt(Carbon::parse($row['e_scheduled_at'] ?? $row['scheduled_at']));
-        $event->setCreatedAt(Carbon::parse($row['e_created_at'] ?? $row['created_at']));
-        $event->setModifiedAt(Carbon::parse($row['e_modified_at'] ?? $row['modified_at']));
+        if(array_key_exists('e_id', $row)){
+            $event->setId($row['e_id']);
+            $event->setGuild(Guild::withDatabaseRow($row));
+            $event->setChannelId($row['e_channel_id']);
+            $event->setName($row['e_name']);
+            $event->setType(EventType::from($row['e_type']));
+            $event->setSeshId($row['e_sesh_id']);
+            $event->setNativeId($row['e_native_id']);
+            $event->setScheduledAt(Carbon::parse($row['e_scheduled_at']));
+            $event->setCreatedAt(Carbon::parse($row['e_created_at']));
+            $event->setModifiedAt(Carbon::parse($row['e_modified_at']));
+        }else{
+            if(!isset($guild)){
+                throw new \InvalidArgumentException('Guild is required when you\'re not using joins.');
+            }
+            $event->setId($row['id']);
+            $event->setGuild($guild);
+            $event->setChannelId($row['channel_id']);
+            $event->setName($row['name']);
+            $event->setType(EventType::from($row['type']));
+            $event->setSeshId($row['sesh_id']);
+            $event->setNativeId($row['native_id']);
+            $event->setScheduledAt(Carbon::parse($row['scheduled_at']));
+            $event->setCreatedAt(Carbon::parse($row['created_at']));
+            $event->setModifiedAt(Carbon::parse($row['modified_at']));
+        }
 
         return $event;
     }

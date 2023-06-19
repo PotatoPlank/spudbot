@@ -37,6 +37,10 @@ class OnReadyExecuteBinds extends IBindableEvent
                     }
                 }
             }
+
+            $debug = $this->spud->getMemberRepository()->getEventAttendance($this->spud->getMemberRepository()->findByDiscordId(171444377279922176));
+            var_dump($debug[0]);
+            exit;
         };
     }
 

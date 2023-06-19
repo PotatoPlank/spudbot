@@ -1,6 +1,6 @@
 <?php
 
-namespace Spudbot\Bindable\Event\ScheduledEvents;
+namespace Spudbot\Bindable\Event\ScheduledEvent;
 
 
 use Discord\WebSockets\Event;
