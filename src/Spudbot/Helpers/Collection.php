@@ -23,7 +23,7 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
         return $this->collection;
     }
 
-    public function push(mixed $value)
+    public function push(mixed $value): void
     {
         $this->collection[] = $value;
     }

@@ -36,9 +36,7 @@ class UserNoShowStatus extends ISubCommand
 
             $eventAttendance->wasNoShow($noShowStatus);
 
-            /**
-             * TODO: Save event attendance with repository
-             */
+            //$memberRepository->saveMemberEventAttendance($eventAttendance);
 
             $message = "<@{$member->getDiscordId()}>'s status was updated.";
         }catch(\Exception $exception){

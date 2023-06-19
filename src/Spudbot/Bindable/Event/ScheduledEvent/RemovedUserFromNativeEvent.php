@@ -65,9 +65,7 @@ class RemovedUserFromNativeEvent extends IBindableEvent
                     $eventAttendance->wasNoShow(true);
                 }
 
-                /**
-                 * TODO save event attendance
-                 */
+//                $memberRepository->saveMemberEventAttendance($eventAttendance);
 
                 $builder->setTitle('Native Event Attendee Removed');
                 $builder->setDescription("<@{$member->getDiscordId()}> removed their RSVP to {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}");

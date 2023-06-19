@@ -57,9 +57,8 @@ class AddedUserToNativeEvent extends IBindableEvent
                     $eventAttendance->setMember($member);
                     $eventAttendance->setStatus('Attendees');
                 }
-                /**
-                 * TODO save event attendance
-                 */
+
+                //$memberRepository->saveMemberEventAttendance($eventAttendance);
 
                 $builder->setTitle('Native Event Attendee');
                 $builder->setDescription("<@{$member->getDiscordId()}> marked they were interested in {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}");
