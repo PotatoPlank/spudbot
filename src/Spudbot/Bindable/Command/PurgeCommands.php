@@ -17,13 +17,13 @@ class PurgeCommands extends IBindableCommand
             if($this->discord->application->owner->id === $interaction->user->id){
                 $builder->setTitle('Purge Commands');
                 $builder->setDescription('Commands are now being purged. The bot will restart when it\'s complete.');
-                $interaction->respondWithMessage($builder->getEmbeddedMessage(), true)->done(function(){
+                $interaction->respondWithMessage($builder->getEmbeddedMessage())->done(function(){
                     $this->discord->application->commands->freshen()->then(function ($commands) {
-                        foreach ($commands as $command) {
+                        foreach ($commands as $i => $command) {
                             $this->discord->getLogger()->alert("Purging the command: {$command->name}");
-                            $this->discord->application->commands->delete($command);
+                            $exit = $i === (count($commands) - 1) ? function(){exit;} : null;
+                            $this->discord->application->commands->delete($command)->done($exit);
                         }
-                        exit;
                     });
                 });
             }else{

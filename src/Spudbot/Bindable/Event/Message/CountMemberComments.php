@@ -26,13 +26,13 @@ class CountMemberComments extends IBindableEvent
                 try{
                     $member = $memberRepository->findByPart($message->member);
                     $member->setTotalComments($member->getTotalComments() + 1);
-                }catch(\Exception){
+                }catch(\OutOfBoundsException){
                     $member = new Member();
                     $member->setGuild($this->spud->getGuildRepository()->findByPart($message->guild));
                     $member->setDiscordId($message->member->id);
                     $member->setTotalComments(1);
                 }
-//                $memberRepository->save($member);
+                $memberRepository->save($member);
             }
         };
     }

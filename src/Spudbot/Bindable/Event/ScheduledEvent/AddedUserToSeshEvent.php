@@ -48,7 +48,7 @@ class AddedUserToSeshEvent extends IBindableEvent
                         $event->setSeshId($message->id);
                         $event->setChannelId($message->channel_id);
                     }
-//                    $spud->getEventRepository()->save($event);
+                    $spud->getEventRepository()->save($event);
 
                     $noShowDateTime = Carbon::parse($event->getScheduledAt())->modify($_ENV['EVENT_NO_SHOW_WINDOW'] ?? '-8 hours');
                     $noShowBoolean = $noShowDateTime->lte(Carbon::now());
@@ -79,12 +79,13 @@ class AddedUserToSeshEvent extends IBindableEvent
                                     $eventAttendance->setEvent($event);
                                     $eventAttendance->setMember($member);
                                     $eventAttendance->setStatus($eventStatus);
+                                    $eventAttendance->wasNoShow(false);
                                 }
                                 if(str_contains($eventStatus, 'No'))
                                 {
                                     $eventAttendance->wasNoShow($noShowBoolean);
                                 }
-                                //$this->spud->getMemberRepository()->saveMemberEventAttendance($eventAttendance);
+                                $this->spud->getMemberRepository()->saveMemberEventAttendance($eventAttendance);
                                 $statusContentText .= "<@{$eventAttendance->getMember()->getDiscordId()}>" . PHP_EOL;
                             }
                             unset($originalAttendees[$attendee->id]);
@@ -94,10 +95,12 @@ class AddedUserToSeshEvent extends IBindableEvent
                     if(!empty($originalAttendees)){
                         $statusContentText = '';
                         foreach ($originalAttendees as $originalAttendee) {
-                            $originalAttendee->wasNoShow($noShowBoolean);
-                            $originalAttendee->setStatus('No');
-                            //$this->spud->getMemberRepository()->saveMemberEventAttendance($originalAttendee);
-                            $statusContentText .= "<@{$originalAttendee->getMember()->getDiscordId()}>" . PHP_EOL;
+                            if($originalAttendee->getStatus() !== 'No'){
+                                $originalAttendee->wasNoShow($noShowBoolean);
+                                $originalAttendee->setStatus('No');
+                                $this->spud->getMemberRepository()->saveMemberEventAttendance($originalAttendee);
+                                $statusContentText .= "<@{$originalAttendee->getMember()->getDiscordId()}>" . PHP_EOL;
+                            }
                         }
                         $messageContent .= empty($statusContentText) ? '' :  'Removed From List:' . PHP_EOL . PHP_EOL . $statusContentText;
                     }

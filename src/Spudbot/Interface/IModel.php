@@ -7,7 +7,7 @@ use Carbon\Carbon;
 
 abstract class IModel
 {
-    private ?int $id;
+    private null|int|string $id;
     private Carbon $createdAt;
     private Carbon $modifiedAt;
 
@@ -27,11 +27,11 @@ abstract class IModel
     {
         $this->modifiedAt = $modifiedAt;
     }
-    public function getId(): ?int
+    public function getId(): null|int|string
     {
-        return $this->id;
+        return $this->id ?? null;
     }
-    public function setId(?int $id): void
+    public function setId(null|string|int $id): void
     {
         $this->id = $id;
     }

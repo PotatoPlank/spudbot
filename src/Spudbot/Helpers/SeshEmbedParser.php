@@ -61,7 +61,7 @@ class SeshEmbedParser
                             if(!isset($this->members[$eventStatus])){
                                 $this->members->set($eventStatus, new Collection());
                             }
-                            $this->members->get($eventStatus)->push($user->user);
+                            $this->members->get($eventStatus)->push($user);
                         }
                     }
                 }

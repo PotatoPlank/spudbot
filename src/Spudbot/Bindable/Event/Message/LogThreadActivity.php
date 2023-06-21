@@ -31,7 +31,7 @@ class LogThreadActivity extends IBindableEvent
                     $thread->setDiscordId($message->thread->id);
                     $thread->setGuild($guild);
                 }
-//                $this->spud->getThreadRepository()->save($thread);
+                $this->spud->getThreadRepository()->save($thread);
             }
         };
     }

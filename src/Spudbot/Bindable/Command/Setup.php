@@ -44,7 +44,7 @@ class Setup extends IBindableCommand
                     if($isThread){
                         $guild->setOutputThreadId($threadId);
                     }
-                    //$repository->save($guild);
+                    $repository->save($guild);
 
                     $builder->setTitle('Setup complete');
                     $builder->setDescription("Set the guild output location to <#{$guild->getOutputLocationId()}>.");

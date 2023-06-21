@@ -28,14 +28,14 @@ class EventCreated extends IBindableEvent
 
             try {
                 $eventRepository->findByPart($eventPart);
-            }catch(\Exception $exception){
+            }catch(\OutOfBoundsException $exception){
                 $event = new \Spudbot\Model\Event();
                 $event->setName($eventPart->name);
                 $event->setGuild($guild);
                 $event->setType(EventType::Native);
                 $event->setNativeId($event->guild_scheduled_event_id);
 
-                //$eventRepository->save($event);
+                $eventRepository->save($event);
             }
         };
     }

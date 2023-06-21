@@ -56,7 +56,7 @@ class ThreadRepository extends IThreadRepository
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select(...$this->fields)->from('threads', 't')
             ->innerJoin('t', 'guilds', 'g', 't.guild_id = g.id')
-            ->where('discord_id = ?')->setParameters([$discordId])
+            ->where('t.discord_id = ?')->setParameters([$discordId])
             ->fetchAssociative();
 
         if(!$response){
@@ -75,7 +75,7 @@ class ThreadRepository extends IThreadRepository
 
         $response = $queryBuilder->select(...$this->fields)->from('threads', 't')
             ->innerJoin('t', 'guilds', 'g', 't.guild_id = g.id')
-            ->where('guild_id = ?')->setParameters([$guild->getId()])
+            ->where('t.guild_id = ?')->setParameters([$guild->getId()])
             ->fetchAllAssociative();
 
         if(!empty($response)){

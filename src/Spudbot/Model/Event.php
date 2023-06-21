@@ -100,7 +100,7 @@ Event extends IModel
 
     public function getSeshId(): ?string
     {
-        return $this->seshId;
+        return $this->seshId ?? null;
     }
 
     public function setNativeId(?string $id): void
@@ -110,7 +110,7 @@ Event extends IModel
 
     public function getNativeId(): ?string
     {
-        return $this->nativeId;
+        return $this->nativeId ?? null;
     }
 
     public function setScheduledAt(Carbon $scheduledAt): void

@@ -31,7 +31,7 @@ class RemovedUserFromNativeEvent extends IBindableEvent
                 $guild = $guildRepository->findByPart($guildPart);
                 try{
                     $eventModel = $eventRepository->findByPart($eventPart);
-                }catch(\Exception $exception){
+                }catch(\OutOfBoundsException $exception){
 
                     $eventModel = new \Spudbot\Model\Event();
                     $eventModel->setNativeId($eventPart->id);
@@ -40,7 +40,7 @@ class RemovedUserFromNativeEvent extends IBindableEvent
                     $eventModel->setName($eventPart->name);
                     $eventModel->setScheduledAt($eventPart->scheduled_start_time);
 
-//                    $eventRepository->save($eventModel);
+                    $eventRepository->save($eventModel);
                 }
                 $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
                 if($guild->isOutputLocationThread()){
@@ -65,7 +65,7 @@ class RemovedUserFromNativeEvent extends IBindableEvent
                     $eventAttendance->wasNoShow(true);
                 }
 
-//                $memberRepository->saveMemberEventAttendance($eventAttendance);
+                $memberRepository->saveMemberEventAttendance($eventAttendance);
 
                 $builder->setTitle('Native Event Attendee Removed');
                 $builder->setDescription("<@{$member->getDiscordId()}> removed their RSVP to {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}");

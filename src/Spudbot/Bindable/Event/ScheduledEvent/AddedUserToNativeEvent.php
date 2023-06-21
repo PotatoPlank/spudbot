@@ -24,6 +24,7 @@ class AddedUserToNativeEvent extends IBindableEvent
             $memberRepository = $this->spud->getMemberRepository();
             $builder = $this->spud->getSimpleResponseBuilder();
             $guildPart = $this->discord->guilds->get('id', $event->guild_id);
+            $guild = $guildRepository->findByPart($guildPart);
             $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
             if($guild->isOutputLocationThread()){
                 $output = $output->threads->get('id', $guild->getOutputThreadId());
@@ -33,9 +34,7 @@ class AddedUserToNativeEvent extends IBindableEvent
             if($eventPart && $eventPart->creator->id !== '616754792965865495'){
                 try{
                     $eventModel = $eventRepository->findByPart($eventPart);
-                }catch(\Exception $exception){
-                    $guild = $guildRepository->findByPart($guildPart);
-
+                }catch(\OutOfBoundsException $exception){
                     $eventModel = new \Spudbot\Model\Event();
                     $eventModel->setNativeId($eventPart->id);
                     $eventModel->setType(EventType::Native);
@@ -43,7 +42,7 @@ class AddedUserToNativeEvent extends IBindableEvent
                     $eventModel->setName($eventPart->name);
                     $eventModel->setScheduledAt($eventPart->scheduled_start_time);
 
-//                    $eventRepository->save($eventModel);
+                    $eventRepository->save($eventModel);
                 }
 
                 $memberPart = $guildPart->members->get('id', $event->user_id);
@@ -51,14 +50,14 @@ class AddedUserToNativeEvent extends IBindableEvent
                 try{
                     $eventAttendance = $eventRepository->getAttendanceByMemberAndEvent($member, $eventModel);
                     $eventAttendance->setStatus('Attendees');
-                }catch (\Exception $exception){
+                }catch (\OutOfBoundsException $exception){
                     $eventAttendance = new EventAttendance();
                     $eventAttendance->setEvent($eventModel);
                     $eventAttendance->setMember($member);
                     $eventAttendance->setStatus('Attendees');
                 }
 
-                //$memberRepository->saveMemberEventAttendance($eventAttendance);
+                $memberRepository->saveMemberEventAttendance($eventAttendance);
 
                 $builder->setTitle('Native Event Attendee');
                 $builder->setDescription("<@{$member->getDiscordId()}> marked they were interested in {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}");

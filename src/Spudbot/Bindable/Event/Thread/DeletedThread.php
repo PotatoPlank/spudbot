@@ -21,7 +21,7 @@ class DeletedThread extends IBindableEvent
         return function (?Thread $threadPart){
             try{
                 $thread = $this->spud->getThreadRepository()->findByPart($threadPart);
-                //$this->spud->getThreadRepository()->remove($thread);
+                $this->spud->getThreadRepository()->remove($thread);
             }catch (\Exception $exception){
                 /**
                  * Already deleted
