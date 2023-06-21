@@ -12,6 +12,7 @@ class SeshEmbedParser
     private string $seshTimeString;
     private ?string $title;
     private string $link;
+    private string $id;
 
     private Collection $members;
     public function __construct(private Message $message){
@@ -30,6 +31,7 @@ class SeshEmbedParser
         $this->seshTimeString = trim(explode('[[+]]', $fields['Time']->value)[0]);
         $this->scheduledAt = $this->parseTimestampFromSeshString($this->seshTimeString);
         $this->link = $this->message->link;
+        $this->id = $this->message->id;
 
         unset($fields['Time'], $fields['Duration'], $fields['Repeat']);
 
@@ -59,7 +61,7 @@ class SeshEmbedParser
                             if(!isset($this->members[$eventStatus])){
                                 $this->members->set($eventStatus, new Collection());
                             }
-                            $this->members->get($eventStatus)->push($user->user);
+                            $this->members->get($eventStatus)->push($user);
                         }
                     }
                 }
@@ -115,5 +117,13 @@ class SeshEmbedParser
     public function getLink(): string
     {
         return $this->link;
+    }
+
+    /**
+     * @return string
+     */
+    public function getId(): string
+    {
+        return $this->id;
     }
 }

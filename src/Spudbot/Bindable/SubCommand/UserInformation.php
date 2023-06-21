@@ -1,13 +1,14 @@
 <?php
 
-namespace Spudbot\Bindable\Command\Sub;
+namespace Spudbot\Bindable\SubCommand;
 
 
 use Carbon\Carbon;
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Interface\ISubCommand;
 use Spudbot\Repository\SQL\MemberRepository;
 
-class UserInformation extends SubCommand
+class UserInformation extends ISubCommand
 {
     protected string $subCommand = 'info';
     public function execute(?Interaction $interaction): void
@@ -27,18 +28,25 @@ class UserInformation extends SubCommand
         $verificationRole = $interaction->guild->roles->get('id', 1114365923730665482);
         $isLevelOne = $memberPart->roles->isset($levelOneRole->id);
         $isVerified = $memberPart->roles->isset($verificationRole->id);
-        $hasMetMembershipLength = $memberLength >= 10;
-        $hasEnoughComments = $member->getTotalComments() >= 10;
+        $hasMetMembershipLength = $memberLength >= $_ENV['MEMBER_TENURE'];
+        $hasEnoughComments = $member->hasMetCommentThreshold();
         $isEligible = $hasMetMembershipLength && $hasEnoughComments;
 
-        $message = "<@{$member->getDiscordId()}> has been a member for {$memberLength->days}/10 days." . PHP_EOL;
-        $message .= "They have posted {$member->getTotalComments()}/10 comments." . PHP_EOL;
-        $message .= $isLevelOne ? "They are {$levelOneRole->name}." . PHP_EOL : "They are not {$levelOneRole->name}." . PHP_EOL;
-        $message .= $isVerified ? "They are {$verificationRole->name}." . PHP_EOL : "They are not {$verificationRole->name}." . PHP_EOL;
-        $message .= $isEligible ? "They are eligible for {$levelOneRole->name}." . PHP_EOL : "They are not eligible for {$levelOneRole->name}." . PHP_EOL;
+        $context = [
+            'memberId' => $member->getDiscordId(),
+            'tenureDays' => $memberLength->days,
+            'requiredTenureDays' => $_ENV['MEMBER_TENURE'],
+            'totalComments' => $member->getTotalComments(),
+            'requiredCommentCount' => $_ENV['MEMBER_COMMENT_THRESHOLD'],
+            'isLevelOne' => $isLevelOne,
+            'isVerified' => $isVerified,
+            'isEligible' => $isEligible,
+            'levelOneRoleName' => $levelOneRole->name,
+            'verifiedRoleName' => $verificationRole->name,
+        ];
 
         $builder->setTitle($title);
-        $builder->setDescription($message);
+        $builder->setDescription($this->spud->getTwig()->render('user/information.twig', $context));
 
         $interaction->respondWithMessage($builder->getEmbeddedMessage());
     }

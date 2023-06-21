@@ -1,14 +1,14 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\Member;
 
 
-use Carbon\Carbon;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 
-class MemberJoins extends BindableEvent
+class MemberJoins extends IBindableEvent
 {
 
     public function getBoundEvent(): string

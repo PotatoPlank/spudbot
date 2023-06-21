@@ -1,13 +1,14 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\Thread;
 
 
 
 use Discord\Parts\Thread\Thread;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 
-class DeletedThread extends BindableEvent
+class DeletedThread extends IBindableEvent
 {
 
     public function getBoundEvent(): string
@@ -17,12 +18,10 @@ class DeletedThread extends BindableEvent
 
     public function getListener(): callable
     {
-        return function (?Thread $thread){
+        return function (?Thread $threadPart){
             try{
-                $threadModel = $this->spud->getThreadRepository()->findByPart($thread);
-                /**
-                 * TODO Delete thread
-                 */
+                $thread = $this->spud->getThreadRepository()->findByPart($threadPart);
+                $this->spud->getThreadRepository()->remove($thread);
             }catch (\Exception $exception){
                 /**
                  * Already deleted

@@ -1,13 +1,14 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\ScheduledEvent;
 
 
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Types\EventType;
 
-class AddedUserToNativeEvent extends BindableEvent
+class AddedUserToNativeEvent extends IBindableEvent
 {
 
     public function getBoundEvent(): string
@@ -23,6 +24,7 @@ class AddedUserToNativeEvent extends BindableEvent
             $memberRepository = $this->spud->getMemberRepository();
             $builder = $this->spud->getSimpleResponseBuilder();
             $guildPart = $this->discord->guilds->get('id', $event->guild_id);
+            $guild = $guildRepository->findByPart($guildPart);
             $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
             if($guild->isOutputLocationThread()){
                 $output = $output->threads->get('id', $guild->getOutputThreadId());
@@ -32,9 +34,7 @@ class AddedUserToNativeEvent extends BindableEvent
             if($eventPart && $eventPart->creator->id !== '616754792965865495'){
                 try{
                     $eventModel = $eventRepository->findByPart($eventPart);
-                }catch(\Exception $exception){
-                    $guild = $guildRepository->findByPart($guildPart);
-
+                }catch(\OutOfBoundsException $exception){
                     $eventModel = new \Spudbot\Model\Event();
                     $eventModel->setNativeId($eventPart->id);
                     $eventModel->setType(EventType::Native);
@@ -50,15 +50,14 @@ class AddedUserToNativeEvent extends BindableEvent
                 try{
                     $eventAttendance = $eventRepository->getAttendanceByMemberAndEvent($member, $eventModel);
                     $eventAttendance->setStatus('Attendees');
-                }catch (\Exception $exception){
+                }catch (\OutOfBoundsException $exception){
                     $eventAttendance = new EventAttendance();
                     $eventAttendance->setEvent($eventModel);
                     $eventAttendance->setMember($member);
                     $eventAttendance->setStatus('Attendees');
                 }
-                /**
-                 * TODO save event attendance
-                 */
+
+                $memberRepository->saveMemberEventAttendance($eventAttendance);
 
                 $builder->setTitle('Native Event Attendee');
                 $builder->setDescription("<@{$member->getDiscordId()}> marked they were interested in {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}");

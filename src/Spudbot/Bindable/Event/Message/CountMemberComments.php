@@ -1,13 +1,14 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\Message;
 
 
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 use Spudbot\Model\Member;
 
-class CountMemberComments extends BindableEvent
+class CountMemberComments extends IBindableEvent
 {
 
     public function getBoundEvent(): string
@@ -25,9 +26,9 @@ class CountMemberComments extends BindableEvent
                 try{
                     $member = $memberRepository->findByPart($message->member);
                     $member->setTotalComments($member->getTotalComments() + 1);
-                }catch(\Exception){
+                }catch(\OutOfBoundsException){
                     $member = new Member();
-                    $member->setGuild($message->guild);
+                    $member->setGuild($this->spud->getGuildRepository()->findByPart($message->guild));
                     $member->setDiscordId($message->member->id);
                     $member->setTotalComments(1);
                 }

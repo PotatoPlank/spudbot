@@ -1,12 +1,13 @@
 <?php
+declare(strict_types=1);
 
-namespace Spudbot\Bindable;
+namespace Spudbot\Interface;
 
 use Discord\Discord;
 use Doctrine\DBAL\Connection;
 use Spudbot\Bot\Spud;
 
-abstract class Bindable
+abstract class IBindable
 {
     protected Discord $discord;
     protected ?Connection $dbal;

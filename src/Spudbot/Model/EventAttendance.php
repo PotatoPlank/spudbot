@@ -12,17 +12,30 @@ class EventAttendance extends IModel
     private string $status;
     private bool $wasNoShow;
 
-    public static function withDatabaseRow(array $row, Event $event, Member $member): self
+    public static function withDatabaseRow(array $row, ?Event $event = null, ?Member $member = null): self
     {
         $eventAttendance = new self();
 
-        $eventAttendance->setId($row['id']);
-        $eventAttendance->setEvent($event);
-        $eventAttendance->setMember($member);
-        $eventAttendance->setStatus($row['status']);
-        $eventAttendance->wasNoShow((bool) $row['no_show']);
-        $eventAttendance->setCreatedAt(Carbon::parse($row['created_at']));
-        $eventAttendance->setModifiedAt(Carbon::parse($row['modified_at']));
+        if(array_key_exists('ea_id', $row)){
+            $eventAttendance->setId($row['ea_id']);
+            $eventAttendance->setEvent(Event::withDatabaseRow($row));
+            $eventAttendance->setMember(Member::withDatabaseRow($row));
+            $eventAttendance->setStatus($row['ea_status']);
+            $eventAttendance->wasNoShow((bool) $row['ea_no_show']);
+            $eventAttendance->setCreatedAt(Carbon::parse($row['ea_created_at']));
+            $eventAttendance->setModifiedAt(Carbon::parse($row['ea_modified_at']));
+        }else{
+            if(!isset($event, $member)){
+                throw new \InvalidArgumentException('Member and event is required when you\'re not using joins.');
+            }
+            $eventAttendance->setId($row['id']);
+            $eventAttendance->setEvent($event);
+            $eventAttendance->setMember($member);
+            $eventAttendance->setStatus($row['status']);
+            $eventAttendance->wasNoShow((bool) $row['no_show']);
+            $eventAttendance->setCreatedAt(Carbon::parse($row['created_at']));
+            $eventAttendance->setModifiedAt(Carbon::parse($row['modified_at']));
+        }
 
         return $eventAttendance;
     }

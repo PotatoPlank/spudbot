@@ -14,10 +14,26 @@ use Spudbot\Traits\UsesDoctrine;
 class ThreadRepository extends IThreadRepository
 {
     use UsesDoctrine;
+
+    private array $fields = [
+        't.id as t_id',
+        't.discord_id as t_discord_id',
+        't.guild_id as t_guild_id',
+        't.created_at as t_created_at',
+        't.modified_at as t_modified_at',
+        'g.id as g_id',
+        'g.discord_id as g_discord_id',
+        'g.output_channel_id as g_output_channel_id',
+        'g.output_thread_id as g_output_thread_id',
+        'g.created_at as g_created_at',
+        'g.modified_at as g_modified_at',
+    ];
+
     public function findById(string|int $id): Thread
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
-        $response = $queryBuilder->select('*')->from('threads')
+        $response = $queryBuilder->select(...$this->fields)->from('threads', 't')
+            ->innerJoin('t', 'guilds', 'g', 't.guild_id = g.id')
             ->where('id = ?')->setParameters([$id])
             ->fetchAssociative();
 
@@ -27,7 +43,7 @@ class ThreadRepository extends IThreadRepository
 
         $guild = new GuildRepository($this->dbal);
 
-        return Thread::withDatabaseRow($response, $guild->findById($response['guild_id']));
+        return Thread::withDatabaseRow($response);
     }
 
     public function findByPart(\Discord\Parts\Thread\Thread $thread): Thread
@@ -38,8 +54,9 @@ class ThreadRepository extends IThreadRepository
     public function findByDiscordId(string $discordId): Thread
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
-        $response = $queryBuilder->select('*')->from('threads')
-            ->where('discord_id = ?')->setParameters([$discordId])
+        $response = $queryBuilder->select(...$this->fields)->from('threads', 't')
+            ->innerJoin('t', 'guilds', 'g', 't.guild_id = g.id')
+            ->where('t.discord_id = ?')->setParameters([$discordId])
             ->fetchAssociative();
 
         if(!$response){
@@ -48,7 +65,7 @@ class ThreadRepository extends IThreadRepository
 
         $guild = new GuildRepository($this->dbal);
 
-        return Thread::withDatabaseRow($response, $guild->findById($response['guild_id']));
+        return Thread::withDatabaseRow($response);
     }
 
     public function findByGuild(Guild $guild): Collection
@@ -56,13 +73,14 @@ class ThreadRepository extends IThreadRepository
         $collection = new Collection();
         $queryBuilder = $this->dbal->createQueryBuilder();
 
-        $response = $queryBuilder->select('*')->from('threads')
-            ->where('guild_id = ?')->setParameters([$guild->getId()])
+        $response = $queryBuilder->select(...$this->fields)->from('threads', 't')
+            ->innerJoin('t', 'guilds', 'g', 't.guild_id = g.id')
+            ->where('t.guild_id = ?')->setParameters([$guild->getId()])
             ->fetchAllAssociative();
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $thread = Thread::withDatabaseRow($row, $guild);
+                $thread = Thread::withDatabaseRow($row);
 
                 $collection->push($thread);
             }
@@ -77,12 +95,14 @@ class ThreadRepository extends IThreadRepository
         $guild = new GuildRepository($this->dbal);
         $queryBuilder = $this->dbal->createQueryBuilder();
 
-        $response = $queryBuilder->select('*')->from('threads')
+        $response = $queryBuilder->select(...$this->fields)
+            ->from('threads', 't')
+            ->innerJoin('t', 'guilds', 'g', 't.guild_id = g.id')
             ->fetchAllAssociative();
 
         if(!empty($response)){
             foreach ($response as $row) {
-                $thread = Thread::withDatabaseRow($row, $guild->findById($row['guild_id']));
+                $thread = Thread::withDatabaseRow($row);
 
                 $collection->push($thread);
             }

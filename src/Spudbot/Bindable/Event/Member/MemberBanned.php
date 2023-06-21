@@ -1,14 +1,14 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\Member;
 
 
 use Carbon\Carbon;
-use Discord\Parts\Channel\Message;
 use Discord\Parts\Guild\Ban;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 
-class MemberBanned extends BindableEvent
+class MemberBanned extends IBindableEvent
 {
 
     public function getBoundEvent(): string

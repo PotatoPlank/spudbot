@@ -1,14 +1,15 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\ScheduledEvent;
 
 
 use Carbon\Carbon;
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Types\EventType;
 
-class RemovedUserFromNativeEvent extends BindableEvent
+class RemovedUserFromNativeEvent extends IBindableEvent
 {
 
     public function getBoundEvent(): string
@@ -30,7 +31,7 @@ class RemovedUserFromNativeEvent extends BindableEvent
                 $guild = $guildRepository->findByPart($guildPart);
                 try{
                     $eventModel = $eventRepository->findByPart($eventPart);
-                }catch(\Exception $exception){
+                }catch(\OutOfBoundsException $exception){
 
                     $eventModel = new \Spudbot\Model\Event();
                     $eventModel->setNativeId($eventPart->id);
@@ -58,15 +59,13 @@ class RemovedUserFromNativeEvent extends BindableEvent
                     $eventAttendance->setStatus('No');
                 }
 
-                $noShowDateTime = $eventPart->scheduled_start_time->modify('-8 hours');
+                $noShowDateTime = $eventPart->scheduled_start_time->modify($_ENV['EVENT_NO_SHOW_WINDOW']);
                 if($noShowDateTime->lte(Carbon::now()))
                 {
                     $eventAttendance->wasNoShow(true);
                 }
 
-                /**
-                 * TODO save event attendance
-                 */
+                $memberRepository->saveMemberEventAttendance($eventAttendance);
 
                 $builder->setTitle('Native Event Attendee Removed');
                 $builder->setDescription("<@{$member->getDiscordId()}> removed their RSVP to {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}");

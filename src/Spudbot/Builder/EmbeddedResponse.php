@@ -10,6 +10,7 @@ class EmbeddedResponse
 {
     private string $title;
     private string $description;
+    private array $allowedMentions = [];
     private array $options = [];
     public function __construct(public Discord $discord) {}
 
@@ -27,6 +28,10 @@ class EmbeddedResponse
     {
         $this->options = $options;
     }
+    public function setAllowedMentions(array $allowedMentions): void
+    {
+        $this->allowedMentions = $allowedMentions;
+    }
 
     public function getEmbeddedMessage(): MessageBuilder
     {
@@ -36,6 +41,9 @@ class EmbeddedResponse
         $options['title'] = $this->title;
         if(!empty($this->description)){
             $options['description'] = $this->description;
+        }
+        if(!empty($this->allowedMentions)){
+            $builder->setAllowedMentions($this->allowedMentions);
         }
 
         $embed = $this->discord->factory(Embed::class, $options);

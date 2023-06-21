@@ -2,16 +2,16 @@
 
 namespace Spudbot\Bindable\Command;
 
-use Discord\Builders\MessageBuilder;
 use Discord\Parts\Channel\Channel;
-use Discord\Parts\Interactions\Command\Command;
-use Discord\Parts\Interactions\Command\Command as CommandPart;
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Interface\IBindableCommand;
 use Spudbot\Model\Guild;
 use Spudbot\Repository\SQL\GuildRepository;
 
-class Setup extends BindableCommand
+class Setup extends IBindableCommand
 {
+    protected string $name = 'setup';
+    protected string $description = 'Setup the guild and the selected channel as the log output location.';
     public function getListener(): callable
     {
         if(empty($this->dbal)){
@@ -58,25 +58,5 @@ class Setup extends BindableCommand
                 $interaction->respondWithMessage($builder->getEmbeddedMessage());
             });
         };
-    }
-
-    public function getCommand(): CommandPart
-    {
-        $attributes = [
-            'name' => $this->getName(),
-            'description' => $this->getDescription(),
-        ];
-
-        return new Command($this->discord, $attributes);
-    }
-
-    public function getName(): string
-    {
-        return 'setup';
-    }
-
-    public function getDescription(): string
-    {
-        return 'Setup the guild and the selected channel as the log output location.';
     }
 }

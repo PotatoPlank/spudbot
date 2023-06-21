@@ -2,16 +2,13 @@
 
 namespace Spudbot\Bindable\Command;
 
-use Discord\Builders\MessageBuilder;
-use Discord\Parts\Channel\Channel;
-use Discord\Parts\Interactions\Command\Command;
-use Discord\Parts\Interactions\Command\Command as CommandPart;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Model\Guild;
-use Spudbot\Repository\SQL\GuildRepository;
+use Spudbot\Interface\IBindableCommand;
 
-class Hype extends BindableCommand
+class Hype extends IBindableCommand
 {
+    protected string $name = 'hype';
+    protected string $description = 'Hype from the ultimate hype man.';
     public function getListener(): callable
     {
         return function (Interaction $interaction){
@@ -36,25 +33,5 @@ class Hype extends BindableCommand
 
             $interaction->respondWithMessage($builder->getEmbeddedMessage());
         };
-    }
-
-    public function getCommand(): Command
-    {
-        $attributes = [
-            'name' => $this->getName(),
-            'description' => $this->getDescription(),
-        ];
-
-        return new Command($this->discord, $attributes);
-    }
-
-    public function getName(): string
-    {
-        return 'hype';
-    }
-
-    public function getDescription(): string
-    {
-        return 'Hype from the ultimate hype man.';
     }
 }

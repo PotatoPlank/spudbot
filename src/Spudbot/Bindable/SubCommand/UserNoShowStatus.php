@@ -1,13 +1,15 @@
 <?php
+declare(strict_types=1);
 
-namespace Spudbot\Bindable\Command\Sub;
+namespace Spudbot\Bindable\SubCommand;
 
 
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Interface\ISubCommand;
 use Spudbot\Repository\SQL\EventRepository;
 use Spudbot\Repository\SQL\MemberRepository;
 
-class UserNoShowStatus extends SubCommand
+class UserNoShowStatus extends ISubCommand
 {
     protected string $subCommand = 'no_show';
     public function execute(?Interaction $interaction): void
@@ -20,7 +22,6 @@ class UserNoShowStatus extends SubCommand
         $memberRepository = $this->spud->getMemberRepository();
         $builder = $this->spud->getSimpleResponseBuilder();
         $title = 'Event No Show';
-        $message = '';
 
         $userId = $this->options['user']->value;
         $eventId = $this->options['internal_id']->value;
@@ -35,12 +36,10 @@ class UserNoShowStatus extends SubCommand
 
             $eventAttendance->wasNoShow($noShowStatus);
 
-            /**
-             * TODO: Save event attendance with repository
-             */
+            $memberRepository->saveMemberEventAttendance($eventAttendance);
 
             $message = "<@{$member->getDiscordId()}>'s status was updated.";
-        }catch(\Exception $exception){
+        }catch(\OutOfBoundsException $exception){
             $message = 'An event with that id and user could not be found.';
         }
 

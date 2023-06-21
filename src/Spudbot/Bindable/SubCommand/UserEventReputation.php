@@ -1,14 +1,16 @@
 <?php
+declare(strict_types=1);
 
-namespace Spudbot\Bindable\Command\Sub;
+namespace Spudbot\Bindable\SubCommand;
 
 
 use Carbon\Carbon;
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Interface\ISubCommand;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Repository\SQL\MemberRepository;
 
-class UserEventReputation extends SubCommand
+class UserEventReputation extends ISubCommand
 {
     protected string $subCommand = 'reputation';
 
@@ -19,6 +21,7 @@ class UserEventReputation extends SubCommand
          */
         $repository = $this->spud->getMemberRepository();
         $builder = $this->spud->getSimpleResponseBuilder();
+        $builder->setTitle("Event Attendance");
         $userId = $this->options['user']->value;
         $memberPart = $interaction->guild->members->get('id', $userId);
 
@@ -42,17 +45,18 @@ class UserEventReputation extends SubCommand
             }
 
             $reputation = round(($totalAttended / $totalEvents) * 100);
-            $message = "<@{$memberPart->id}> has as an event reputation of {$reputation}%." . PHP_EOL;
-            $message .= "They have attended {$totalAttended}/{$totalEvents} events they have expressed interest in.";
-            $builder->setTitle("Event Attendance");
+            $context = [
+                'memberId' => $memberPart->id,
+                'reputation' => $reputation,
+                'eventsAttended' => $totalAttended,
+                'eventsInterested' => $totalEvents,
+            ];
+            $message = $this->spud->getTwig()->render('user/event_reputation.twig', $context);
+
             $builder->setDescription($message);
-
-            $interaction->respondWithMessage($builder->getEmbeddedMessage());
         } else {
-            $builder->setTitle("Event Attendance");
             $builder->setDescription("<@{$memberPart->id}> hasn't attended an event yet.");
-
-            $interaction->respondWithMessage($builder->getEmbeddedMessage());
         }
+        $interaction->respondWithMessage($builder->getEmbeddedMessage());
     }
 }

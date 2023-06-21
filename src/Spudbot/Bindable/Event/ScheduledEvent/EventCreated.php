@@ -1,12 +1,13 @@
 <?php
 
-namespace Spudbot\Bindable\Event;
+namespace Spudbot\Bindable\Event\ScheduledEvent;
 
 
 use Discord\WebSockets\Event;
+use Spudbot\Interface\IBindableEvent;
 use Spudbot\Types\EventType;
 
-class EventCreated extends BindableEvent
+class EventCreated extends IBindableEvent
 {
 
     public function getBoundEvent(): string
@@ -27,7 +28,7 @@ class EventCreated extends BindableEvent
 
             try {
                 $eventRepository->findByPart($eventPart);
-            }catch(\Exception $exception){
+            }catch(\OutOfBoundsException $exception){
                 $event = new \Spudbot\Model\Event();
                 $event->setName($eventPart->name);
                 $event->setGuild($guild);

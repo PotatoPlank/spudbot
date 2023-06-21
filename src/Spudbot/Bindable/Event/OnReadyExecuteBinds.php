@@ -3,8 +3,9 @@
 namespace Spudbot\Bindable\Event;
 
 use Spudbot\Helpers\Collection;
+use Spudbot\Interface\IBindableEvent;
 
-class OnReadyExecuteBinds extends BindableEvent
+class OnReadyExecuteBinds extends IBindableEvent
 {
     private Collection $commands;
     private Collection $events;
@@ -20,21 +21,43 @@ class OnReadyExecuteBinds extends BindableEvent
             if(!empty($this->commands))
             {
                 foreach ($this->commands as $command) {
+                    $commandClass = get_class($command);
                     $this->discord->application->commands->save($command->getCommand());
-                    $this->discord->listenCommand($command->getName(),$command->getListener());
+                    $this->discord->listenCommand($command->getName(), function(...$args) use ($command, $commandClass){
+                        ($command->getListener())(...$args);
+
+                        $this->discord->getLogger()
+                            ->info("Slash command '{$command->getName()}' called using '{$commandClass}'.");
+                    });
                     $this->discord->getLogger()
-                        ->info("Slash command '{$command->getName()}' bound.");
+                        ->info("Slash command '{$command->getName()}' bound using '{$commandClass}'.");
                 }
             }
             if(!empty($this->events))
             {
                 foreach ($this->events as $eventType => $eventCollection) {
                     foreach ($eventCollection as $event) {
-                        $this->discord->on($event->getBoundEvent(), $event->getListener());
+                        $eventClass = get_class($event);
+                        $this->discord->on($event->getBoundEvent(), function(...$args) use ($event, $eventClass){
+                            ($event->getListener())(...$args);
+
+                            $this->discord->getLogger()
+                                ->info("Event '{$event->getBoundEvent()}' called using '{$eventClass}'.");
+                        });
                         $this->discord->getLogger()
-                            ->info("Event listening to '{$event->getBoundEvent()}'.");
+                            ->info("Event listening to '{$event->getBoundEvent()}' using '{$eventClass}'.");
                     }
                 }
+            }
+            if(!empty($_ENV['LOG_GUILD'])){
+                $output = $this->discord->guilds->get('id', $this->spud->logGuild->getDiscordId())->channels->get('id', $this->spud->logGuild->getOutputChannelId());
+                if(!empty($this->spud->logGuild->getOutputThreadId())){
+                    $output = $output->threads->get('id', $this->spud->logGuild->getOutputThreadId());
+                }
+                $builder = $this->spud->getSimpleResponseBuilder();
+                $builder->setTitle('Bot started');
+                $builder->setDescription('Bot started running.');
+                $output->sendMessage($builder->getEmbeddedMessage());
             }
         };
     }

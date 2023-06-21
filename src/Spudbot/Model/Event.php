@@ -5,31 +5,49 @@ namespace Spudbot\Model;
 
 use Carbon\Carbon;
 use Spudbot\Interface\IModel;
+use Spudbot\Types\EventType;
 
-class Event extends IModel
+class
+Event extends IModel
 {
     private Guild $guild;
     private ?string $channelId;
     private string $name;
-    private \Spudbot\Type\EventType $type;
+    private EventType $type;
     private ?string $seshId;
     private ?string $nativeId;
     private Carbon $scheduledAt;
 
-    public static function withDatabaseRow(array $row, Guild $guild): self
+    public static function withDatabaseRow(array $row, ?Guild $guild = null): self
     {
         $event = new self();
 
-        $event->setId($row['id']);
-        $event->setGuild($guild);
-        $event->setChannelId($row['channel_id']);
-        $event->setName($row['name']);
-        $event->setType(\Spudbot\Type\EventType::from($row['type']));
-        $event->setSeshId($row['sesh_id']);
-        $event->setNativeId($row['native_id']);
-        $event->setScheduledAt(Carbon::parse($row['scheduled_at']));
-        $event->setCreatedAt(Carbon::parse($row['created_at']));
-        $event->setModifiedAt(Carbon::parse($row['modified_at']));
+        if(array_key_exists('e_id', $row)){
+            $event->setId($row['e_id']);
+            $event->setGuild(Guild::withDatabaseRow($row));
+            $event->setChannelId($row['e_channel_id']);
+            $event->setName($row['e_name']);
+            $event->setType(EventType::from($row['e_type']));
+            $event->setSeshId($row['e_sesh_id']);
+            $event->setNativeId($row['e_native_id']);
+            $event->setScheduledAt(Carbon::parse($row['e_scheduled_at']));
+            $event->setCreatedAt(Carbon::parse($row['e_created_at']));
+            $event->setModifiedAt(Carbon::parse($row['e_modified_at']));
+        }else{
+            if(!isset($guild)){
+                throw new \InvalidArgumentException('Guild is required when you\'re not using joins.');
+            }
+            $event->setId($row['id']);
+            $event->setGuild($guild);
+            $event->setChannelId($row['channel_id']);
+            $event->setName($row['name']);
+            $event->setType(EventType::from($row['type']));
+            $event->setSeshId($row['sesh_id']);
+            $event->setNativeId($row['native_id']);
+            $event->setScheduledAt(Carbon::parse($row['scheduled_at']));
+            $event->setCreatedAt(Carbon::parse($row['created_at']));
+            $event->setModifiedAt(Carbon::parse($row['modified_at']));
+        }
 
         return $event;
     }
@@ -65,12 +83,12 @@ class Event extends IModel
         return $this->name;
     }
 
-    public function setType(\Spudbot\Type\EventType $type): void
+    public function setType(EventType $type): void
     {
         $this->type = $type;
     }
 
-    public function getType(): \Spudbot\Type\EventType
+    public function getType(): EventType
     {
         return $this->type;
     }
@@ -82,7 +100,7 @@ class Event extends IModel
 
     public function getSeshId(): ?string
     {
-        return $this->seshId;
+        return $this->seshId ?? null;
     }
 
     public function setNativeId(?string $id): void
@@ -92,7 +110,7 @@ class Event extends IModel
 
     public function getNativeId(): ?string
     {
-        return $this->nativeId;
+        return $this->nativeId ?? null;
     }
 
     public function setScheduledAt(Carbon $scheduledAt): void

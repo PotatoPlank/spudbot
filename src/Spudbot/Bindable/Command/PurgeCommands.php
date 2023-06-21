@@ -2,16 +2,13 @@
 
 namespace Spudbot\Bindable\Command;
 
-use Discord\Builders\MessageBuilder;
-use Discord\Parts\Channel\Channel;
-use Discord\Parts\Interactions\Command\Command;
-use Discord\Parts\Interactions\Command\Command as CommandPart;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Model\Guild;
-use Spudbot\Repository\SQL\GuildRepository;
+use Spudbot\Interface\IBindableCommand;
 
-class PurgeCommands extends BindableCommand
+class PurgeCommands extends IBindableCommand
 {
+    protected string $name = 'purge_commands';
+    protected string $description = 'Purges bound commands within the bot.';
     public function getListener(): callable
     {
         return function (Interaction $interaction){
@@ -20,13 +17,13 @@ class PurgeCommands extends BindableCommand
             if($this->discord->application->owner->id === $interaction->user->id){
                 $builder->setTitle('Purge Commands');
                 $builder->setDescription('Commands are now being purged. The bot will restart when it\'s complete.');
-                $interaction->respondWithMessage($builder->getEmbeddedMessage(), true)->done(function(){
+                $interaction->respondWithMessage($builder->getEmbeddedMessage())->done(function(){
                     $this->discord->application->commands->freshen()->then(function ($commands) {
-                        foreach ($commands as $command) {
+                        foreach ($commands as $i => $command) {
                             $this->discord->getLogger()->alert("Purging the command: {$command->name}");
-                            $this->discord->application->commands->delete($command);
+                            $exit = $i === (count($commands) - 1) ? function(){exit;} : null;
+                            $this->discord->application->commands->delete($command)->done($exit);
                         }
-                        exit;
                     });
                 });
             }else{
@@ -36,25 +33,5 @@ class PurgeCommands extends BindableCommand
                 $interaction->respondWithMessage($builder->getEmbeddedMessage());
             }
         };
-    }
-
-    public function getCommand(): Command
-    {
-        $attributes = [
-            'name' => $this->getName(),
-            'description' => $this->getDescription(),
-        ];
-
-        return new Command($this->discord, $attributes);
-    }
-
-    public function getName(): string
-    {
-        return 'purge_commands';
-    }
-
-    public function getDescription(): string
-    {
-        return 'Purges bound commands within the bot.';
     }
 }

@@ -1,13 +1,15 @@
 <?php
+declare(strict_types=1);
 
-namespace Spudbot\Bindable\Command\Sub;
+namespace Spudbot\Bindable\SubCommand;
 
 
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Interface\ISubCommand;
 use Spudbot\Model\Member;
 use Spudbot\Repository\SQL\MemberRepository;
 
-class UserLeaderboard extends SubCommand
+class UserLeaderboard extends ISubCommand
 {
     protected string $subCommand = 'leaderboard';
     public function execute(?Interaction $interaction): void
@@ -19,7 +21,7 @@ class UserLeaderboard extends SubCommand
         $builder = $this->spud->getSimpleResponseBuilder();
         $members = $repository->getAll();
 
-        $maximumUsers = 10;
+        $maximumUsers = $_ENV['LEADERBOARD_LENGTH'];
         $leaderboard = [];
         /**
          * @var Member $member
@@ -37,7 +39,7 @@ class UserLeaderboard extends SubCommand
                     }
                 }else{
                     $leaderboard[$member->getDiscordId()] = $member->getTotalComments();
-                    if(count($leaderboard) === 10){
+                    if(count($leaderboard) === $maximumUsers){
                         arsort($leaderboard);
                     }
                 }
