@@ -4,9 +4,11 @@ namespace Spudbot\Bot;
 
 use Carbon\Carbon;
 use Discord\Discord;
+use Discord\WebSockets\Event;
 use Doctrine\DBAL\Connection;
 use Spudbot\Bindable\Event\OnReadyExecuteBinds;
 use Spudbot\Builder\EmbeddedResponse;
+use Spudbot\Exception\BotTerminationException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IBindableCommand;
 use Spudbot\Interface\IBindableEvent;
@@ -15,11 +17,19 @@ use Spudbot\Interface\IGuildRepository;
 use Spudbot\Interface\IMemberRepository;
 use Spudbot\Interface\IThreadRepository;
 use Spudbot\Model\Guild;
+use Throwable;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
 
+use function Sentry\captureException;
+use function Sentry\init;
+
 class Spud
 {
+    public const MAJOR = 1;
+    public const MINOR = 0;
+    public const REVISION = 1;
+    public const BUILD = null;
     private Discord $discord;
     private Collection $events;
     private Collection $commands;
@@ -39,6 +49,21 @@ class Spud
         $this->commands = new Collection();
         $loader = new FilesystemLoader(dirname(__DIR__, 2) . '/views');
         $this->twig = new Environment($loader);
+
+        if(!empty($_ENV['SENTRY_DSN'])){
+            init(['dsn' => $_ENV['SENTRY_DSN'], 'environment' => $_ENV['SENTRY_ENV'] ]);
+        }
+
+        set_exception_handler(function (Throwable $exception){
+            if(!$exception instanceof BotTerminationException || !empty($exception->getMessage())){
+                if(!empty($_ENV['SENTRY_DSN'])){
+                    captureException($exception);
+                }
+                print "An exception was encountered and the bot stopped: {$exception->getMessage()}" . PHP_EOL;
+            }else{
+                print "Bot killed." . PHP_EOL;
+            }
+        });
     }
 
     public function setDoctrineClient(?Connection $dbal): void
@@ -155,4 +180,21 @@ class Spud
     {
         return $this->twig;
     }
+
+    public function kill(string $message = ''): void
+    {
+        throw new BotTerminationException($message);
+    }
+
+    public static function getVersionString(): string
+    {
+        $version = sprintf('v%d.%d.%d', self::MAJOR, self::MINOR, self::REVISION);
+
+        if(!empty(self::BUILD)){
+            $version .= '-' . self::BUILD;
+        }
+
+        return $version;
+    }
+
 }

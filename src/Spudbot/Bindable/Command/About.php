@@ -4,11 +4,12 @@ namespace Spudbot\Bindable\Command;
 
 use Carbon\Carbon;
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Bot\Spud;
 use Spudbot\Interface\IBindableCommand;
 
 class About extends IBindableCommand
 {
-    protected string $name = 'about';
+    protected string $name = 'about_test';
     protected string $description = 'About this bot.';
 
     public function getListener(): callable
@@ -16,10 +17,9 @@ class About extends IBindableCommand
         return function (Interaction $interaction){
             $builder = $this->spud->getSimpleResponseBuilder();
             $builder->setTitle('About');
-            $lastCommit = Carbon::parse(trim(exec('git log -n1 --pretty=%ci HEAD')));
 
             $context = [
-                'lastCommitDate' => $lastCommit->toIso8601String(),
+                'version' => Spud::getVersionString(),
                 'applicationOwnerId' => $this->discord->application->owner->id,
             ];
 
@@ -27,6 +27,7 @@ class About extends IBindableCommand
             $builder->setDescription($message);
 
             $interaction->respondWithMessage($builder->getEmbeddedMessage());
+            $this->spud->kill();
         };
     }
 }

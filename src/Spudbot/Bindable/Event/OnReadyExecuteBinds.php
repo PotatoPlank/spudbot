@@ -2,6 +2,8 @@
 
 namespace Spudbot\Bindable\Event;
 
+use Carbon\Carbon;
+use Spudbot\Bot\Spud;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IBindableEvent;
 
@@ -49,14 +51,14 @@ class OnReadyExecuteBinds extends IBindableEvent
                     }
                 }
             }
-            if(!empty($_ENV['LOG_GUILD'])){
+            if(!empty($this->spud->logGuild)){
                 $output = $this->discord->guilds->get('id', $this->spud->logGuild->getDiscordId())->channels->get('id', $this->spud->logGuild->getOutputChannelId());
                 if(!empty($this->spud->logGuild->getOutputThreadId())){
                     $output = $output->threads->get('id', $this->spud->logGuild->getOutputThreadId());
                 }
                 $builder = $this->spud->getSimpleResponseBuilder();
                 $builder->setTitle('Bot started');
-                $builder->setDescription('Bot started running.');
+                $builder->setDescription("Spudbot started. " . Spud::getVersionString());
                 $output->sendMessage($builder->getEmbeddedMessage());
             }
         };
