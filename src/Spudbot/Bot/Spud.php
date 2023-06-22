@@ -60,9 +60,11 @@ class Spud
                     captureException($exception);
                 }
                 print "An exception was encountered and the bot stopped: {$exception->getMessage()}" . PHP_EOL;
-            }else{
-                print "Bot killed." . PHP_EOL;
+                exit();
             }
+
+            print "Bot killed." . PHP_EOL;
+            exit();
         });
     }
 
