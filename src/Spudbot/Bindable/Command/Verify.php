@@ -35,7 +35,7 @@ class Verify extends IBindableCommand
             $memberToBeVerified = $interaction->guild->members->get('id', $targetMemberId);
             $sourceMemberIsVerified = $interaction->member->roles->isset(1114365923730665482);
 
-            if ($memberToBeVerified) {
+            if (!$memberToBeVerified) {
                 $builder->setDescription('An invalid user was submitted for verification.');
                 $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
                 return;
@@ -60,7 +60,7 @@ class Verify extends IBindableCommand
             ];
 
             if ($sourceMemberIsVerified) {
-                $builder->setDescription($this->spud->getTwig()->render('verification.twig', $context));
+                $builder->setDescription($this->spud->getTwig()->render('user/verification.twig', $context));
 
                 $interaction->respondWithMessage($builder->getEmbeddedMessage());
                 $output->sendMessage($builder->getEmbeddedMessage());
@@ -70,7 +70,7 @@ class Verify extends IBindableCommand
             $builder->setDescription('You do not have the required permissions to verify.');
             $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
 
-            $builder->setDescription($this->spud->getTwig()->render('verification_error.twig', $context));
+            $builder->setDescription($this->spud->getTwig()->render('user/verification_error.twig', $context));
             $output->sendMessage($builder->getEmbeddedMessage());
         };
     }
