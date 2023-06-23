@@ -9,7 +9,7 @@ use Spudbot\Interface\IBindableCommand;
 
 class About extends IBindableCommand
 {
-    protected string $name = 'about_test';
+    protected string $name = 'about';
     protected string $description = 'About this bot.';
 
     public function getListener(): callable

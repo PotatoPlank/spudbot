@@ -28,7 +28,7 @@ class Spud
 {
     public const MAJOR = 1;
     public const MINOR = 0;
-    public const REVISION = 1;
+    public const REVISION = 4;
     public const BUILD = null;
     private Discord $discord;
     private Collection $events;
@@ -59,7 +59,7 @@ class Spud
                 if(!empty($_ENV['SENTRY_DSN'])){
                     captureException($exception);
                 }
-                print "An exception was encountered and the bot stopped: {$exception->getMessage()}" . PHP_EOL;
+                print "An exception was encountered and the bot stopped: {$exception->getFile()}:{$exception->getLine()} {$exception->getMessage()}" . PHP_EOL;
                 exit();
             }
 
