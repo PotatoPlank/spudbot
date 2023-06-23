@@ -1,0 +1,146 @@
+{
+  "taskDefinitionArn": "arn:aws:ecs:us-east-2:955650548478:task-definition/SpudbotTask:5",
+  "containerDefinitions": [
+    {
+      "name": "spudbot",
+      "image": "public.ecr.aws/c1w1a2g6/potatoplank/spudbot",
+      "cpu": 0,
+      "portMappings": [
+        {
+          "name": "spudbot-80-tcp",
+          "containerPort": 80,
+          "hostPort": 0,
+          "protocol": "tcp",
+          "appProtocol": "http"
+        }
+      ],
+      "essential": true,
+      "environment": [],
+      "environmentFiles": [],
+      "mountPoints": [],
+      "volumesFrom": [],
+      "secrets": [
+        {
+          "name": "DATABASE_DRIVER",
+          "valueFrom": "SpudBotDatabaseDriver"
+        },
+        {
+          "name": "DATABASE_NAME",
+          "valueFrom": "SpudBotDatabaseName"
+        },
+        {
+          "name": "SENTRY_ENV",
+          "valueFrom": "SpudBotSentryEnv"
+        },
+        {
+          "name": "DATABASE_HOST",
+          "valueFrom": "SpudBotDatabaseHost"
+        },
+        {
+          "name": "DATABASE_PORT",
+          "valueFrom": "SpudBotDatabasePort"
+        },
+        {
+          "name": "LOG_GUILD",
+          "valueFrom": "SpudBotLogGuildId"
+        },
+        {
+          "name": "REACTION_ALERT_THRESHOLD",
+          "valueFrom": "SpudBotReactionAlertThreshold"
+        },
+        {
+          "name": "EVENT_NO_SHOW_WINDOW",
+          "valueFrom": "SpudBotNoShowWindow"
+        },
+        {
+          "name": "LEADERBOARD_LENGTH",
+          "valueFrom": "SpudBothLeaderboard"
+        },
+        {
+          "name": "SENTRY_DSN",
+          "valueFrom": "SpudBotSentryDsn"
+        },
+        {
+          "name": "MEMBER_COUNT_THRESHOLD",
+          "valueFrom": "SpudBotMemberCommentThreshold"
+        },
+        {
+          "name": "DATABASE_USERNAME",
+          "valueFrom": "SpudBotDatabaseUsername"
+        },
+        {
+          "name": "MOD_ALERT_CHANNEL",
+          "valueFrom": "SpudBotModAlertChannelId"
+        },
+        {
+          "name": "DISCORD_TOKEN",
+          "valueFrom": "SpudBotDiscordToken"
+        },
+        {
+          "name": "MEMBER_TENURE",
+          "valueFrom": "SpudBotMemberTenure"
+        },
+        {
+          "name": "DATABASE_PASSWORD",
+          "valueFrom": "SpudBotDatabasePassword"
+        }
+      ],
+      "ulimits": [],
+      "logConfiguration": {
+        "logDriver": "awslogs",
+        "options": {
+          "awslogs-create-group": "true",
+          "awslogs-group": "/ecs/SpudbotTask",
+          "awslogs-region": "us-east-2",
+          "awslogs-stream-prefix": "ecs"
+        }
+      }
+    }
+  ],
+  "family": "SpudbotTask",
+  "taskRoleArn": "arn:aws:iam::955650548478:role/ecsTaskExecutionRole",
+  "executionRoleArn": "arn:aws:iam::955650548478:role/ecsTaskExecutionRole",
+  "networkMode": "bridge",
+  "revision": 5,
+  "volumes": [],
+  "status": "ACTIVE",
+  "requiresAttributes": [
+    {
+      "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+    },
+    {
+      "name": "ecs.capability.execution-role-awslogs"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.task-iam-role"
+    },
+    {
+      "name": "ecs.capability.secrets.ssm.environment-variables"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+    },
+    {
+      "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
+    }
+  ],
+  "placementConstraints": [],
+  "compatibilities": [
+    "EC2"
+  ],
+  "requiresCompatibilities": [
+    "EC2"
+  ],
+  "cpu": "922",
+  "memory": "512",
+  "runtimePlatform": {
+    "cpuArchitecture": "X86_64",
+    "operatingSystemFamily": "LINUX"
+  },
+  "registeredAt": "2023-06-22T21:54:29.616Z",
+  "registeredBy": "arn:aws:iam::955650548478:root",
+  "tags": []
+}

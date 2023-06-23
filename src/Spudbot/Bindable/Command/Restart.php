@@ -19,7 +19,7 @@ class Restart extends IBindableCommand
                 $builder->setDescription('The bot will now restart.');
 
                 $interaction->respondWithMessage($builder->getEmbeddedMessage(), true)->done(function(){
-                    exit;
+                    $this->spud->kill();
                 });
             }else{
                 $builder->setTitle('Invalid Permissions for Restart');

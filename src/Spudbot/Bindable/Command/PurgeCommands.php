@@ -21,7 +21,7 @@ class PurgeCommands extends IBindableCommand
                     $this->discord->application->commands->freshen()->then(function ($commands) {
                         foreach ($commands as $i => $command) {
                             $this->discord->getLogger()->alert("Purging the command: {$command->name}");
-                            $exit = $i === (count($commands) - 1) ? function(){exit;} : null;
+                            $exit = $i === (count($commands) - 1) ? function(){$this->spud->kill();} : null;
                             $this->discord->application->commands->delete($command)->done($exit);
                         }
                     });
