@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+COPY --from=public.ecr.aws/composer/composer:latest /usr/bin/composer /usr/local/bin/composer
 
 COPY src /usr/src/spudbot/src
 COPY composer.json composer.lock spudbot.php /usr/src/spudbot/
