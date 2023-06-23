@@ -1,4 +1,4 @@
-FROM php:8.1-cli
+FROM public.ecr.aws/docker/library/php:8.1-cli
 
 ENV DOCKER 1
 
