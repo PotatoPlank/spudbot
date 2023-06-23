@@ -61,7 +61,7 @@
           "valueFrom": "SpudBotSentryDsn"
         },
         {
-          "name": "MEMBER_COUNT_THRESHOLD",
+          "name": "MEMBER_COMMENT_THRESHOLD",
           "valueFrom": "SpudBotMemberCommentThreshold"
         },
         {

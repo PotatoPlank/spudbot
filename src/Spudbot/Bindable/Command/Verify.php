@@ -60,6 +60,8 @@ class Verify extends IBindableCommand
             ];
 
             if ($sourceMemberIsVerified) {
+                $memberToBeVerified->addRole(1114365923730665481);
+
                 $builder->setDescription($this->spud->getTwig()->render('user/verification.twig', $context));
 
                 $interaction->respondWithMessage($builder->getEmbeddedMessage());

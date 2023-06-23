@@ -28,7 +28,7 @@ class Spud
 {
     public const MAJOR = 1;
     public const MINOR = 0;
-    public const REVISION = 4;
+    public const REVISION = 5;
     public const BUILD = null;
     private Discord $discord;
     private Collection $events;
