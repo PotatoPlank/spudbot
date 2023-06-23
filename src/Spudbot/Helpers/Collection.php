@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Spudbot\Helpers;
 
@@ -58,8 +63,30 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
         return count($this->collection);
     }
 
+    public function empty(): bool
+    {
+        return empty($this->collection);
+    }
+
     public function getIterator(): Traversable
     {
         return new \ArrayIterator($this->collection);
     }
+
+    public function filter(callable $callback): void
+    {
+        foreach ($this->collection as $key => $item) {
+            if ($callback($item, $key) === false) {
+                unset($this->collection[$key]);
+            }
+        }
+    }
+
+    public function transform(callable $callback): void
+    {
+        foreach ($this->collection as $key => $item) {
+            $this->collection[$key] = $callback($item, $key);
+        }
+    }
+
 }
