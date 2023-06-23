@@ -27,7 +27,6 @@ class About extends IBindableCommand
             $builder->setDescription($message);
 
             $interaction->respondWithMessage($builder->getEmbeddedMessage());
-            $this->spud->kill();
         };
     }
 }
