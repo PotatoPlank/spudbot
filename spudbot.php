@@ -47,34 +47,12 @@ $spud->setEventRepository(new EventRepository($dbal));
 $spud->setGuildRepository(new GuildRepository($dbal));
 $spud->setThreadRepository(new ThreadRepository($dbal));
 
-$spud->loadBindableCommandDirectory(__DIR__ . '/src/Spudbot/Bindable/Command/');
-$spud->loadBindableEventDirectory(__DIR__ . '/src/Spudbot/Bindable/Event/', [MessageHasManyReactions::class]);
+$spud->loadBindableCommandDirectory(__DIR__ . '/src/Spudbot/Bindable/Command');
 
-//$spud->loadBindableEvent(new MemberBanned());
-//$spud->loadBindableEvent(new MemberJoins());
-//$spud->loadBindableEvent(new MemberLeaves());
-//$spud->loadBindableEvent(new ApplyMemberRoleUpgrades());
-//$spud->loadBindableEvent(new BotMentioned());
-//$spud->loadBindableEvent(new CountMemberComments());
-//$spud->loadBindableEvent(new LogThreadActivity());
-//$spud->loadBindableEvent(new MessageHasManyReactions());
-//$spud->loadBindableEvent(new AddedUserToNativeEvent());
-//$spud->loadBindableEvent(new AddedUserToNativeSeshEvent());
-//$spud->loadBindableEvent(new AddedUserToSeshEvent());
-//$spud->loadBindableEvent(new EventCreated());
-//$spud->loadBindableEvent(new RemovedUserFromNativeEvent());
-//$spud->loadBindableEvent(new DeletedThread());
-
-//$spud->loadBindableCommand(new About());
-//$spud->loadBindableCommand(new FAQ());
-//$spud->loadBindableCommand(new Hype());
-//$spud->loadBindableCommand(new MemberCount());
-//$spud->loadBindableCommand(new PurgeCommands());
-//$spud->loadBindableCommand(new Restart());
-//$spud->loadBindableCommand(new Setup());
-//$spud->loadBindableCommand(new User());
-//$spud->loadBindableCommand(new Verify());
-//$spud->loadBindableCommand(new Version());
+$excludedEvents = [
+    MessageHasManyReactions::class,
+];
+$spud->loadBindableEventDirectory(__DIR__ . '/src/Spudbot/Bindable/Event', $excludedEvents);
 
 
 $spud->run();

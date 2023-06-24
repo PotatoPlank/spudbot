@@ -86,19 +86,18 @@ class Spud
     public function loadBindableCommandDirectory(string $path, array $excludedCommands = []): void
     {
         $files = Filesystem::fetchFilesByDirectoryRecursively(realpath($path));
-        if (!empty($files)) {
+        if (!$files->empty()) {
             $files->transform(function ($event) use ($path) {
-                return Filesystem::getNamespaceFromPath($path . $event);
+                return Filesystem::getNamespaceFromPath($path . '\\' . $event);
             });
             if (!empty($excludedCommands)) {
                 $files->filter(function ($command) use ($excludedCommands) {
-                    return isset($excludedCommands[$command::class]);
+                    return !in_array($command, $excludedCommands);
                 });
             }
 
             foreach ($files as $file) {
-                $className = Filesystem::getNamespaceFromPath($path . $file);
-                $this->loadBindableCommand(new $className());
+                $this->loadBindableCommand(new $file());
             }
         }
     }
@@ -125,18 +124,17 @@ class Spud
 
         if (!$files->empty()) {
             $files->transform(function ($event) use ($path) {
-                return Filesystem::getNamespaceFromPath($path . $event);
+                return Filesystem::getNamespaceFromPath($path . '\\' . $event);
             });
 
             if (!empty($excludedEvents)) {
                 $files->filter(function ($event) use ($excludedEvents) {
-                    return !isset($excludedEvents[$event]);
+                    return !in_array($event, $excludedEvents);
                 });
             }
 
             foreach ($files as $file) {
-                $className = Filesystem::getNamespaceFromPath($path . $file);
-                $this->loadBindableEvent(new $className());
+                $this->loadBindableEvent(new $file());
             }
         }
     }
