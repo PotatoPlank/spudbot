@@ -51,7 +51,7 @@ class OnReadyExecuteBinds extends IBindableEvent
                     }
                 }
             }
-            if(!empty($this->spud->logGuild)){
+            if(!empty($this->spud->logGuild) && $_ENV['SENTRY_ENV'] !== 'dev'){
                 $output = $this->discord->guilds->get('id', $this->spud->logGuild->getDiscordId())->channels->get('id', $this->spud->logGuild->getOutputChannelId());
                 if(!empty($this->spud->logGuild->getOutputThreadId())){
                     $output = $output->threads->get('id', $this->spud->logGuild->getOutputThreadId());
