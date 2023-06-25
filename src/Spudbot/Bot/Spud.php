@@ -32,19 +32,19 @@ use function Sentry\init;
 class Spud
 {
     public const MAJOR = 1;
-    public const MINOR = 1;
+    public const MINOR = 2;
     public const REVISION = 0;
     public const BUILD = null;
-    public ?Guild $logGuild;
-    private Discord $discord;
+    public readonly ?Guild $logGuild;
+    public readonly Environment $twig;
+    public readonly Discord $discord;
+    public readonly ?Connection $dbal;
     private Collection $events;
     private Collection $commands;
-    private ?Connection $dbal;
     private IMemberRepository $memberRepository;
     private IEventRepository $eventRepository;
     private IGuildRepository $guildRepository;
     private IThreadRepository $threadRepository;
-    private Environment $twig;
 
     public function __construct(SpudOptions $options)
     {
@@ -239,6 +239,11 @@ class Spud
         $this->threadRepository = $threadRepository;
     }
 
+    /**
+     * @return Environment
+     * @deprecated v1.2.0 Removing accessors and mutators in favor of readonly properties
+     * @see Spud::$twig
+     */
     public function getTwig(): Environment
     {
         return $this->twig;
