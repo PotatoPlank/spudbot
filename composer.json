@@ -14,7 +14,8 @@
         "vlucas/phpdotenv": "^5.5",
         "twig/twig": "^3.6",
         "sentry/sdk": "^3.5",
-        "ext-pcntl": "*"
+        "ext-pcntl": "*",
+        "doctrine/migrations": "^3.6"
     },
     "autoload": {
         "psr-4": {
