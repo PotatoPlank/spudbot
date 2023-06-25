@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Spudbot\Bindable\Command;
 
@@ -6,11 +11,6 @@ use Discord\Builders\CommandBuilder;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Bindable\SubCommand\TotalUserComments;
-use Spudbot\Bindable\SubCommand\UserEventReputation;
-use Spudbot\Bindable\SubCommand\UserInformation;
-use Spudbot\Bindable\SubCommand\UserLeaderboard;
-use Spudbot\Bindable\SubCommand\UserNoShowStatus;
 use Spudbot\Interface\IBindableCommand;
 
 class Verify extends IBindableCommand
@@ -31,6 +31,7 @@ class Verify extends IBindableCommand
             $builder->setTitle('User Verification');
             $targetMemberId = $interaction->data->options['user']->value;
             $verificationReason = $interaction->data->options['reason']->value;
+            $sourceMemberName = $interaction->member->nick ?? $interaction->member->displayname;
 
             $memberToBeVerified = $interaction->guild->members->get('id', $targetMemberId);
             $sourceMemberIsVerified = $interaction->member->roles->isset(1114365923730665482);
@@ -41,7 +42,7 @@ class Verify extends IBindableCommand
                 return;
             }
 
-            if($interaction->member->id === $memberToBeVerified->id){
+            if ($interaction->member->id === $memberToBeVerified->id) {
                 $builder->setDescription('You cannot verify yourself.');
                 $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
                 return;
@@ -49,7 +50,7 @@ class Verify extends IBindableCommand
 
             $guild = $this->spud->getGuildRepository()->findByPart($interaction->guild);
             $output = $interaction->guild->channels->get('id', $guild->getOutputChannelId());
-            if($guild->isOutputLocationThread()){
+            if ($guild->isOutputLocationThread()) {
                 $output = $output->threads->get('id', $guild->getOutputThreadId());
             }
 
@@ -60,7 +61,7 @@ class Verify extends IBindableCommand
             ];
 
             if ($sourceMemberIsVerified) {
-                $memberToBeVerified->addRole(1114365923730665482);
+                $memberToBeVerified->addRole(1114365923730665482, "Verified by {$sourceMemberName}");
 
                 $builder->setDescription($this->spud->getTwig()->render('user/verification.twig', $context));
 
