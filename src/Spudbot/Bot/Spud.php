@@ -39,8 +39,16 @@ class Spud
     public readonly Environment $twig;
     public readonly Discord $discord;
     public readonly ?Connection $dbal;
-    private Collection $events;
-    private Collection $commands;
+    /**
+     * @var Collection
+     * @deprecated v1.2.0 In v2, this will be replaced with an observer
+     */
+    public Collection $events;
+    /**
+     * @var Collection
+     * @deprecated v1.2.0 In v2, this will be replaced with an observer
+     */
+    public Collection $commands;
     private IMemberRepository $memberRepository;
     private IEventRepository $eventRepository;
     private IGuildRepository $guildRepository;
@@ -141,17 +149,19 @@ class Spud
 
     public function loadBindableEvent(IBindableEvent $event): void
     {
-        $event->setDiscordClient($this->discord);
-        $event->setSpudClient($this);
-        if (!empty($this->dbal)) {
-            $event->setDoctrineClient($this->dbal);
-        }
+        if (!$event instanceof OnReadyExecuteBinds) {
+            $event->setDiscordClient($this->discord);
+            $event->setSpudClient($this);
+            if (!empty($this->dbal)) {
+                $event->setDoctrineClient($this->dbal);
+            }
 
-        if (!isset($this->events[$event->getBoundEvent()])) {
-            $this->events->set($event->getBoundEvent(), new Collection());
+            if (!isset($this->events[$event->getBoundEvent()])) {
+                $this->events->set($event->getBoundEvent(), new Collection());
+            }
+            $this->events->get($event->getBoundEvent())
+                ->push($event);
         }
-        $this->events->get($event->getBoundEvent())
-            ->push($event);
     }
 
     public function kill(string $message = ''): void

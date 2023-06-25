@@ -75,11 +75,7 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
 
     public function filter(callable $callback): void
     {
-        foreach ($this->collection as $key => $item) {
-            if ($callback($item, $key) === false) {
-                unset($this->collection[$key]);
-            }
-        }
+        $this->collection = array_filter($this->collection, $callback, ARRAY_FILTER_USE_BOTH);
     }
 
     public function transform(callable $callback): void
@@ -87,6 +83,17 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
         foreach ($this->collection as $key => $item) {
             $this->collection[$key] = $callback($item, $key);
         }
+    }
+
+    public function has(callable $callback): bool
+    {
+        foreach ($this->collection as $key => $item) {
+            $result = $callback($item, $key);
+            if ($result === true) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
