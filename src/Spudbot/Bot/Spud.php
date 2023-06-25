@@ -114,6 +114,7 @@ class Spud
     {
         $command->setDiscordClient($this->discord);
         $command->setSpudClient($this);
+        $command->checkRequirements();
         if (!empty($this->dbal)) {
             $command->setDoctrineClient($this->dbal);
         }
@@ -152,6 +153,7 @@ class Spud
         if (!$event instanceof OnReadyExecuteBinds) {
             $event->setDiscordClient($this->discord);
             $event->setSpudClient($this);
+            $event->checkRequirements();
             if (!empty($this->dbal)) {
                 $event->setDoctrineClient($this->dbal);
             }

@@ -18,6 +18,7 @@ abstract class IBindable
     protected Discord $discord;
     protected ?Connection $dbal;
     protected Spud $spud;
+    protected bool $requirements = true;
 
     /**
      * @param Discord $discord
@@ -44,5 +45,12 @@ abstract class IBindable
     public function setSpudClient(Spud $spud): void
     {
         $this->spud = $spud;
+    }
+
+    public function checkRequirements(): void
+    {
+        if ($this->requirements === true) {
+            throw new \RuntimeException(__CLASS__ . ' did not have it\'s requirements met to be run.');
+        }
     }
 }
