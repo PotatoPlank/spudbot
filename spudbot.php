@@ -47,6 +47,10 @@ $spud->setEventRepository(new EventRepository($dbal));
 $spud->setGuildRepository(new GuildRepository($dbal));
 $spud->setThreadRepository(new ThreadRepository($dbal));
 
+$excludedCommands = [
+    \Spudbot\Bindable\Command\Remind::class,
+];
+
 $spud->loadBindableCommandDirectory(__DIR__ . '/src/Spudbot/Bindable/Command');
 
 $excludedEvents = [
