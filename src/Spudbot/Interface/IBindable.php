@@ -49,7 +49,7 @@ abstract class IBindable
 
     public function checkRequirements(): void
     {
-        if ($this->requirements === true) {
+        if ($this->requirements !== true) {
             throw new \RuntimeException(__CLASS__ . ' did not have it\'s requirements met to be run.');
         }
     }

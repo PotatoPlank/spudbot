@@ -7,11 +7,14 @@
 
 namespace Spudbot\Bindable\Command;
 
+use Carbon\Carbon;
 use Discord\Builders\CommandBuilder;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\IBindableCommand;
+use Spudbot\Model\Channel;
+use Spudbot\Model\Reminder;
 
 class Remind extends IBindableCommand
 {
@@ -21,6 +24,35 @@ class Remind extends IBindableCommand
     public function getListener(): callable
     {
         return function (Interaction $interaction) {
+            $builder = $this->spud->getSimpleResponseBuilder();
+            $builder->setTitle('Scheduled Reminder');
+            $reminderDescription = $interaction->data->options['message']->value;
+            $scheduledAt = $interaction->data->options['datetime']->value;
+
+            try {
+                $channel = $this->spud->getChannelRepository()->findByPart($interaction->channel);
+            } catch (\OutOfBoundsException $exception) {
+                $channel = new Channel();
+                $channel->setGuild($this->spud->getGuildRepository()->findByPart($interaction->guild));
+                $channel->setDiscordId($interaction->channel->id);
+                $this->spud->getChannelRepository()->save($channel);
+            }
+
+            $guildTimeZone = $channel->getGuild()->getTimeZone();
+            $scheduledAt = Carbon::parse($scheduledAt, $guildTimeZone);
+            $reminder = new Reminder();
+            $reminder->setDescription($reminderDescription);
+            $reminder->setScheduledAt($scheduledAt);
+            $reminder->setGuild($channel->getGuild());
+            $reminder->setChannel($channel);
+
+            $this->spud->getReminderRepository()->save($reminder);
+
+            $builder->setDescription(
+                "The reminder will be sent out at {$reminder->getLocalScheduledAt()->toDayDateTimeString()}"
+            );
+
+            $interaction->respondWithMessage($builder->getEmbeddedMessage());
         };
     }
 
@@ -38,12 +70,6 @@ class Remind extends IBindableCommand
             ->setRequired(true)
             ->setType(Option::STRING);
 
-        $reason = new Option($this->discord);
-        $reason->setName('channel')
-            ->setDescription('The location of where the reminder should be sent.')
-            ->setRequired(true)
-            ->setType(Option::CHANNEL);
-
         $command = CommandBuilder::new();
         $command->setName($this->getName())
             ->setDescription($this->getDescription())
@@ -54,7 +80,7 @@ class Remind extends IBindableCommand
 
     public function checkRequirements(): void
     {
-        if (empty($this->dbal)) {
+        if (empty($this->spud->dbal)) {
             throw new \RuntimeException(
                 "Command '{$this->getName()}' requires a DBAL Client to function appropriately."
             );
