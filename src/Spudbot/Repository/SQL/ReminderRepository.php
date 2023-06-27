@@ -253,4 +253,28 @@ class ReminderRepository extends IReminderRepository
         }
         return $collection;
     }
+
+    public function findElapsed(): Collection
+    {
+        $collection = new Collection();
+
+        $response = $this->dbal->createQueryBuilder()
+            ->select(...$this->fields)
+            ->from('reminders', 'r')
+            ->innerJoin('r', 'guilds', 'g', 'r.guild_id = g.id')
+            ->innerJoin('r', 'channels', 'c', 'r.channel_id = c.id')
+            ->where('r.scheduled_at <= ?')
+            ->setParameters([Carbon::now()->toDateTimeString()])
+            ->fetchAllAssociative();
+
+        if (!empty($response)) {
+            foreach ($response as $row) {
+                $reminder = Reminder::withDatabaseRow($row);
+
+                $collection->push($reminder);
+            }
+        }
+
+        return $collection;
+    }
 }

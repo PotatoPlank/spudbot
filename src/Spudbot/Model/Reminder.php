@@ -34,8 +34,8 @@ class Reminder extends IModel
             $reminder->setRepeats($row['r_repeats']);
             $reminder->setChannel(Channel::withDatabaseRow($row));
             $reminder->setGuild(Guild::withDatabaseRow($row));
-            $reminder->setCreatedAt(Carbon::parse($row['m_created_at']));
-            $reminder->setModifiedAt(Carbon::parse($row['m_modified_at']));
+            $reminder->setCreatedAt(Carbon::parse($row['r_created_at']));
+            $reminder->setModifiedAt(Carbon::parse($row['r_modified_at']));
         } else {
             if (!isset($guild)) {
                 throw new \InvalidArgumentException('Guild is required when you\'re not using joins.');
@@ -55,22 +55,6 @@ class Reminder extends IModel
         }
 
         return $reminder;
-    }
-
-    /**
-     * @return Guild
-     */
-    public function getGuild(): Guild
-    {
-        return $this->guild;
-    }
-
-    /**
-     * @param Guild $guild
-     */
-    public function setGuild(Guild $guild): void
-    {
-        $this->guild = $guild;
     }
 
     /**
@@ -110,7 +94,7 @@ class Reminder extends IModel
      */
     public function getScheduledAt(): Carbon
     {
-        return $this->scheduledAt;
+        return $this->scheduledAt->copy();
     }
 
     /**
@@ -118,7 +102,28 @@ class Reminder extends IModel
      */
     public function setScheduledAt(Carbon $scheduledAt): void
     {
-        $this->scheduledAt = $scheduledAt;
+        $this->scheduledAt = $scheduledAt->copy()->setTimezone('UTC');
+    }
+
+    public function getLocalScheduledAt(): Carbon
+    {
+        return $this->scheduledAt->copy()->setTimezone($this->getGuild()->getTimeZone());
+    }
+
+    /**
+     * @return Guild
+     */
+    public function getGuild(): Guild
+    {
+        return $this->guild;
+    }
+
+    /**
+     * @param Guild $guild
+     */
+    public function setGuild(Guild $guild): void
+    {
+        $this->guild = $guild;
     }
 
     /**

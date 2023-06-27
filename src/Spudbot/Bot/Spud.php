@@ -16,9 +16,11 @@ use Spudbot\Exception\BotTerminationException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IBindableCommand;
 use Spudbot\Interface\IBindableEvent;
+use Spudbot\Interface\IChannelRepository;
 use Spudbot\Interface\IEventRepository;
 use Spudbot\Interface\IGuildRepository;
 use Spudbot\Interface\IMemberRepository;
+use Spudbot\Interface\IReminderRepository;
 use Spudbot\Interface\IThreadRepository;
 use Spudbot\Model\Guild;
 use Spudbot\Util\Filesystem;
@@ -53,6 +55,8 @@ class Spud
     private IEventRepository $eventRepository;
     private IGuildRepository $guildRepository;
     private IThreadRepository $threadRepository;
+    private IChannelRepository $channelRepository;
+    private IReminderRepository $reminderRepository;
 
     public function __construct(SpudOptions $options)
     {
@@ -181,8 +185,15 @@ class Spud
         $onReadyEvent->setEventCollection($this->events);
         $onReadyEvent->setCommandCollection($this->commands);
 
-        $this->discord->on($onReadyEvent->getBoundEvent(), $onReadyEvent->getListener())
-            ->run();
+        $this->discord->on($onReadyEvent->getBoundEvent(), $onReadyEvent->getListener());
+
+        $this->discord->getLoop()
+            ->addPeriodicTimer(60, function () {
+                $this->discord->emit(Events::EVERY_MINUTE->value);
+            });
+
+        $this->discord->run();
+
 
         if (!empty($this->logGuild)) {
             $channelId = $this->logGuild->getOutputChannelId();
@@ -260,6 +271,38 @@ class Spud
     public function getTwig(): Environment
     {
         return $this->twig;
+    }
+
+    /**
+     * @return IChannelRepository
+     */
+    public function getChannelRepository(): IChannelRepository
+    {
+        return $this->channelRepository;
+    }
+
+    /**
+     * @param IChannelRepository $channelRepository
+     */
+    public function setChannelRepository(IChannelRepository $channelRepository): void
+    {
+        $this->channelRepository = $channelRepository;
+    }
+
+    /**
+     * @return IReminderRepository
+     */
+    public function getReminderRepository(): IReminderRepository
+    {
+        return $this->reminderRepository;
+    }
+
+    /**
+     * @param IReminderRepository $reminderRepository
+     */
+    public function setReminderRepository(IReminderRepository $reminderRepository): void
+    {
+        $this->reminderRepository = $reminderRepository;
     }
 
 }

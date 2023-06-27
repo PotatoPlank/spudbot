@@ -23,6 +23,8 @@ abstract class IReminderRepository
 
     abstract public function findByDateTime(Carbon $scheduledAt): Reminder;
 
+    abstract public function findElapsed(): Collection;
+
     abstract public function findByGuild(Guild $guild): Collection;
 
     abstract public function findByChannel(Channel $channel): Collection;

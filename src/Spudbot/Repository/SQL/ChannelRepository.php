@@ -161,6 +161,11 @@ class ChannelRepository extends IChannelRepository
         return true;
     }
 
+    public function findByPart(\Discord\Parts\Channel\Channel $channel): Channel
+    {
+        return $this->findByDiscordId($channel->id);
+    }
+
     public function findByDiscordId(string $discordId): Channel
     {
         $response = $this->dbal->createQueryBuilder()

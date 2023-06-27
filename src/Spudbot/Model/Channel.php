@@ -21,7 +21,7 @@ class Channel extends IModel
     {
         $channel = new self();
 
-        if (array_key_exists('m_id', $row)) {
+        if (array_key_exists('c_id', $row)) {
             $channel->setId($row['c_id']);
             $channel->setDiscordId($row['c_discord_id']);
             $channel->setGuild(Guild::withDatabaseRow($row));

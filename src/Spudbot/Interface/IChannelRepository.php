@@ -17,6 +17,8 @@ abstract class IChannelRepository
 {
     abstract public function findById(string|int $id): Channel;
 
+    abstract public function findByPart(\Discord\Parts\Channel\Channel $channel): Channel;
+
     abstract public function findByDiscordId(string $discordId): Channel;
 
     abstract public function findByGuild(Guild $guild): Collection;

@@ -16,7 +16,7 @@ use Spudbot\Interface\IBindableCommand;
 use Spudbot\Model\Channel;
 use Spudbot\Model\Reminder;
 
-class Remind extends IBindableCommand
+class AddReminder extends IBindableCommand
 {
     protected string $name = 'remind';
     protected string $description = 'Creates a reminder at the specified datetime.';
