@@ -56,6 +56,7 @@ class Spud
 
     public function __construct(SpudOptions $options)
     {
+        date_default_timezone_set('UTC');
         $this->discord = new Discord($options->getOptions());
         $this->events = new Collection();
         $this->commands = new Collection();
