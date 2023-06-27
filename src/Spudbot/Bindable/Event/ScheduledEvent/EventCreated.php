@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Spudbot\Bindable\Event\ScheduledEvent;
 
@@ -17,25 +22,28 @@ class EventCreated extends IBindableEvent
 
     public function getListener(): callable
     {
-        return function ($event){
+        return function ($event) {
             $eventRepository = $this->spud->getEventRepository();
             $guildRepository = $this->spud->getGuildRepository();
 
             $guild = $this->discord->guilds->get('id', $event->guild_id);
-            $eventPart = $guild->guild_scheduled_events->get('id', $event->guild_scheduled_event_id);
+            if ($guild) {
+                $eventPart = $guild->guild_scheduled_events->get('id', $event->guild_scheduled_event_id);
+                if ($eventPart) {
+                    $guild = $guildRepository->findByPart($guild);
 
-            $guild = $guildRepository->findByPart($eventPart->guild);
+                    try {
+                        $eventRepository->findByPart($eventPart);
+                    } catch (\OutOfBoundsException $exception) {
+                        $event = new \Spudbot\Model\Event();
+                        $event->setName($eventPart->name);
+                        $event->setGuild($guild);
+                        $event->setType(EventType::Native);
+                        $event->setNativeId($eventPart->guild_scheduled_event_id);
 
-            try {
-                $eventRepository->findByPart($eventPart);
-            }catch(\OutOfBoundsException $exception){
-                $event = new \Spudbot\Model\Event();
-                $event->setName($eventPart->name);
-                $event->setGuild($guild);
-                $event->setType(EventType::Native);
-                $event->setNativeId($event->guild_scheduled_event_id);
-
-                $eventRepository->save($event);
+                        $eventRepository->save($event);
+                    }
+                }
             }
         };
     }
