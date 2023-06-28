@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Spudbot\Repository\SQL;
@@ -37,33 +43,30 @@ class ThreadRepository extends IThreadRepository
             ->where('id = ?')->setParameters([$id])
             ->fetchAssociative();
 
-        if(!$response){
+        if (!$response) {
             throw new OutOfBoundsException("Thread with id {$id} does not exist.");
         }
-
-        $guild = new GuildRepository($this->dbal);
 
         return Thread::withDatabaseRow($response);
     }
 
     public function findByPart(\Discord\Parts\Thread\Thread $thread): Thread
     {
-        return $this->findByDiscordId($thread->id);
+        return $this->findByDiscordId($thread->id, $thread->guild->id);
     }
 
-    public function findByDiscordId(string $discordId): Thread
+    public function findByDiscordId(string $discordId, string $discordGuildId): Thread
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select(...$this->fields)->from('threads', 't')
             ->innerJoin('t', 'guilds', 'g', 't.guild_id = g.id')
-            ->where('t.discord_id = ?')->setParameters([$discordId])
+            ->where('t.discord_id = ?')->andWhere('g.discord_id = ?')
+            ->setParameters([$discordId, $discordGuildId])
             ->fetchAssociative();
 
-        if(!$response){
+        if (!$response) {
             throw new OutOfBoundsException("Thread with id {$discordId} does not exist.");
         }
-
-        $guild = new GuildRepository($this->dbal);
 
         return Thread::withDatabaseRow($response);
     }
@@ -78,7 +81,7 @@ class ThreadRepository extends IThreadRepository
             ->where('t.guild_id = ?')->setParameters([$guild->getId()])
             ->fetchAllAssociative();
 
-        if(!empty($response)){
+        if (!empty($response)) {
             foreach ($response as $row) {
                 $thread = Thread::withDatabaseRow($row);
 
@@ -100,7 +103,7 @@ class ThreadRepository extends IThreadRepository
             ->innerJoin('t', 'guilds', 'g', 't.guild_id = g.id')
             ->fetchAllAssociative();
 
-        if(!empty($response)){
+        if (!empty($response)) {
             foreach ($response as $row) {
                 $thread = Thread::withDatabaseRow($row);
 
@@ -115,7 +118,7 @@ class ThreadRepository extends IThreadRepository
     {
         $thread->setModifiedAt(Carbon::now());
 
-        if(!$thread->getId()){
+        if (!$thread->getId()) {
             $thread->setCreatedAt(Carbon::now());
 
             $columns = [
@@ -157,16 +160,16 @@ class ThreadRepository extends IThreadRepository
 
     public function remove(Thread $thread): bool
     {
-        if(!$thread->getId()){
-            Throw New OutOfBoundsException("Thread is unable to be removed without a proper id.");
+        if (!$thread->getId()) {
+            throw new OutOfBoundsException("Thread is unable to be removed without a proper id.");
         }
 
         $impactedRows = $this->dbal->createQueryBuilder()
             ->delete('threads')->where('id = ?')->setParameter(0, $thread->getId())
             ->executeStatement();
 
-        if($impactedRows === 0){
-            Throw New \RuntimeException("Removing thread #{$thread->getId()} was unsuccessful");
+        if ($impactedRows === 0) {
+            throw new \RuntimeException("Removing thread #{$thread->getId()} was unsuccessful");
         }
 
         return true;

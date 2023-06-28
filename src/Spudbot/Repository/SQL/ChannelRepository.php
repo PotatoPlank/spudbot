@@ -163,16 +163,17 @@ class ChannelRepository extends IChannelRepository
 
     public function findByPart(\Discord\Parts\Channel\Channel $channel): Channel
     {
-        return $this->findByDiscordId($channel->id);
+        return $this->findByDiscordId($channel->id, $channel->guild->id);
     }
 
-    public function findByDiscordId(string $discordId): Channel
+    public function findByDiscordId(string $discordId, string $discordGuildId): Channel
     {
         $response = $this->dbal->createQueryBuilder()
             ->select(...$this->fields)
             ->from('channels', 'c')
             ->innerJoin('c', 'guilds', 'g', 'c.guild_id = g.id')
-            ->where('c.discord_id = ?')->setParameters([$discordId])
+            ->where('c.discord_id = ?')->andWhere('g.discord_id = ?')
+            ->setParameters([$discordId, $discordGuildId])
             ->fetchAssociative();
 
         if (!$response) {

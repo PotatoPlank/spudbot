@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Spudbot\Repository\SQL;
@@ -29,6 +35,7 @@ class MemberRepository extends IMemberRepository
         'g.created_at as g_created_at',
         'g.modified_at as g_modified_at',
     ];
+
     public function findById(string|int $id): Member
     {
         $response = $this->dbal->createQueryBuilder()
@@ -38,7 +45,7 @@ class MemberRepository extends IMemberRepository
             ->where('m.id = ?')->setParameters([$id])
             ->fetchAssociative();
 
-        if(!$response){
+        if (!$response) {
             throw new OutOfBoundsException("Member with id {$id} does not exist.");
         }
 
@@ -47,18 +54,19 @@ class MemberRepository extends IMemberRepository
 
     public function findByPart(\Discord\Parts\User\Member $member): Member
     {
-        return $this->findByDiscordId($member->id);
+        return $this->findByDiscordId($member->id, $member->guild->id);
     }
 
-    public function findByDiscordId(string $discordId): Member
+    public function findByDiscordId(string $discordId, string $discordGuildId): Member
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
         $response = $queryBuilder->select(...$this->fields)->from('members', 'm')
             ->innerJoin('m', 'guilds', 'g', 'm.guild_id = g.id')
-            ->where('m.discord_id = ?')->setParameters([$discordId])
+            ->where('m.discord_id = ?')->andWhere('g.discord_id = ?')
+            ->setParameters([$discordId, $discordGuildId])
             ->fetchAssociative();
 
-        if(!$response){
+        if (!$response) {
             throw new OutOfBoundsException("Member with id {$discordId} does not exist.");
         }
 
@@ -77,7 +85,7 @@ class MemberRepository extends IMemberRepository
             ->where('m.guild_id = ?')->setParameter(0, $guild->getId())
             ->fetchAllAssociative();
 
-        if(!empty($response)){
+        if (!empty($response)) {
             foreach ($response as $row) {
                 $member = Member::withDatabaseRow($row);
 
@@ -98,7 +106,7 @@ class MemberRepository extends IMemberRepository
             ->innerJoin('m', 'guilds', 'g', 'm.guild_id = g.id')
             ->fetchAllAssociative();
 
-        if(!empty($response)){
+        if (!empty($response)) {
             foreach ($response as $row) {
                 $member = Member::withDatabaseRow($row);
 
@@ -133,14 +141,14 @@ class MemberRepository extends IMemberRepository
         $fields[] = 'e.created_at as e_created_at';
         $fields[] = 'e.modified_at as e_modified_at';
 
-        $response = $queryBuilder->select(...$fields)->from('members','m')
+        $response = $queryBuilder->select(...$fields)->from('members', 'm')
             ->innerJoin('m', 'guilds', 'g', 'm.guild_id = g.id')
             ->innerJoin('m', 'event_attendance', 'ea', 'm.id = ea.member_id')
             ->innerJoin('ea', 'events', 'e', 'e.id = ea.event_id')
             ->where('m.id = ?')->setParameters([$member->getId()])
             ->fetchAllAssociative();
 
-        if(!empty($response)){
+        if (!empty($response)) {
             foreach ($response as $row) {
                 $attendance = EventAttendance::withDatabaseRow($row);
 
@@ -155,7 +163,7 @@ class MemberRepository extends IMemberRepository
     {
         $member->setModifiedAt(Carbon::now());
 
-        if(!$member->getId()){
+        if (!$member->getId()) {
             $member->setCreatedAt(Carbon::now());
 
             $columns = [
@@ -201,15 +209,15 @@ class MemberRepository extends IMemberRepository
 
     public function remove(Member $member): bool
     {
-        if(!$member->getId()){
-            Throw New OutOfBoundsException("Member is unable to be removed without a proper id.");
+        if (!$member->getId()) {
+            throw new OutOfBoundsException("Member is unable to be removed without a proper id.");
         }
 
         $impactedRows = $this->dbal->createQueryBuilder()
             ->delete('members')->where('id = ?')->setParameter(0, $member->getId())
             ->executeStatement();
-        if($impactedRows === 0){
-            Throw New \RuntimeException("Removing member #{$member->getId()} was unsuccessful");
+        if ($impactedRows === 0) {
+            throw new \RuntimeException("Removing member #{$member->getId()} was unsuccessful");
         }
 
         $this->dbal->createQueryBuilder()
@@ -223,7 +231,7 @@ class MemberRepository extends IMemberRepository
     {
         $eventAttendance->setModifiedAt(Carbon::now());
 
-        if(!$eventAttendance->getId()){
+        if (!$eventAttendance->getId()) {
             $eventAttendance->setCreatedAt(Carbon::now());
 
             $columns = [
