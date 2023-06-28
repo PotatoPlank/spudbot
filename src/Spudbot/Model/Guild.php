@@ -16,8 +16,8 @@ use Spudbot\Interface\IModel;
 class Guild extends IModel
 {
     private string $discordId;
-    private ?string $outputChannelId;
-    private ?string $outputThreadId;
+    private ?string $outputChannelId = null;
+    private ?string $outputThreadId = null;
     private CarbonTimeZone $timeZone;
 
     public function __construct()
