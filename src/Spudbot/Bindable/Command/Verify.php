@@ -63,17 +63,23 @@ class Verify extends IBindableCommand
             if ($sourceMemberIsVerified) {
                 $memberToBeVerified->addRole(1114365923730665482, "Verified by {$sourceMemberName}");
 
-                $builder->setDescription($this->spud->getTwig()->render('user/verification.twig', $context));
+                $builder->setDescription($this->spud->twig->render('user/verification.twig', $context));
 
                 $interaction->respondWithMessage($builder->getEmbeddedMessage());
                 $output->sendMessage($builder->getEmbeddedMessage());
+
+                $verifyingMember = $this->spud->getMemberRepository()->findByPart($interaction->member);
+                $verifiedMember = $this->spud->getMemberRepository()->findByPart($memberToBeVerified);
+                $verifiedMember->setVerifiedBy($verifyingMember->getId());
+                $this->spud->getMemberRepository()->save($verifiedMember);
+
                 return;
             }
 
             $builder->setDescription('You do not have the required permissions to verify.');
             $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
 
-            $builder->setDescription($this->spud->getTwig()->render('user/verification_error.twig', $context));
+            $builder->setDescription($this->spud->twig->render('user/verification_error.twig', $context));
             $output->sendMessage($builder->getEmbeddedMessage());
         };
     }

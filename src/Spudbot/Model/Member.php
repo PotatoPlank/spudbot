@@ -18,6 +18,7 @@ class Member extends IModel
     private Guild $guild;
     private int $totalComments = 0;
     private ?string $username = null;
+    private ?int $verifiedBy = null;
 
     public static function withDatabaseRow(array $row, ?Guild $guild = null): self
     {
@@ -96,6 +97,22 @@ class Member extends IModel
     public function hasMetCommentThreshold(): bool
     {
         return $this->totalComments >= $_ENV['MEMBER_COMMENT_THRESHOLD'];
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getVerifiedBy(): ?int
+    {
+        return $this->verifiedBy;
+    }
+
+    /**
+     * @param int|null $verifiedBy
+     */
+    public function setVerifiedBy(?int $verifiedBy): void
+    {
+        $this->verifiedBy = $verifiedBy;
     }
 
 }
