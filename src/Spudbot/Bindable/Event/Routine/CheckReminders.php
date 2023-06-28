@@ -11,11 +11,12 @@ namespace Spudbot\Bindable\Event\Routine;
 use Spudbot\Bot\Events;
 use Spudbot\Interface\IBindableEvent;
 use Spudbot\Model\Reminder;
+use Spudbot\Util\Recurrence;
 
 class CheckReminders extends IBindableEvent
 {
 
-    public function getBoundEvent(): string|Events
+    public function getBoundEvent(): string
     {
         return Events::EVERY_MINUTE->value;
     }
@@ -39,7 +40,18 @@ class CheckReminders extends IBindableEvent
 
                             $channel->sendMessage($builder->getEmbeddedMessage())->done(
                                 function () use ($reminder) {
-                                    $this->spud->getReminderRepository()->remove($reminder);
+                                    if (!empty($reminder->getRepeats())) {
+                                        $scheduled = $reminder->getScheduledAt();
+                                        $interval = $reminder->getRepeats();
+                                        $nextOccurrence = Recurrence::getNextDateTimeFromInterval(
+                                            $scheduled,
+                                            $interval
+                                        );
+                                        $reminder->setScheduledAt($nextOccurrence);
+                                        $this->spud->getReminderRepository()->save($reminder);
+                                    } else {
+                                        $this->spud->getReminderRepository()->remove($reminder);
+                                    }
                                 }
                             );
                         }
