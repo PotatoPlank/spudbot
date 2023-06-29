@@ -10,22 +10,22 @@ declare(strict_types=1);
 namespace Spudbot\Interface;
 
 use Spudbot\Helpers\Collection;
+use Spudbot\Model\Channel;
 use Spudbot\Model\Guild;
-use Spudbot\Model\Thread;
 
-abstract class IThreadRepository
+abstract class IChannelRepository
 {
-    abstract public function findById(string|int $id): Thread;
+    abstract public function findById(string|int $id): Channel;
 
-    abstract public function findByDiscordId(string $discordId, string $discordGuildId): Thread;
+    abstract public function findByPart(\Discord\Parts\Channel\Channel $channel): Channel;
 
-    abstract public function findByPart(\Discord\Parts\Thread\Thread $thread): Thread;
+    abstract public function findByDiscordId(string $discordId, string $discordGuildId): Channel;
 
     abstract public function findByGuild(Guild $guild): Collection;
 
     abstract public function getAll(): Collection;
 
-    abstract public function save(Thread $thread): bool;
+    abstract public function save(Channel $channel): bool;
 
-    abstract public function remove(Thread $thread): bool;
+    abstract public function remove(Channel $channel): bool;
 }

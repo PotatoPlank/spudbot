@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Spudbot\Repository\SQL;
@@ -37,6 +43,7 @@ class EventRepository extends IEventRepository
         'g.created_at as g_created_at',
         'g.modified_at as g_modified_at',
     ];
+
     public function findById(string|int $id): Event
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
@@ -47,7 +54,7 @@ class EventRepository extends IEventRepository
             ->where('e.id = ?')->setParameters([$id])
             ->fetchAssociative();
 
-        if(!$response){
+        if (!$response) {
             throw new OutOfBoundsException("Event with id {$id} does not exist.");
         }
 
@@ -56,26 +63,26 @@ class EventRepository extends IEventRepository
 
     public function findByPart(\stdClass|ScheduledEvent $event): Event
     {
-        if(!($event instanceof ScheduledEvent) && !isset($event->guild_scheduled_event_id)){
+        if (!($event instanceof ScheduledEvent) && !isset($event->guild_scheduled_event_id)) {
             throw new InvalidArgumentException("Part is not an instance with an Event Id.");
         }
 
         $id = $event instanceof ScheduledEvent ? $event->id : $event->guild_scheduled_event_id;
 
-        return $this->findByDiscordId($id);
+        return $this->findByDiscordId($id, $event->guild_id);
     }
 
-    public function findByDiscordId(string $discordId): Event
+    public function findByDiscordId(string $discordId, string $discordGuildId): Event
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
-        $guild = new GuildRepository($this->dbal);
 
         $response = $queryBuilder->select(...$this->fields)->from('events', 'e')
             ->innerJoin('e', 'guilds', 'g', 'g.id = e.guild_id')
-            ->where('e.native_id = ?')->setParameters([$discordId])
+            ->where('e.native_id = ?')->andWhere('g.discord_id = ?')
+            ->setParameters([$discordId, $discordGuildId])
             ->fetchAssociative();
 
-        if(!$response){
+        if (!$response) {
             throw new OutOfBoundsException("Event with id {$discordId} does not exist.");
         }
 
@@ -85,14 +92,13 @@ class EventRepository extends IEventRepository
     public function findBySeshId(string $seshId): Event
     {
         $queryBuilder = $this->dbal->createQueryBuilder();
-        $guild = new GuildRepository($this->dbal);
 
         $response = $queryBuilder->select(...$this->fields)->from('events', 'e')
             ->innerJoin('e', 'guilds', 'g', 'g.id = e.guild_id')
             ->where('e.sesh_id = ?')->setParameters([$seshId])
             ->fetchAssociative();
 
-        if(!$response){
+        if (!$response) {
             throw new OutOfBoundsException("Event with id {$seshId} does not exist.");
         }
 
@@ -109,7 +115,7 @@ class EventRepository extends IEventRepository
             ->where('e.guild_id = ?')->setParameters([$guild->getId()])
             ->fetchAllAssociative();
 
-        if(!empty($response)){
+        if (!empty($response)) {
             foreach ($response as $row) {
                 $event = Event::withDatabaseRow($row);
 
@@ -130,7 +136,7 @@ class EventRepository extends IEventRepository
             ->innerJoin('e', 'guilds', 'g', 'g.id = e.guild_id')
             ->fetchAllAssociative();
 
-        if(!empty($response)){
+        if (!empty($response)) {
             foreach ($response as $row) {
                 $event = Event::withDatabaseRow($row);
 
@@ -158,6 +164,8 @@ class EventRepository extends IEventRepository
         $fields[] = 'm.id as m_id';
         $fields[] = 'm.discord_id as m_discord_id';
         $fields[] = 'm.total_comments as m_total_comments';
+        $fields[] = 'm.verified_by as m_verified_by';
+        $fields[] = 'm.username as m_username';
         $fields[] = 'm.created_at as m_created_at';
         $fields[] = 'm.modified_at as m_modified_at';
 
@@ -168,7 +176,7 @@ class EventRepository extends IEventRepository
             ->where('ea.event_id = ?')->setParameters([$event->getId()])
             ->fetchAllAssociative();
 
-        if(!empty($response)){
+        if (!empty($response)) {
             foreach ($response as $row) {
                 $attendance = EventAttendance::withDatabaseRow($row);
 
@@ -193,6 +201,8 @@ class EventRepository extends IEventRepository
         $fields[] = 'm.id as m_id';
         $fields[] = 'm.discord_id as m_discord_id';
         $fields[] = 'm.total_comments as m_total_comments';
+        $fields[] = 'm.verified_by as m_verified_by';
+        $fields[] = 'm.username as m_username';
         $fields[] = 'm.created_at as m_created_at';
         $fields[] = 'm.modified_at as m_modified_at';
 
@@ -205,7 +215,7 @@ class EventRepository extends IEventRepository
             ->setParameters([$event->getId(), $member->getId()])
             ->fetchAssociative();
 
-        if(!$response){
+        if (!$response) {
             throw new OutOfBoundsException("Event data associated with specified user and event does not exist.");
         }
 
@@ -216,7 +226,7 @@ class EventRepository extends IEventRepository
     {
         $event->setModifiedAt(Carbon::now());
 
-        if(!$event->getId()){
+        if (!$event->getId()) {
             $event->setCreatedAt(Carbon::now());
 
             $columns = [
@@ -280,15 +290,15 @@ class EventRepository extends IEventRepository
 
     public function remove(Event $event): bool
     {
-        if(!$event->getId()){
-            Throw New OutOfBoundsException("Event is unable to be removed without a proper id.");
+        if (!$event->getId()) {
+            throw new OutOfBoundsException("Event is unable to be removed without a proper id.");
         }
 
         $impactedRows = $this->dbal->createQueryBuilder()
             ->delete('events')->where('id = ?')->setParameter(0, $event->getId())
             ->executeStatement();
-        if($impactedRows === 0){
-            Throw New \RuntimeException("Removing event #{$event->getId()} was unsuccessful");
+        if ($impactedRows === 0) {
+            throw new \RuntimeException("Removing event #{$event->getId()} was unsuccessful");
         }
 
         $this->dbal->createQueryBuilder()

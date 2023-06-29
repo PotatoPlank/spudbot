@@ -16,9 +16,12 @@ use Spudbot\Exception\BotTerminationException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IBindableCommand;
 use Spudbot\Interface\IBindableEvent;
+use Spudbot\Interface\IChannelRepository;
+use Spudbot\Interface\IDirectoryRepository;
 use Spudbot\Interface\IEventRepository;
 use Spudbot\Interface\IGuildRepository;
 use Spudbot\Interface\IMemberRepository;
+use Spudbot\Interface\IReminderRepository;
 use Spudbot\Interface\IThreadRepository;
 use Spudbot\Model\Guild;
 use Spudbot\Util\Filesystem;
@@ -32,22 +35,34 @@ use function Sentry\init;
 class Spud
 {
     public const MAJOR = 1;
-    public const MINOR = 1;
+    public const MINOR = 2;
     public const REVISION = 0;
     public const BUILD = null;
-    public ?Guild $logGuild;
-    private Discord $discord;
-    private Collection $events;
-    private Collection $commands;
-    private ?Connection $dbal;
+    public readonly ?Guild $logGuild;
+    public readonly Environment $twig;
+    public readonly Discord $discord;
+    public readonly ?Connection $dbal;
+    /**
+     * @var Collection
+     * @deprecated v1.2.0 In v2, this will be replaced with an observer
+     */
+    public Collection $events;
+    /**
+     * @var Collection
+     * @deprecated v1.2.0 In v2, this will be replaced with an observer
+     */
+    public Collection $commands;
     private IMemberRepository $memberRepository;
     private IEventRepository $eventRepository;
     private IGuildRepository $guildRepository;
     private IThreadRepository $threadRepository;
-    private Environment $twig;
+    private IChannelRepository $channelRepository;
+    private IReminderRepository $reminderRepository;
+    private IDirectoryRepository $directoryRepository;
 
     public function __construct(SpudOptions $options)
     {
+        date_default_timezone_set('UTC');
         $this->discord = new Discord($options->getOptions());
         $this->events = new Collection();
         $this->commands = new Collection();
@@ -106,6 +121,7 @@ class Spud
     {
         $command->setDiscordClient($this->discord);
         $command->setSpudClient($this);
+        $command->checkRequirements();
         if (!empty($this->dbal)) {
             $command->setDoctrineClient($this->dbal);
         }
@@ -141,17 +157,20 @@ class Spud
 
     public function loadBindableEvent(IBindableEvent $event): void
     {
-        $event->setDiscordClient($this->discord);
-        $event->setSpudClient($this);
-        if (!empty($this->dbal)) {
-            $event->setDoctrineClient($this->dbal);
-        }
+        if (!$event instanceof OnReadyExecuteBinds) {
+            $event->setDiscordClient($this->discord);
+            $event->setSpudClient($this);
+            $event->checkRequirements();
+            if (!empty($this->dbal)) {
+                $event->setDoctrineClient($this->dbal);
+            }
 
-        if (!isset($this->events[$event->getBoundEvent()])) {
-            $this->events->set($event->getBoundEvent(), new Collection());
+            if (!isset($this->events[$event->getBoundEvent()])) {
+                $this->events->set($event->getBoundEvent(), new Collection());
+            }
+            $this->events->get($event->getBoundEvent())
+                ->push($event);
         }
-        $this->events->get($event->getBoundEvent())
-            ->push($event);
     }
 
     public function kill(string $message = ''): void
@@ -168,8 +187,15 @@ class Spud
         $onReadyEvent->setEventCollection($this->events);
         $onReadyEvent->setCommandCollection($this->commands);
 
-        $this->discord->on($onReadyEvent->getBoundEvent(), $onReadyEvent->getListener())
-            ->run();
+        $this->discord->on($onReadyEvent->getBoundEvent(), $onReadyEvent->getListener());
+
+        $this->discord->getLoop()
+            ->addPeriodicTimer(60, function () {
+                $this->discord->emit(Events::EVERY_MINUTE->value);
+            });
+
+        $this->discord->run();
+
 
         if (!empty($this->logGuild)) {
             $channelId = $this->logGuild->getOutputChannelId();
@@ -239,9 +265,47 @@ class Spud
         $this->threadRepository = $threadRepository;
     }
 
+    /**
+     * @return Environment
+     * @deprecated v1.2.0 Removing accessors and mutators in favor of readonly properties
+     * @see Spud::$twig
+     */
     public function getTwig(): Environment
     {
         return $this->twig;
+    }
+
+    public function getChannelRepository(): IChannelRepository
+    {
+        return $this->channelRepository;
+    }
+
+    /**
+     * @param IChannelRepository $channelRepository
+     */
+    public function setChannelRepository(IChannelRepository $channelRepository): void
+    {
+        $this->channelRepository = $channelRepository;
+    }
+
+    public function getReminderRepository(): IReminderRepository
+    {
+        return $this->reminderRepository;
+    }
+
+    public function setReminderRepository(IReminderRepository $reminderRepository): void
+    {
+        $this->reminderRepository = $reminderRepository;
+    }
+
+    public function getDirectoryRepository(): IDirectoryRepository
+    {
+        return $this->directoryRepository;
+    }
+
+    public function setDirectoryRepository(IDirectoryRepository $directoryRepository): void
+    {
+        $this->directoryRepository = $directoryRepository;
     }
 
 }

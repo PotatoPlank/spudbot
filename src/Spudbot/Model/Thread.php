@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Spudbot\Model;
@@ -10,24 +16,33 @@ class Thread extends IModel
 {
     private string $discordId;
     private Guild $guild;
+    private Channel $channel;
+    private ?string $tag = '';
 
-    public static function withDatabaseRow(array $row, ?Guild $guild = null): self
+    public static function withDatabaseRow(array $row, ?Guild $guild = null, ?Channel $channel = null): self
     {
         $thread = new self();
 
-        if(array_key_exists('t_id', $row)){
+        if (array_key_exists('t_id', $row)) {
             $thread->setId($row['t_id']);
             $thread->setDiscordId($row['t_discord_id']);
             $thread->setGuild(Guild::withDatabaseRow($row));
+            $thread->setChannel($row['c_id']);
+            $thread->setTag($row['t_tag']);
             $thread->setCreatedAt(Carbon::parse($row['t_created_at']));
             $thread->setModifiedAt(Carbon::parse($row['t_modified_at']));
-        }else{
-            if(!isset($guild)){
+        } else {
+            if (!isset($guild)) {
                 throw new \InvalidArgumentException('Guild is required when you\'re not using joins.');
+            }
+            if (!isset($channel)) {
+                throw new \InvalidArgumentException('Channel is required when you\'re not using joins.');
             }
             $thread->setId($row['t_id']);
             $thread->setDiscordId($row['t_discord_id']);
             $thread->setGuild($guild);
+            $thread->setChannel($channel);
+            $thread->setTag($row['t_tag']);
             $thread->setCreatedAt(Carbon::parse($row['t_created_at']));
             $thread->setModifiedAt(Carbon::parse($row['t_modified_at']));
         }
@@ -35,9 +50,30 @@ class Thread extends IModel
         return $thread;
     }
 
-    public function setDiscordId(string $discordId): void
+    /**
+     * @return Channel
+     */
+    public function getChannel(): Channel
     {
-        $this->discordId = $discordId;
+        return $this->channel;
+    }
+
+    /**
+     * @param Channel $channel
+     */
+    public function setChannel(Channel $channel): void
+    {
+        $this->channel = $channel;
+    }
+
+    public function getTag(): ?string
+    {
+        return $this->tag;
+    }
+
+    public function setTag(?string $tag): void
+    {
+        $this->tag = $tag;
     }
 
     public function getDiscordId(): string
@@ -45,13 +81,18 @@ class Thread extends IModel
         return $this->discordId;
     }
 
-    public function setGuild(Guild $guild): void
+    public function setDiscordId(string $discordId): void
     {
-        $this->guild = $guild;
+        $this->discordId = $discordId;
     }
 
     public function getGuild(): Guild
     {
         return $this->guild;
+    }
+
+    public function setGuild(Guild $guild): void
+    {
+        $this->guild = $guild;
     }
 }
