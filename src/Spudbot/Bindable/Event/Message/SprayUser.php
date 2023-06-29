@@ -29,10 +29,13 @@ class SprayUser extends IBindableEvent
                 'cat',
                 'woof',
                 'owner',
+                'm___',
             ];
-            $wordCount = count(explode($message->content, ' '));
+            $wordCount = count(explode(' ', $message->content));
             $hasAnimal = $this->stringContains($message->content, $meows);
-            $spray = ['992794792419401728', '1064128213518921758'];
+            $spray = ['992794792419401728', '1064128213518921758', '82628865792409600', '147494168128651264',];
+            $isSprayable = in_array($message->member->id, $spray);
+            $isSprayable = true;
 
             if (in_array($message->member->id, $spray) && ($hasAnimal || $wordCount < 2)) {
                 $message->react(':nospray:1115701447569461349');
