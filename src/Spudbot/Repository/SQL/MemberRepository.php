@@ -26,6 +26,8 @@ class MemberRepository extends IMemberRepository
         'm.id as m_id',
         'm.discord_id as m_discord_id',
         'm.total_comments as m_total_comments',
+        'm.username as m_username',
+        'm.verified_by as m_verified_by',
         'm.created_at as m_created_at',
         'm.modified_at as m_modified_at',
         'g.id as g_id',

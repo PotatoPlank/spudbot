@@ -164,6 +164,8 @@ class EventRepository extends IEventRepository
         $fields[] = 'm.id as m_id';
         $fields[] = 'm.discord_id as m_discord_id';
         $fields[] = 'm.total_comments as m_total_comments';
+        $fields[] = 'm.verified_by as m_verified_by';
+        $fields[] = 'm.username as m_username';
         $fields[] = 'm.created_at as m_created_at';
         $fields[] = 'm.modified_at as m_modified_at';
 
@@ -199,6 +201,8 @@ class EventRepository extends IEventRepository
         $fields[] = 'm.id as m_id';
         $fields[] = 'm.discord_id as m_discord_id';
         $fields[] = 'm.total_comments as m_total_comments';
+        $fields[] = 'm.verified_by as m_verified_by';
+        $fields[] = 'm.username as m_username';
         $fields[] = 'm.created_at as m_created_at';
         $fields[] = 'm.modified_at as m_modified_at';
 
