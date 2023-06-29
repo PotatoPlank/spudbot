@@ -30,6 +30,7 @@ class Member extends IModel
             $member->setGuild(Guild::withDatabaseRow($row));
             $member->setUsername($row['m_username']);
             $member->setTotalComments($row['m_total_comments']);
+            $member->setVerifiedBy($row['m_verified_by']);
             $member->setCreatedAt(Carbon::parse($row['m_created_at']));
             $member->setModifiedAt(Carbon::parse($row['m_modified_at']));
         } else {
@@ -41,6 +42,7 @@ class Member extends IModel
             $member->setGuild($guild);
             $member->setTotalComments($row['total_comments']);
             $member->setUsername($row['username']);
+            $member->setVerifiedBy($row['verified_by']);
             $member->setCreatedAt(Carbon::parse($row['created_at']));
             $member->setModifiedAt(Carbon::parse($row['modified_at']));
         }
