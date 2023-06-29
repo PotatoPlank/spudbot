@@ -31,10 +31,10 @@ class LogThreadActivity extends IBindableEvent
 
                 try {
                     $channel = $this->spud->getChannelRepository()
-                        ->findByPart($message->channel);
+                        ->findByPart($message->thread->parent);
                 } catch (\OutOfBoundsException $exception) {
                     $channel = new Channel();
-                    $channel->setDiscordId($message->channel->id);
+                    $channel->setDiscordId($message->thread->parent->id);
                     $channel->setGuild($guild);
                     $this->spud->getChannelRepository()->save($channel);
                 }
