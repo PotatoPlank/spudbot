@@ -82,7 +82,8 @@ class MemberRepository extends IMemberRepository
         $collection = new Collection();
         $queryBuilder = $this->dbal->createQueryBuilder();
 
-        $response = $queryBuilder->select(...$this->fields)->from('members', 'm')
+        $response = $queryBuilder->select(...$this->fields)
+            ->from('members', 'm')
             ->innerJoin('m', 'guilds', 'g', 'm.guild_id = g.id')
             ->where('m.guild_id = ?')->setParameter(0, $guild->getId())
             ->fetchAllAssociative();

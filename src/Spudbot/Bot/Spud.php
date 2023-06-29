@@ -17,6 +17,7 @@ use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IBindableCommand;
 use Spudbot\Interface\IBindableEvent;
 use Spudbot\Interface\IChannelRepository;
+use Spudbot\Interface\IDirectoryRepository;
 use Spudbot\Interface\IEventRepository;
 use Spudbot\Interface\IGuildRepository;
 use Spudbot\Interface\IMemberRepository;
@@ -57,6 +58,7 @@ class Spud
     private IThreadRepository $threadRepository;
     private IChannelRepository $channelRepository;
     private IReminderRepository $reminderRepository;
+    private IDirectoryRepository $directoryRepository;
 
     public function __construct(SpudOptions $options)
     {
@@ -273,9 +275,6 @@ class Spud
         return $this->twig;
     }
 
-    /**
-     * @return IChannelRepository
-     */
     public function getChannelRepository(): IChannelRepository
     {
         return $this->channelRepository;
@@ -289,20 +288,24 @@ class Spud
         $this->channelRepository = $channelRepository;
     }
 
-    /**
-     * @return IReminderRepository
-     */
     public function getReminderRepository(): IReminderRepository
     {
         return $this->reminderRepository;
     }
 
-    /**
-     * @param IReminderRepository $reminderRepository
-     */
     public function setReminderRepository(IReminderRepository $reminderRepository): void
     {
         $this->reminderRepository = $reminderRepository;
+    }
+
+    public function getDirectoryRepository(): IDirectoryRepository
+    {
+        return $this->directoryRepository;
+    }
+
+    public function setDirectoryRepository(IDirectoryRepository $directoryRepository): void
+    {
+        $this->directoryRepository = $directoryRepository;
     }
 
 }
