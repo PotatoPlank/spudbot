@@ -27,7 +27,7 @@ class Thread extends IModel
             $thread->setId($row['t_id']);
             $thread->setDiscordId($row['t_discord_id']);
             $thread->setGuild(Guild::withDatabaseRow($row));
-            $thread->setChannel($row['c_id']);
+            $thread->setChannel(Channel::withDatabaseRow($row));
             $thread->setTag($row['t_tag']);
             $thread->setCreatedAt(Carbon::parse($row['t_created_at']));
             $thread->setModifiedAt(Carbon::parse($row['t_modified_at']));
