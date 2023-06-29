@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Spudbot\Bindable\Event\Member;
 
@@ -18,21 +23,30 @@ class MemberBanned extends IBindableEvent
 
     public function getListener(): callable
     {
-        return function (Ban $ban){
-            $builder = $this->spud->getSimpleResponseBuilder();
-            $publicModLogChannel = $ban->guild->channels->get('id', 1114365924733104133);
+        return function (Ban $ban) {
+            return;
+            $this->discord->getLoop()->addTimer(10, function () use ($ban) {
+                $this->discord->guilds->get('id', $ban->guild_id)->bans->fetch($ban->user_id)->done(
+                    function (Ban $ban) {
+                        $builder = $this->spud->getSimpleResponseBuilder();
 
-            $context = [
-                'username' => $ban->user->username,
-                'reason' => $ban->reason,
-                'timestamp' => Carbon::now()->timestamp,
-            ];
-            $message = $this->spud->getTwig()->render('ban_alert.twig', $context);
+                        $modLogChannelId = 1114365924733104133;
+                        $publicModLogChannel = $ban->guild->channels->get('id', $modLogChannelId);
 
-            $builder->setTitle('Member Banned');
-            $builder->setDescription($message);
+                        $context = [
+                            'username' => $ban->user->username,
+                            'reason' => $ban->reason ?? 'N/A',
+                            'timestamp' => Carbon::now()->timestamp,
+                        ];
+                        $message = $this->spud->getTwig()->render('ban_alert.twig', $context);
 
-            $publicModLogChannel->sendMessage($builder->getEmbeddedMessage());
+                        $builder->setTitle('Member Banned');
+                        $builder->setDescription($message);
+
+                        $publicModLogChannel->sendMessage($builder->getEmbeddedMessage());
+                    }
+                );
+            });
         };
     }
 }
