@@ -37,7 +37,7 @@ class SprayUser extends IBindableEvent
             $isSprayable = in_array($message->member->id, $spray);
             $isSprayable = true;
 
-            if (in_array($message->member->id, $spray) && ($hasAnimal || $wordCount < 2)) {
+            if ($isSprayable && ($hasAnimal || $wordCount < 2)) {
                 $message->react(':nospray:1115701447569461349');
             }
         };
