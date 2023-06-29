@@ -30,7 +30,7 @@ class SprayUser extends IBindableEvent
                 'woof',
                 'owner',
             ];
-            $wordCount = count(explode($message->content, ' '));
+            $wordCount = count(explode(' ', $message->content));
             $hasAnimal = $this->stringContains($message->content, $meows);
             $spray = ['992794792419401728', '1064128213518921758'];
 
