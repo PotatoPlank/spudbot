@@ -14,6 +14,7 @@ use Spudbot\Interface\IBindableEvent;
 
 class SprayUser extends IBindableEvent
 {
+    private array $sprays = [];
 
     public function getBoundEvent(): string
     {
@@ -23,21 +24,34 @@ class SprayUser extends IBindableEvent
     public function getListener(): callable
     {
         return function (Message $message) {
-            $meows = [
+            $keywords = [
                 'meow',
-                'miao',
-                'cat',
                 'woof',
-                'owner',
-                'm___',
+                'my owner',
             ];
-            $wordCount = count(explode(' ', $message->content));
-            $hasAnimal = $this->stringContains($message->content, $meows);
-            $spray = ['992794792419401728', '1064128213518921758',];
-            $isSprayable = in_array($message->member->id, $spray) && ($hasAnimal || $wordCount < 2);
 
-            if ($isSprayable || $this->stringContains($message->content, ['meow', 'woof'])) {
-                $message->react(':nospray:1115701447569461349');
+            if ($this->stringContains($message->content, $keywords)) {
+                if (!isset($this->sprays[$message->guild->id])) {
+                    $this->sprays[$message->guild->id] = 0;
+                }
+                $this->sprays[$message->guild->id]++;
+                $sprayCount = $this->sprays[$message->guild->id];
+                $reaction = ':nospray:1115701447569461349';
+
+                if ($sprayCount % 10 !== 0) {
+                    $message->react($reaction);
+                } else {
+                    $refill = 'https://www.contemporist.com/wp-content/uploads/2015/11/bu-water_071115_04.gif';
+                    $response = $this->spud->getSimpleResponseBuilder();
+                    $response->setTitle('We\'ll Be Right Back');
+                    $response->setOptions(['image' => ['url' => $refill]]);
+                    $message->reply($response->getEmbeddedMessage());
+
+
+                    $this->discord->getLoop()->addTimer(random_int(2, 15), function () use ($message, $reaction) {
+                        $message->react($reaction);
+                    });
+                }
             }
         };
     }
