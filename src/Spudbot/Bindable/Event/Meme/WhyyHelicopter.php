@@ -5,15 +5,17 @@
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
-namespace Spudbot\Bindable\Event\Message;
+namespace Spudbot\Bindable\Event\Meme;
 
 
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\IBindableEvent;
 
-class SprayUser extends IBindableEvent
+class WhyyHelicopter extends IBindableEvent
 {
+    private string $whyy = ':whyy:1115394039815090196';
+    private string $helicopter = '🚁';
 
     public function getBoundEvent(): string
     {
@@ -23,21 +25,14 @@ class SprayUser extends IBindableEvent
     public function getListener(): callable
     {
         return function (Message $message) {
-            $meows = [
-                'meow',
-                'miao',
-                'cat',
-                'woof',
-                'owner',
-                'm___',
+            $keywords = [
+                'why helicopter',
+                'whyy',
             ];
-            $wordCount = count(explode(' ', $message->content));
-            $hasAnimal = $this->stringContains($message->content, $meows);
-            $spray = ['992794792419401728', '1064128213518921758',];
-            $isSprayable = in_array($message->member->id, $spray) && ($hasAnimal || $wordCount < 2);
 
-            if ($isSprayable || $this->stringContains($message->content, ['meow', 'woof'])) {
-                $message->react(':nospray:1115701447569461349');
+            if ($this->stringContains($message->content, $keywords)) {
+                $message->react($this->whyy);
+                $message->react($this->helicopter);
             }
         };
     }

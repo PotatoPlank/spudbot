@@ -173,6 +173,8 @@ class MemberRepository extends IMemberRepository
                 'discord_id' => '?',
                 'guild_id' => '?',
                 'total_comments' => '?',
+                'username' => '?',
+                'verified_by' => '?',
                 'created_at' => '?',
                 'modified_at' => '?',
             ];
@@ -181,6 +183,8 @@ class MemberRepository extends IMemberRepository
                 $member->getDiscordId(),
                 $member->getGuild()->getId(),
                 $member->getTotalComments(),
+                $member->getUsername(),
+                $member->getVerifiedBy(),
                 $member->getCreatedAt()->toDateTimeString(),
                 $member->getModifiedAt()->toDateTimeString(),
             ];
@@ -196,6 +200,8 @@ class MemberRepository extends IMemberRepository
         $parameters = [
             $member->getTotalComments(),
             $member->getModifiedAt()->toDateTimeString(),
+            $member->getUsername(),
+            $member->getVerifiedBy(),
             $member->getId(),
         ];
 
@@ -203,6 +209,8 @@ class MemberRepository extends IMemberRepository
             ->update('members')
             ->set('total_comments', '?')
             ->set('modified_at', '?')
+            ->set('username', '?')
+            ->set('verified_by', '?')
             ->where('id = ?')
             ->setParameters($parameters)
             ->executeStatement();

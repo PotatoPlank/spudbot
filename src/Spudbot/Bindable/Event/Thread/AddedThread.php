@@ -13,26 +13,17 @@ use Discord\Parts\Thread\Thread;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\IBindableEvent;
 
-class DeletedThread extends IBindableEvent
+class AddedThread extends IBindableEvent
 {
 
     public function getBoundEvent(): string
     {
-        return Event::THREAD_DELETE;
+        return Event::THREAD_CREATE;
     }
 
     public function getListener(): callable
     {
         return function (?Thread $threadPart) {
-            try {
-                $thread = $this->spud->getThreadRepository()->findByPart($threadPart);
-                $this->spud->getThreadRepository()->remove($thread);
-            } catch (\Exception $exception) {
-                /**
-                 * Already deleted
-                 */
-            }
-
             if ($threadPart) {
                 try {
                     $forumChannel = $this->spud->getChannelRepository()
