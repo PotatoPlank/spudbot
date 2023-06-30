@@ -12,7 +12,7 @@ use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\IBindableEvent;
 
-class WhyyyHelicopter extends IBindableEvent
+class WhyyHelicopter extends IBindableEvent
 {
     private string $whyy = ':whyy:1115394039815090196';
     private string $helicopter = '🚁';
