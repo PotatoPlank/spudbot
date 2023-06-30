@@ -35,17 +35,22 @@ class Recurrence
         'minutes' => self::MINUTE_UNIT,
         'hour' => self::HOUR_UNIT,
         'hours' => self::HOUR_UNIT,
+        'hourly' => "1 " . self::HOUR_UNIT,
         'h' => self::HOUR_UNIT,
         'day' => self::DAY_UNIT,
         'days' => self::DAY_UNIT,
+        'daily' => "1 " . self::DAY_UNIT,
         'd' => self::DAY_UNIT,
         'week' => self::WEEK_UNIT,
         'weeks' => self::WEEK_UNIT,
+        'weekly' => "1 " . self::WEEK_UNIT,
+        'bi-weekly' => "2 " . self::WEEK_UNIT,
         'w' => self::WEEK_UNIT,
         'wk' => self::WEEK_UNIT,
         'wks' => self::WEEK_UNIT,
         'month' => self::MONTH_UNIT,
         'months' => self::MONTH_UNIT,
+        'monthly' => "1 " . self::MONTH_UNIT,
     ];
 
     /**
