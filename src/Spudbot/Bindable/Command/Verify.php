@@ -65,13 +65,21 @@ class Verify extends IBindableCommand
 
                 $builder->setDescription($this->spud->twig->render('user/verification.twig', $context));
 
-                $interaction->respondWithMessage($builder->getEmbeddedMessage());
-                $output->sendMessage($builder->getEmbeddedMessage());
 
                 $verifyingMember = $this->spud->getMemberRepository()->findByPart($interaction->member);
-                $verifiedMember = $this->spud->getMemberRepository()->findByPart($memberToBeVerified);
-                $verifiedMember->setVerifiedBy($verifyingMember->getId());
-                $this->spud->getMemberRepository()->save($verifiedMember);
+                try {
+                    $verifiedMember = $this->spud->getMemberRepository()->findByPart($memberToBeVerified);
+                    $verifiedMember->setVerifiedBy($verifyingMember->getId());
+
+                    $this->spud->getMemberRepository()->save($verifiedMember);
+                } catch (\OutOfBoundsException $exception) {
+                    $builder->setDescription(
+                        "Unable to verify <@{$memberToBeVerified->id}>, they haven't made any comments."
+                    );
+                }
+
+                $interaction->respondWithMessage($builder->getEmbeddedMessage());
+                $output->sendMessage($builder->getEmbeddedMessage());
 
                 return;
             }
