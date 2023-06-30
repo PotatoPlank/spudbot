@@ -15,6 +15,8 @@ use Spudbot\Interface\IBindableEvent;
 class SprayUser extends IBindableEvent
 {
     private array $sprays = [];
+    private string $reaction = ':nospray:1115701447569461349';
+    private string $refill = 'https://www.contemporist.com/wp-content/uploads/2015/11/bu-water_071115_04.gif';
 
     public function getBoundEvent(): string
     {
@@ -36,20 +38,21 @@ class SprayUser extends IBindableEvent
                 }
                 $this->sprays[$message->guild->id]++;
                 $sprayCount = $this->sprays[$message->guild->id];
-                $reaction = ':nospray:1115701447569461349';
 
                 if ($sprayCount % 10 !== 0) {
-                    $message->react($reaction);
+                    $message->react($this->reaction);
                 } else {
-                    $refill = 'https://www.contemporist.com/wp-content/uploads/2015/11/bu-water_071115_04.gif';
                     $response = $this->spud->getSimpleResponseBuilder();
                     $response->setTitle('We\'ll Be Right Back');
-                    $response->setOptions(['image' => ['url' => $refill]]);
-                    $message->reply($response->getEmbeddedMessage());
+                    $response->setOptions(['image' => ['url' => $this->refill]]);
+                    $response = $response->getEmbeddedMessage();
 
-
-                    $this->discord->getLoop()->addTimer(random_int(2, 15), function () use ($message, $reaction) {
-                        $message->react($reaction);
+                    $message->reply($response)->done(function (Message $responseMessage) use ($message) {
+                        $delay = random_int(6, 15);
+                        $this->discord->getLoop()->addTimer($delay, function () use ($message, $responseMessage) {
+                            $message->react($this->reaction);
+                            $responseMessage->delete();
+                        });
                     });
                 }
             }
