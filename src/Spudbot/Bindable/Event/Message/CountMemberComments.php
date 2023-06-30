@@ -40,6 +40,17 @@ class CountMemberComments extends IBindableEvent
                     $member->setUsername($username);
                 }
                 $memberRepository->save($member);
+            } elseif ($message->member->user->bot) {
+                $memberRepository = $this->spud->getMemberRepository();
+                try {
+                    $member = $memberRepository->findByPart($message->member);
+
+                    $memberRepository->remove($member);
+                } catch (\OutOfBoundsException) {
+                    /**
+                     * Don't add the bot
+                     */
+                }
             }
         };
     }
