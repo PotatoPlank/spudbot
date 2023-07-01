@@ -162,6 +162,31 @@ class MemberRepository extends IMemberRepository
         return $collection;
     }
 
+    public function getTopCommentersByGuild(Guild $guild, $limit = 10): Collection
+    {
+        $collection = new Collection();
+        $queryBuilder = $this->dbal->createQueryBuilder();
+
+        $response = $queryBuilder->select(...$this->fields)
+            ->from('members', 'm')
+            ->innerJoin('m', 'guilds', 'g', 'm.guild_id = g.id')
+            ->where('m.guild_id = ?')
+            ->orderBy('m.total_comments', 'desc')
+            ->setParameter(0, $guild->getId())
+            ->setMaxResults($limit)
+            ->fetchAllAssociative();
+
+        if (!empty($response)) {
+            foreach ($response as $row) {
+                $member = Member::withDatabaseRow($row);
+
+                $collection->push($member);
+            }
+        }
+
+        return $collection;
+    }
+
     public function save(Member $member): bool
     {
         $member->setModifiedAt(Carbon::now());
@@ -289,4 +314,5 @@ class MemberRepository extends IMemberRepository
 
         return $impactedRows > 0;
     }
+
 }

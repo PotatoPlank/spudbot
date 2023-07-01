@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Spudbot\Bindable\SubCommand;
@@ -7,59 +8,40 @@ namespace Spudbot\Bindable\SubCommand;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\ISubCommand;
 use Spudbot\Model\Member;
-use Spudbot\Repository\SQL\MemberRepository;
 
 class UserLeaderboard extends ISubCommand
 {
     protected string $subCommand = 'leaderboard';
+    private int $max = 50;
+    private int $default = 35;
+
     public function execute(?Interaction $interaction): void
     {
-        /**
-         * @var MemberRepository $repository
-         */
-        $repository = $this->spud->getMemberRepository();
         $builder = $this->spud->getSimpleResponseBuilder();
-        $members = $repository->getAll();
-
-        $maximumUsers = $_ENV['LEADERBOARD_LENGTH'];
-        $leaderboard = [];
-        /**
-         * @var Member $member
-         */
-        foreach ($members as $member) {
-            if($member->getGuild()->getDiscordId() === $interaction->guild_id){
-                if(count($leaderboard) >= $maximumUsers)
-                {
-                    foreach ($leaderboard as $key => $totalComments){
-                        if($member->getTotalComments() > $totalComments){
-                            unset($leaderboard[$key]);
-                            $leaderboard[$member->getDiscordId()] = $member->getTotalComments();
-                            arsort($leaderboard);
-                        }
-                    }
-                }else{
-                    $leaderboard[$member->getDiscordId()] = $member->getTotalComments();
-                    if(count($leaderboard) === $maximumUsers){
-                        arsort($leaderboard);
-                    }
-                }
-            }
+        $limit = $this->options['limit']->value ?? $this->default;
+        if ($limit > $this->max) {
+            $limit = $this->max;
         }
+
+        $guild = $this->spud->getGuildRepository()->findByPart($interaction->guild);
+        $members = $this->spud->getMemberRepository()
+            ->getTopCommentersByGuild($guild, $limit);
 
         $title = 'User Leaderboard';
         $message = '';
-        if(!empty($leaderboard)){
+        if (!$members->empty()) {
             $position = 1;
-            foreach ($leaderboard as $memberId => $comments)
-            {
-                $message .= "{$position}) <@{$memberId}> has made {$comments} comments." . PHP_EOL;
+            /**
+             * @var $member Member
+             */
+            foreach ($members as $member) {
+                $message .= "{$position}) <@{$member->getDiscordId()}> ({$member->getUsername()}) has made {$member->getTotalComments()} comments." . PHP_EOL;
 
                 $position++;
             }
-        }else{
+        } else {
             $message = 'Unable to retrieve leaderboard.';
         }
-
 
 
         $builder->setTitle($title);
