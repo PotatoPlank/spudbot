@@ -185,6 +185,9 @@ class DirectoryRepository extends IDirectoryRepository
          * @var \Discord\Parts\Thread\Thread $threadPart
          */
         foreach ($forumChannel->threads as $threadPart) {
+            if ($threadPart->locked || ($threadPart->archived && $threadPart->archive_timestamp->diffInWeeks() >= 2)) {
+                continue;
+            }
             try {
                 $thread = $threadRepository->findByPart($threadPart);
             } catch (\OutOfBoundsException $exception) {
