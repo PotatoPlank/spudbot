@@ -9,6 +9,7 @@ use Discord\WebSockets\Intents;
 use Doctrine\DBAL\DriverManager;
 use Spudbot\Bindable\Event\Member\MemberBanned;
 use Spudbot\Bindable\Event\Reactions\MessageHasManyReactions;
+use Spudbot\Bindable\Event\Thread\DeletedThread;
 use Spudbot\Bot\Spud;
 use Spudbot\Bot\SpudOptions;
 use Spudbot\Repository\SQL\ChannelRepository;
@@ -65,6 +66,7 @@ $spud->loadBindableCommandDirectory(__DIR__ . '/src/Spudbot/Bindable/Command');
 $excludedEvents = [
     MessageHasManyReactions::class,
     MemberBanned::class,
+    DeletedThread::class,
 ];
 $spud->loadBindableEventDirectory(__DIR__ . '/src/Spudbot/Bindable/Event', $excludedEvents);
 
