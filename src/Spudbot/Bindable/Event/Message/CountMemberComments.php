@@ -24,7 +24,8 @@ class CountMemberComments extends IBindableEvent
     public function getListener(): callable
     {
         return function (Message $message) {
-            if ($message->member && !$message->member->user->bot) {
+            $isBot = isset($message->member->user->bot) && $message->member->user->bot;
+            if ($message->member && !$isBot) {
                 $username = $message->member->nick ?? $message->member->displayname;
                 $memberRepository = $this->spud->getMemberRepository();
 
@@ -40,7 +41,7 @@ class CountMemberComments extends IBindableEvent
                     $member->setUsername($username);
                 }
                 $memberRepository->save($member);
-            } elseif ($message->member->user->bot) {
+            } elseif ($isBot) {
                 $memberRepository = $this->spud->getMemberRepository();
                 try {
                     $member = $memberRepository->findByPart($message->member);

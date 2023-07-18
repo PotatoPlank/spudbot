@@ -24,6 +24,8 @@ class DeletedThread extends IBindableEvent
     public function getListener(): callable
     {
         return function (?Thread $threadPart) {
+            // See SPUDBOT-23
+            return;
             try {
                 $thread = $this->spud->getThreadRepository()->findByPart($threadPart);
                 $this->spud->getThreadRepository()->remove($thread);

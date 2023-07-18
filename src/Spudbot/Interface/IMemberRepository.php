@@ -28,6 +28,8 @@ abstract class IMemberRepository
 
     abstract public function getEventAttendance(Member $member): Collection;
 
+    abstract public function getTopCommentersByGuild(Guild $guild): Collection;
+
     abstract public function save(Member $member): bool;
 
     abstract public function saveMemberEventAttendance(EventAttendance $eventAttendance): bool;

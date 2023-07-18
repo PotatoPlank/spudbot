@@ -185,6 +185,9 @@ class DirectoryRepository extends IDirectoryRepository
          * @var \Discord\Parts\Thread\Thread $threadPart
          */
         foreach ($forumChannel->threads as $threadPart) {
+            if ($threadPart->locked || ($threadPart->archived && $threadPart->archive_timestamp->diffInWeeks() >= 2)) {
+                continue;
+            }
             try {
                 $thread = $threadRepository->findByPart($threadPart);
             } catch (\OutOfBoundsException $exception) {
@@ -206,10 +209,11 @@ class DirectoryRepository extends IDirectoryRepository
         }
 
         foreach ($categories as $category => $threads) {
-            $embedContent .= $category . PHP_EOL . PHP_EOL;
+            $embedContent .= "**{$category}**" . PHP_EOL;
             foreach ($threads as $threadId) {
                 $embedContent .= "<#$threadId>" . PHP_EOL;
             }
+            $embedContent .= PHP_EOL;
         }
 
         return $embedContent;

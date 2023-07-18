@@ -20,11 +20,13 @@ class User extends IBindableCommand
 
     public function getListener(): callable
     {
-        if(empty($this->dbal)){
-            throw new \RuntimeException("Command '{$this->getName()}' requires a DBAL Client to function appropriately.");
+        if (empty($this->dbal)) {
+            throw new \RuntimeException(
+                "Command '{$this->getName()}' requires a DBAL Client to function appropriately."
+            );
         }
 
-        return function (Interaction $interaction){
+        return function (Interaction $interaction) {
             $this->observer->subscribe(new TotalUserComments());
             $this->observer->subscribe(new UserEventReputation());
             $this->observer->subscribe(new UserInformation());
@@ -74,6 +76,14 @@ class User extends IBindableCommand
         $leaderboardSubCommand->setName('leaderboard');
         $leaderboardSubCommand->setDescription("Get the top 10 users with the most comments since tracking began.");
         $leaderboardSubCommand->setType(Option::SUB_COMMAND);
+        $leaderboardSubCommand->addOption(
+            (new Option($this->discord))
+                ->setName('limit')
+                ->setType(Option::INTEGER)
+                ->setMinValue(5)
+                ->setMaxValue(50)
+                ->setDescription('How many members to show on the leaderboard.')
+        );
 
         $userInfoSubCommand = new Option($this->discord);
         $userInfoSubCommand->setName('info');
