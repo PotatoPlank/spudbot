@@ -25,37 +25,33 @@ class TagThread extends IBindableCommand
         return function (Interaction $interaction) {
             $builder = $this->spud->getSimpleResponseBuilder();
             $tag = $interaction->data->options['tag']->value;
+            $threadId = $interaction->data->options['thread']->value;
+
+            $channelPart = $interaction->guild->channels->find(function (Channel $channel) use ($threadId) {
+                return !empty($channel->threads->get('id', $threadId));
+            });
 
             $builder->setTitle('Applied Tag');
             $builder->setDescription("You do not have correct permissions to apply the tag.");
 
-            $threadTypes = [
-                Channel::TYPE_PUBLIC_THREAD,
-                Channel::TYPE_PRIVATE_THREAD,
-                Channel::TYPE_ANNOUNCEMENT_THREAD
-            ];
-
-            var_dump($interaction->guild->channels->get('id', $interaction->channel_id));
-
-            $isThread = isset($interaction->channel->parent_id);
             $isOwner = isset($interaction->channel->owner_id) && $interaction->channel->owner_id === $interaction->member->id;
             $isMod = $interaction->member->getPermissions()->manage_messages;
-            if ($isThread && ($isOwner || $isMod)) {
+            if ($channelPart && ($isOwner || $isMod)) {
                 $guild = $this->spud->getGuildRepository()->findByPart($interaction->guild);
                 try {
                     $channel = $this->spud->getChannelRepository()
-                        ->findByDiscordId($interaction->channel->parent_id, $interaction->guild->id);
+                        ->findByDiscordId($channelPart->id, $threadId);
                 } catch (\OutOfBoundsException $exception) {
                     $channel = new \Spudbot\Model\Channel();
                     $channel->setGuild($guild);
-                    $channel->setDiscordId($interaction->channel->parent_id);
+                    $channel->setDiscordId($channelPart->id);
                     $this->spud->getChannelRepository()
                         ->save($channel);
                 }
 
                 try {
                     $thread = $this->spud->getThreadRepository()
-                        ->findByDiscordId($interaction->channel_id, $interaction->guild->id);
+                        ->findByDiscordId($threadId, $interaction->guild->id);
                     $thread->setTag($tag);
                 } catch (\OutOfBoundsException $exception) {
                     $thread = new Thread();
@@ -68,6 +64,11 @@ class TagThread extends IBindableCommand
                 $this->spud->getThreadRepository()
                     ->save($thread);
                 $builder->setDescription("Your tag {$tag} was applied.");
+            } else {
+                $builder->setDescription("Unable to locate the relevant parent channel.");
+                if ($channelPart) {
+                    $builder->setDescription("You do not have correct permissions to apply the tag.");
+                }
             }
 
             $interaction->respondWithMessage($builder->getEmbeddedMessage());
@@ -77,6 +78,13 @@ class TagThread extends IBindableCommand
     public function getCommand(): Command
     {
         $tag = new Option($this->discord);
+        $thread = new Option($this->discord);
+
+        $thread->setName('thread')
+            ->setDescription('The thread to tag.')
+            ->setRequired(true)
+            ->setType(Option::CHANNEL);
+
         $tag->setName('tag')
             ->setDescription('The tag name.')
             ->setRequired(true)
@@ -85,6 +93,7 @@ class TagThread extends IBindableCommand
         $command = CommandBuilder::new();
         $command->setName($this->getName())
             ->setDescription($this->getDescription())
+            ->addOption($thread)
             ->addOption($tag);
 
         return new Command($this->discord, $command->toArray());
