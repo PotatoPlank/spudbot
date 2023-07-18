@@ -127,7 +127,7 @@ class GenerateDirectory extends IBindableCommand
                 $response->setDescription('Unable to locate the specified forum channel.');
             }
 
-            $interaction->respondWithMessage($response->getEmbeddedMessage());
+            $interaction->respondWithMessage($response->getEmbeddedMessage(), true);
         };
     }
 

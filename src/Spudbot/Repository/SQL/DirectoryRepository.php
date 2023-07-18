@@ -209,10 +209,11 @@ class DirectoryRepository extends IDirectoryRepository
         }
 
         foreach ($categories as $category => $threads) {
-            $embedContent .= $category . PHP_EOL . PHP_EOL;
+            $embedContent .= "**{$category}**" . PHP_EOL;
             foreach ($threads as $threadId) {
                 $embedContent .= "<#$threadId>" . PHP_EOL;
             }
+            $embedContent .= PHP_EOL;
         }
 
         return $embedContent;

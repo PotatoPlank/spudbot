@@ -9,6 +9,7 @@ namespace Spudbot\Bindable\Command;
 
 use Discord\Builders\CommandBuilder;
 use Discord\Parts\Channel\Channel;
+use Discord\Parts\Channel\Message;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
@@ -40,7 +41,7 @@ class TagThread extends IBindableCommand
                 $guild = $this->spud->getGuildRepository()->findByPart($interaction->guild);
                 try {
                     $channel = $this->spud->getChannelRepository()
-                        ->findByDiscordId($channelPart->id, $threadId);
+                        ->findByDiscordId($channelPart->id, $channelPart->guild_id);
                 } catch (\OutOfBoundsException $exception) {
                     $channel = new \Spudbot\Model\Channel();
                     $channel->setGuild($guild);
@@ -64,6 +65,48 @@ class TagThread extends IBindableCommand
                 $this->spud->getThreadRepository()
                     ->save($thread);
                 $builder->setDescription("Your tag {$tag} was applied.");
+
+                try {
+                    $directory = $this->spud->getDirectoryRepository()
+                        ->findByForumChannel($channel);
+
+                    $forumDirectoryPart = $channelPart->guild->channels
+                        ->get('id', $directory->getDirectoryChannel()->getDiscordId());
+
+                    if ($forumDirectoryPart) {
+                        $directoryMessage = $this->spud->getDirectoryRepository()
+                            ->getEmbedContentFromPart($channelPart);
+
+                        $embed = $this->spud->getSimpleResponseBuilder();
+                        $embed->setTitle($forumDirectoryPart->name . ' Thread Directory');
+                        $embed->setDescription($directoryMessage);
+
+                        $success = function (Message $message) use ($embed) {
+                            $message->edit($embed->getEmbeddedMessage());
+                        };
+
+                        $rejected = function () use ($forumDirectoryPart, $embed, $directory) {
+                            $forumDirectoryPart
+                                ->sendMessage($embed->getEmbeddedMessage())->done(
+                                    function (Message $message) use ($directory) {
+                                        $directory->setEmbedId($message->id);
+
+                                        $this->spud->getDirectoryRepository()
+                                            ->save($directory);
+                                    }
+                                );
+                        };
+
+                        $forumDirectoryPart->messages
+                            ->fetch($directory->getEmbedId())->done($success, $rejected);
+                    } else {
+                        throw new \RuntimeException('The specified directory channel does not exist.');
+                    }
+                } catch (\OutOfBoundsException $exception) {
+                    /**
+                     * There is no directory for this channel
+                     */
+                }
             } else {
                 $builder->setDescription("Unable to locate the relevant parent channel.");
                 if ($channelPart) {
@@ -71,7 +114,7 @@ class TagThread extends IBindableCommand
                 }
             }
 
-            $interaction->respondWithMessage($builder->getEmbeddedMessage());
+            $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
         };
     }
 
