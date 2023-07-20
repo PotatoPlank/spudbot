@@ -29,7 +29,6 @@ class SprayUser extends IBindableEvent
             $keywords = [
                 'meow',
                 'woof',
-                'my owner',
             ];
 
             if ($this->stringContains($message->content, $keywords)) {
@@ -59,11 +58,15 @@ class SprayUser extends IBindableEvent
         };
     }
 
-    private function stringContains($string, array $array)
+    private function stringContains($string, array $array): bool
     {
-        foreach ($array as $a) {
-            if (stripos($string, $a) !== false) {
-                return true;
+        $words = explode(' ', $string);
+        foreach ($words as $word) {
+            foreach ($array as $matchingWord) {
+                similar_text($word, $matchingWord, $percent);
+                if ($percent > 70) {
+                    return true;
+                }
             }
         }
         return false;
