@@ -78,7 +78,7 @@ class GenerateDirectory extends IBindableCommand
                         ->getEmbedContentFromPart($formChannelPart);
 
                     $embed = $this->spud->getSimpleResponseBuilder();
-                    $embed->setTitle($formChannelPart->name . ' Thread Directory');
+                    $embed->setTitle($formChannelPart->name . ' thread directory');
                     $embed->setDescription($directoryMessage);
 
                     $success = function (Message $message) use ($embed) {
