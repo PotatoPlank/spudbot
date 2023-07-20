@@ -207,16 +207,19 @@ class DirectoryRepository extends IDirectoryRepository
                 $categories[$thread->getTag()][] = $threadPart->id;
             }
         }
-
-        foreach ($categories as $category => $threads) {
-            $embedContent .= "**{$category}**" . PHP_EOL;
-            foreach ($threads as $threadId) {
-                $embedContent .= "<#$threadId>" . PHP_EOL;
+        if (!empty($categories)) {
+            foreach ($categories as $category => $threads) {
+                if (!empty($threads)) {
+                    $embedContent .= "**{$category}**" . PHP_EOL;
+                    foreach ($threads as $threadId) {
+                        $embedContent .= "<#$threadId>" . PHP_EOL;
+                    }
+                    $embedContent .= PHP_EOL;
+                }
             }
-            $embedContent .= PHP_EOL;
         }
 
-        return $embedContent;
+        return !empty($embedContent) ? $embedContent : 'No threads found.';
     }
 
     public function save(Directory $directory): bool

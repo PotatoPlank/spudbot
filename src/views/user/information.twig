@@ -1,9 +1,9 @@
-<@{{ memberId }}> has been a member for {{ tenureDays }} of the {{ requiredTenureDays }} required days.
+<@{{ memberId }}> ({{ memberName }}) has been a member for {{ tenureDays }} of the {{ requiredTenureDays }} required days.
 They have posted {{ totalComments }} of the {{ requiredCommentCount }} comments required.
 {% if isLevelOne %}
-    They are {{ levelOneRoleName }}.
+    They have been given {{ levelOneRoleName }}.
 {% else %}
-    They are not {{ levelOneRoleName }}.
+    They have not been given {{ levelOneRoleName }}.
 {% endif %}
 {% if isVerified %}
     They are {{ verifiedRoleName }}.
@@ -14,4 +14,7 @@ They have posted {{ totalComments }} of the {{ requiredCommentCount }} comments 
     They are eligible for automatic assignment to {{ levelOneRoleName }}.
 {% else %}
     They are not eligible for automatic assignment to {{ levelOneRoleName }}.
+{% endif %}
+{% if isVerified and verifiedById %}
+    Verified By: <@{{ verifiedById }}> ({{ verifiedByName }})
 {% endif %}

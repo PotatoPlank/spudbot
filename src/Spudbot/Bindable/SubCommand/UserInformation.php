@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Spudbot\Bindable\SubCommand;
 
@@ -11,6 +16,7 @@ use Spudbot\Repository\SQL\MemberRepository;
 class UserInformation extends ISubCommand
 {
     protected string $subCommand = 'info';
+
     public function execute(?Interaction $interaction): void
     {
         /**
@@ -22,6 +28,7 @@ class UserInformation extends ISubCommand
         $userId = $this->options['user']->value;
         $memberPart = $interaction->guild->members->get('id', $userId);
         $member = $memberRepository->findByPart($memberPart);
+        $memberName = $member->getUsername();
 
         $memberLength = $memberPart->joined_at->diff(Carbon::now());
         $levelOneRole = $interaction->guild->roles->get('id', 1114365923730665481);
@@ -32,8 +39,15 @@ class UserInformation extends ISubCommand
         $hasEnoughComments = $member->hasMetCommentThreshold();
         $isEligible = $hasMetMembershipLength && $hasEnoughComments;
 
+        if ($member->getVerifiedBy()) {
+            $verifier = $memberRepository->findById($member->getVerifiedBy());
+            $verifierName = $verifier->getUsername();
+            $verifierId = $verifier->getDiscordId();
+        }
+
         $context = [
             'memberId' => $member->getDiscordId(),
+            'memberName' => $memberName,
             'tenureDays' => $memberLength->days,
             'requiredTenureDays' => $_ENV['MEMBER_TENURE'],
             'totalComments' => $member->getTotalComments(),
@@ -43,6 +57,8 @@ class UserInformation extends ISubCommand
             'isEligible' => $isEligible,
             'levelOneRoleName' => $levelOneRole->name,
             'verifiedRoleName' => $verificationRole->name,
+            'verifiedById' => $verifierId ?? null,
+            'verifiedByName' => $verifierName ?? null,
         ];
 
         $builder->setTitle($title);

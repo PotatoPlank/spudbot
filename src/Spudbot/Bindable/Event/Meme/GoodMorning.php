@@ -12,10 +12,9 @@ use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\IBindableEvent;
 
-class WhyyHelicopter extends IBindableEvent
+class GoodMorning extends IBindableEvent
 {
-    private string $whyy = ':whyy:1115394039815090196';
-    private string $helicopter = '🚁';
+    private string $reaction = ':sun_with_face:';
 
     public function getBoundEvent(): string
     {
@@ -26,18 +25,16 @@ class WhyyHelicopter extends IBindableEvent
     {
         return function (Message $message) {
             $keywords = [
-                'why helicopter',
-                'whyy',
+                'good morning',
             ];
 
             if ($this->stringContains(strtolower($message->content), $keywords)) {
-                $message->react($this->whyy);
-                $message->react($this->helicopter);
+                $message->react($this->reaction);
             }
         };
     }
 
-    private function stringContains($string, array $array)
+    private function stringContains($string, array $array): bool
     {
         foreach ($array as $a) {
             if (stripos($string, $a) !== false) {

@@ -78,7 +78,7 @@ class TagThread extends IBindableCommand
                             ->getEmbedContentFromPart($channelPart);
 
                         $embed = $this->spud->getSimpleResponseBuilder();
-                        $embed->setTitle($forumDirectoryPart->name . ' Thread Directory');
+                        $embed->setTitle($forumDirectoryPart->name . ' thread directory');
                         $embed->setDescription($directoryMessage);
 
                         $success = function (Message $message) use ($embed) {

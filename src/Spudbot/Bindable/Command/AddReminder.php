@@ -39,7 +39,7 @@ class AddReminder extends IBindableCommand
 
             if (in_array($interaction->channel->type, $threadTypes, true)) {
                 $builder->setDescription('I cannot create reminders in threads at this time.');
-                $interaction->sendFollowUpMessage($builder->getEmbeddedMessage());
+                $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
                 return;
             }
 
@@ -48,15 +48,15 @@ class AddReminder extends IBindableCommand
                     $repeats = Recurrence::getIntervalFromString($repeats);
                 } catch (\InvalidArgumentException $exception) {
                     $builder->setDescription($exception->getMessage());
-                    $interaction->sendFollowUpMessage($builder->getEmbeddedMessage());
+                    $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
                     return;
                 }
 
-                if (Recurrence::isIntervalLongEnough($repeats)) {
+                if (!Recurrence::isIntervalLongEnough($repeats)) {
                     $builder->setDescription(
                         'The specified interval is using units that are too small for a reminder.'
                     );
-                    $interaction->sendFollowUpMessage($builder->getEmbeddedMessage());
+                    $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
                     return;
                 }
             }

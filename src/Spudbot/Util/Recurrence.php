@@ -116,6 +116,9 @@ class Recurrence
             if (isset(self::$unitMap[$stringPart])) {
                 $stringPart = self::$unitMap[$stringPart];
                 $hasUnit = true;
+                if (!$hasNumber) {
+                    $hasNumber = preg_match('~[0-9]+~', $stringPart) !== false;
+                }
             }
 
             if (!empty($parsedPieces) && !is_numeric(end($parsedPieces)) && !is_numeric($stringPart)) {

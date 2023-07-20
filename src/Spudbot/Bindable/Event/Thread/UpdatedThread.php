@@ -48,7 +48,7 @@ class UpdatedThread extends IBindableEvent
                             ->getEmbedContentFromPart($threadPart->parent);
 
                         $embed = $this->spud->getSimpleResponseBuilder();
-                        $embed->setTitle($threadPart->parent->name . ' Thread Directory');
+                        $embed->setTitle($threadPart->parent->name . ' thread directory');
                         $embed->setDescription($directoryMessage);
 
                         $success = function (Message $message) use ($embed) {
