@@ -31,7 +31,7 @@ class SprayUser extends IBindableEvent
                 'woof',
             ];
 
-            if ($this->stringContains($message->content, $keywords)) {
+            if ($this->stringContains(strtolower($message->content), $keywords)) {
                 if (!isset($this->sprays[$message->guild->id])) {
                     $this->sprays[$message->guild->id] = 0;
                 }
