@@ -29,7 +29,7 @@ class SuperiorSteak extends IBindableEvent
                 'genos',
             ];
 
-            if ($this->stringContains(strtolower($message->content), $keywords)) {
+            if (stripos('steak', $message->content) && $this->stringContains($message->content, $keywords)) {
                 $message->react($this->reaction);
             }
         };
@@ -41,7 +41,7 @@ class SuperiorSteak extends IBindableEvent
         foreach ($words as $word) {
             foreach ($array as $matchingWord) {
                 similar_text($word, $matchingWord, $percent);
-                if ($percent > 70) {
+                if ($percent > 65) {
                     return true;
                 }
             }
