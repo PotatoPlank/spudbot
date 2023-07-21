@@ -29,7 +29,7 @@ class SuperiorSteak extends IBindableEvent
                 'genos',
             ];
 
-            if ($this->stringContains(strtolower($message->content), $keywords)) {
+            if ($this->stringContains($message->content, $keywords)) {
                 $message->react($this->reaction);
             }
         };
