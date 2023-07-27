@@ -36,7 +36,7 @@ class Spud
 {
     public const MAJOR = 1;
     public const MINOR = 2;
-    public const REVISION = 8;
+    public const REVISION = 9;
     public const BUILD = null;
     public readonly ?Guild $logGuild;
     public readonly Environment $twig;
