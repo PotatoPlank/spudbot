@@ -30,8 +30,10 @@ class SprayUser extends IBindableEvent
                 'meow',
                 'woof',
             ];
+            $wordCount = str_word_count($message->content);
+            $normalizedMessage = strtolower($message->content);
 
-            if ($this->stringContains($message->content, $keywords)) {
+            if ($wordCount === 1 && in_array($normalizedMessage, $keywords, true)) {
                 if (!isset($this->sprays[$message->guild->id])) {
                     $this->sprays[$message->guild->id] = 0;
                 }
