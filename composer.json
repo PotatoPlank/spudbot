@@ -15,7 +15,8 @@
         "twig/twig": "^3.6",
         "sentry/sdk": "^3.5",
         "ext-pcntl": "*",
-        "doctrine/migrations": "^3.6"
+        "doctrine/migrations": "^3.6",
+        "guzzlehttp/guzzle": "^7.0"
     },
     "autoload": {
         "psr-4": {
