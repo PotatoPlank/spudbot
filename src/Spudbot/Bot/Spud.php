@@ -8,6 +8,7 @@
 namespace Spudbot\Bot;
 
 use Carbon\Carbon;
+use DI\Attribute\Inject;
 use Discord\Discord;
 use Doctrine\DBAL\Connection;
 use GuzzleHttp\Client;
@@ -25,10 +26,16 @@ use Spudbot\Interface\IMemberRepository;
 use Spudbot\Interface\IReminderRepository;
 use Spudbot\Interface\IThreadRepository;
 use Spudbot\Model\Guild;
+use Spudbot\Repository\Api\ChannelRepository;
+use Spudbot\Repository\Api\DirectoryRepository;
+use Spudbot\Repository\Api\EventRepository;
+use Spudbot\Repository\Api\GuildRepository;
+use Spudbot\Repository\Api\MemberRepository;
+use Spudbot\Repository\Api\ReminderRepository;
+use Spudbot\Repository\Api\ThreadRepository;
 use Spudbot\Util\Filesystem;
 use Throwable;
 use Twig\Environment;
-use Twig\Loader\FilesystemLoader;
 
 use function Sentry\captureException;
 use function Sentry\init;
@@ -40,6 +47,7 @@ class Spud
     public const REVISION = 9;
     public const BUILD = null;
     public readonly ?Guild $logGuild;
+    #[Inject]
     public readonly Environment $twig;
     public readonly Discord $discord;
     public readonly ?Connection $dbal;
@@ -54,13 +62,20 @@ class Spud
      * @deprecated v1.2.0 In v2, this will be replaced with an observer
      */
     public Collection $commands;
-    private IMemberRepository $memberRepository;
-    private IEventRepository $eventRepository;
-    private IGuildRepository $guildRepository;
-    private IThreadRepository $threadRepository;
-    private IChannelRepository $channelRepository;
-    private IReminderRepository $reminderRepository;
-    private IDirectoryRepository $directoryRepository;
+    #[Inject]
+    public readonly MemberRepository $memberRepository;
+    #[Inject]
+    public readonly EventRepository $eventRepository;
+    #[Inject]
+    public readonly GuildRepository $guildRepository;
+    #[Inject]
+    public readonly ThreadRepository $threadRepository;
+    #[Inject]
+    public readonly ChannelRepository $channelRepository;
+    #[Inject]
+    public readonly ReminderRepository $reminderRepository;
+    #[Inject]
+    public readonly DirectoryRepository $directoryRepository;
 
     public function __construct(SpudOptions $options)
     {
@@ -68,8 +83,6 @@ class Spud
         $this->discord = new Discord($options->getOptions());
         $this->events = new Collection();
         $this->commands = new Collection();
-        $loader = new FilesystemLoader(dirname(__DIR__, 2) . '/views');
-        $this->twig = new Environment($loader);
 
         if (!empty($_ENV['SENTRY_DSN'])) {
             init(['dsn' => $_ENV['SENTRY_DSN'], 'environment' => $_ENV['SENTRY_ENV']]);
@@ -129,16 +142,6 @@ class Spud
         }
 
         $this->commands->push($command);
-    }
-
-    public function setDoctrineClient(?Connection $dbal): void
-    {
-        $this->dbal = $dbal;
-    }
-
-    public function setGuzzleClient(?Client $client): void
-    {
-        $this->client = $client;
     }
 
     public function loadBindableEventDirectory(string $path, array $excludedEvents = []): void
@@ -234,19 +237,9 @@ class Spud
         return $this->memberRepository;
     }
 
-    public function setMemberRepository(IMemberRepository $repository): void
-    {
-        $this->memberRepository = $repository;
-    }
-
     public function getEventRepository(): IEventRepository
     {
         return $this->eventRepository;
-    }
-
-    public function setEventRepository(IEventRepository $eventRepository): void
-    {
-        $this->eventRepository = $eventRepository;
     }
 
     public function getGuildRepository(): IGuildRepository
@@ -254,22 +247,9 @@ class Spud
         return $this->guildRepository;
     }
 
-    public function setGuildRepository(IGuildRepository $guildRepository): void
-    {
-        $this->guildRepository = $guildRepository;
-        if (!empty($_ENV['LOG_GUILD'])) {
-            $this->logGuild = $this->guildRepository->findById($_ENV['LOG_GUILD']);
-        }
-    }
-
     public function getThreadRepository(): IThreadRepository
     {
         return $this->threadRepository;
-    }
-
-    public function setThreadRepository(IThreadRepository $threadRepository): void
-    {
-        $this->threadRepository = $threadRepository;
     }
 
     /**
@@ -287,32 +267,13 @@ class Spud
         return $this->channelRepository;
     }
 
-    /**
-     * @param IChannelRepository $channelRepository
-     */
-    public function setChannelRepository(IChannelRepository $channelRepository): void
-    {
-        $this->channelRepository = $channelRepository;
-    }
-
     public function getReminderRepository(): IReminderRepository
     {
         return $this->reminderRepository;
-    }
-
-    public function setReminderRepository(IReminderRepository $reminderRepository): void
-    {
-        $this->reminderRepository = $reminderRepository;
     }
 
     public function getDirectoryRepository(): IDirectoryRepository
     {
         return $this->directoryRepository;
     }
-
-    public function setDirectoryRepository(IDirectoryRepository $directoryRepository): void
-    {
-        $this->directoryRepository = $directoryRepository;
-    }
-
 }
