@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Spudbot\Model;
@@ -22,7 +28,7 @@ Event extends IModel
     {
         $event = new self();
 
-        if(array_key_exists('e_id', $row)){
+        if (array_key_exists('e_id', $row)) {
             $event->setId($row['e_id']);
             $event->setGuild(Guild::withDatabaseRow($row));
             $event->setChannelId($row['e_channel_id']);
@@ -33,8 +39,8 @@ Event extends IModel
             $event->setScheduledAt(Carbon::parse($row['e_scheduled_at']));
             $event->setCreatedAt(Carbon::parse($row['e_created_at']));
             $event->setModifiedAt(Carbon::parse($row['e_modified_at']));
-        }else{
-            if(!isset($guild)){
+        } else {
+            if (!isset($guild)) {
                 throw new \InvalidArgumentException('Guild is required when you\'re not using joins.');
             }
             $event->setId($row['id']);
@@ -52,9 +58,22 @@ Event extends IModel
         return $event;
     }
 
-    public function setGuild(Guild $guild): void
+    public static function hydrateWithArray(array $row): self
     {
-        $this->guild = $guild;
+        $event = new self();
+
+        $event->setId($row['external_id']);
+        $event->setGuild(Guild::hydrateWithArray($row['guild']));
+        $event->setChannelId($row['discord_channel_id']);
+        $event->setName($row['name']);
+        $event->setType(EventType::from($row['type']));
+        $event->setSeshId($row['sesh_message_id']);
+        $event->setNativeId($row['native_event_id']);
+        $event->setScheduledAt(Carbon::parse($row['scheduled_at']));
+        $event->setCreatedAt(Carbon::parse($row['created_at']));
+        $event->setModifiedAt(Carbon::parse($row['updated_at']));
+
+        return $event;
     }
 
     public function getGuild(): Guild
@@ -62,10 +81,9 @@ Event extends IModel
         return $this->guild;
     }
 
-
-    public function setChannelId(?string $channelId): void
+    public function setGuild(Guild $guild): void
     {
-        $this->channelId = $channelId;
+        $this->guild = $guild;
     }
 
     public function getChannelId(): string
@@ -73,9 +91,9 @@ Event extends IModel
         return $this->channelId;
     }
 
-    public function setName(string $name): void
+    public function setChannelId(?string $channelId): void
     {
-        $this->name = $name;
+        $this->channelId = $channelId;
     }
 
     public function getName(): string
@@ -83,9 +101,9 @@ Event extends IModel
         return $this->name;
     }
 
-    public function setType(EventType $type): void
+    public function setName(string $name): void
     {
-        $this->type = $type;
+        $this->name = $name;
     }
 
     public function getType(): EventType
@@ -93,9 +111,9 @@ Event extends IModel
         return $this->type;
     }
 
-    public function setSeshId(?string $id): void
+    public function setType(EventType $type): void
     {
-        $this->seshId = $id;
+        $this->type = $type;
     }
 
     public function getSeshId(): ?string
@@ -103,9 +121,9 @@ Event extends IModel
         return $this->seshId ?? null;
     }
 
-    public function setNativeId(?string $id): void
+    public function setSeshId(?string $id): void
     {
-        $this->nativeId = $id;
+        $this->seshId = $id;
     }
 
     public function getNativeId(): ?string
@@ -113,13 +131,18 @@ Event extends IModel
         return $this->nativeId ?? null;
     }
 
-    public function setScheduledAt(Carbon $scheduledAt): void
+    public function setNativeId(?string $id): void
     {
-        $this->scheduledAt = $scheduledAt;
+        $this->nativeId = $id;
     }
 
     public function getScheduledAt(): Carbon
     {
         return $this->scheduledAt;
+    }
+
+    public function setScheduledAt(Carbon $scheduledAt): void
+    {
+        $this->scheduledAt = $scheduledAt;
     }
 }

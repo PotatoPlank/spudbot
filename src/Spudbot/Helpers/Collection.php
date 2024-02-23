@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -16,6 +16,15 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
     public function set(string|int $key, mixed $value): void
     {
         $this->collection[$key] = $value;
+    }
+
+    public function first()
+    {
+        if (empty($this->collection)) {
+            return null;
+        }
+
+        return current($this->collection);
     }
 
     public function get(string|int $key): mixed

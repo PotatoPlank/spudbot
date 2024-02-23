@@ -1,24 +1,24 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
 use Discord\WebSockets\Intents;
-use Doctrine\DBAL\DriverManager;
+use GuzzleHttp\Client;
 use Spudbot\Bindable\Event\Member\MemberBanned;
 use Spudbot\Bindable\Event\Reactions\MessageHasManyReactions;
 use Spudbot\Bindable\Event\Thread\DeletedThread;
 use Spudbot\Bot\Spud;
 use Spudbot\Bot\SpudOptions;
-use Spudbot\Repository\SQL\ChannelRepository;
-use Spudbot\Repository\SQL\DirectoryRepository;
-use Spudbot\Repository\SQL\EventRepository;
-use Spudbot\Repository\SQL\GuildRepository;
-use Spudbot\Repository\SQL\MemberRepository;
-use Spudbot\Repository\SQL\ReminderRepository;
-use Spudbot\Repository\SQL\ThreadRepository;
+use Spudbot\Repository\Api\ChannelRepository;
+use Spudbot\Repository\Api\DirectoryRepository;
+use Spudbot\Repository\Api\EventRepository;
+use Spudbot\Repository\Api\GuildRepository;
+use Spudbot\Repository\Api\MemberRepository;
+use Spudbot\Repository\Api\ReminderRepository;
+use Spudbot\Repository\Api\ThreadRepository;
 
 
 require_once "vendor/autoload.php";
@@ -31,14 +31,14 @@ if (!isset($_ENV['DATABASE_NAME'])) {
     exit('Invalid config, database not detected');
 }
 
-$connectionParams = [
-    'dbname' => $_ENV['DATABASE_NAME'],
-    'user' => $_ENV['DATABASE_USERNAME'],
-    'password' => $_ENV['DATABASE_PASSWORD'],
-    'host' => $_ENV['DATABASE_HOST'],
-    'driver' => $_ENV['DATABASE_DRIVER'],
-];
-$dbal = DriverManager::getConnection($connectionParams);
+$client = new Client([
+    'base_uri' => $_ENV['API_ENDPOINT'],
+    'headers' => [
+        'Authorization' => "Bearer {$_ENV['API_TOKEN']}",
+        'Content-Type' => "application/json",
+        'Accept' => "application/json",
+    ],
+]);
 
 $options = new SpudOptions($_ENV['DISCORD_TOKEN']);
 $options->setIntents(
@@ -48,27 +48,27 @@ $options->shouldLoadAllMembers();
 
 $spud = new Spud($options);
 
-$spud->setDoctrineClient($dbal);
-$spud->setMemberRepository(new MemberRepository($dbal));
-$spud->setEventRepository(new EventRepository($dbal));
-$spud->setGuildRepository(new GuildRepository($dbal));
-$spud->setThreadRepository(new ThreadRepository($dbal));
-$spud->setChannelRepository(new ChannelRepository($dbal));
-$spud->setReminderRepository(new ReminderRepository($dbal));
-$spud->setDirectoryRepository(new DirectoryRepository($dbal));
+$spud->setGuzzleClient($client);
+$spud->setMemberRepository(new MemberRepository($client));
+$spud->setEventRepository(new EventRepository($client));
+$spud->setGuildRepository(new GuildRepository($client));
+$spud->setThreadRepository(new ThreadRepository($client));
+$spud->setChannelRepository(new ChannelRepository($client));
+$spud->setReminderRepository(new ReminderRepository($client));
+$spud->setDirectoryRepository(new DirectoryRepository($client));
 
 $excludedCommands = [
 
 ];
 
-$spud->loadBindableCommandDirectory(__DIR__ . '/src/Spudbot/Bindable/Command');
+//$spud->loadBindableCommandDirectory(__DIR__ . '/src/Spudbot/Bindable/Command');
 
 $excludedEvents = [
     MessageHasManyReactions::class,
     MemberBanned::class,
     DeletedThread::class,
 ];
-$spud->loadBindableEventDirectory(__DIR__ . '/src/Spudbot/Bindable/Event', $excludedEvents);
+//$spud->loadBindableEventDirectory(__DIR__ . '/src/Spudbot/Bindable/Event', $excludedEvents);
 
 
 $spud->run();

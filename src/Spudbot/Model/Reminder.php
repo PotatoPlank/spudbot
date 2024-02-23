@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -52,6 +52,28 @@ class Reminder extends IModel
             $reminder->setGuild($guild);
             $reminder->setCreatedAt(Carbon::parse($row['created_at']));
             $reminder->setModifiedAt(Carbon::parse($row['modified_at']));
+        }
+
+        return $reminder;
+    }
+
+    public static function hydrateWithArray(array $row): self
+    {
+        $reminder = new self();
+
+        $reminder->setId($row['external_id']);
+        $reminder->setDescription($row['description']);
+        $reminder->setMentionableRole($row['mention_role']);
+        $reminder->setScheduledAt(Carbon::parse($row['scheduled_at']));
+        $reminder->setRepeats($row['repeats']);
+        $reminder->setCreatedAt(Carbon::parse($row['created_at']));
+        $reminder->setModifiedAt(Carbon::parse($row['updated_at']));
+
+        if ($row['channel']) {
+            $reminder->setChannel(Channel::hydrateWithArray($row['channel']));
+        }
+        if ($row['guild']) {
+            $reminder->setGuild(Guild::hydrateWithArray($row['guild']));
         }
 
         return $reminder;

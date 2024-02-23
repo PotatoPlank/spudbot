@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -33,6 +33,25 @@ class Directory extends IModel
         $channel->setModifiedAt(Carbon::parse($row['modified_at']));
 
         return $channel;
+    }
+
+    public static function hydrateWithArray(array $row): self
+    {
+        $directory = new self();
+
+        $directory->setId($row['external_id']);
+        $directory->setEmbedId($row['embed_id']);
+        $directory->setCreatedAt(Carbon::parse($row['created_at']));
+        $directory->setModifiedAt(Carbon::parse($row['updated_at']));
+
+        if ($row['directory_channel']) {
+            $directory->setDirectoryChannel($row['directory_channel']);
+        }
+        if ($row['forum_channel']) {
+            $directory->setForumChannel($row['forum_channel']);
+        }
+
+        return $directory;
     }
 
     /**

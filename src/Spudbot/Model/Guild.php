@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -44,6 +44,20 @@ class Guild extends IModel
             $guild->setCreatedAt(Carbon::parse($row['created_at']));
             $guild->setModifiedAt(Carbon::parse($row['modified_at']));
         }
+
+        return $guild;
+    }
+
+    public static function hydrateWithArray(array $row): self
+    {
+        $guild = new self();
+
+        $guild->setId($row['external_id']);
+        $guild->setDiscordId($row['discord_id']);
+        $guild->setOutputChannelId($row['channel_announce_id']);
+        $guild->setOutputThreadId($row['channel_thread_announce_id']);
+        $guild->setCreatedAt(Carbon::parse($row['created_at']));
+        $guild->setModifiedAt(Carbon::parse($row['updated_at']));
 
         return $guild;
     }

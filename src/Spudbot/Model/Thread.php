@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -45,6 +45,26 @@ class Thread extends IModel
             $thread->setTag($row['t_tag']);
             $thread->setCreatedAt(Carbon::parse($row['t_created_at']));
             $thread->setModifiedAt(Carbon::parse($row['t_modified_at']));
+        }
+
+        return $thread;
+    }
+
+    public static function hydrateWithArray(array $row): self
+    {
+        $thread = new self();
+
+        $thread->setId($row['external_id']);
+        $thread->setDiscordId($row['discord_id']);
+        $thread->setTag($row['tag']);
+        $thread->setCreatedAt(Carbon::parse($row['created_at']));
+        $thread->setModifiedAt(Carbon::parse($row['updated_at']));
+
+        if ($row['guild']) {
+            $thread->setGuild(Guild::hydrateWithArray($row['guild']));
+        }
+        if ($row['channel']) {
+            $thread->setChannel(Channel::hydrateWithArray($row['channel']));
         }
 
         return $thread;

@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -10,6 +10,7 @@ namespace Spudbot\Bot;
 use Carbon\Carbon;
 use Discord\Discord;
 use Doctrine\DBAL\Connection;
+use GuzzleHttp\Client;
 use Spudbot\Bindable\Event\OnReadyExecuteBinds;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Exception\BotTerminationException;
@@ -42,6 +43,7 @@ class Spud
     public readonly Environment $twig;
     public readonly Discord $discord;
     public readonly ?Connection $dbal;
+    public readonly ?Client $client;
     /**
      * @var Collection
      * @deprecated v1.2.0 In v2, this will be replaced with an observer
@@ -132,6 +134,11 @@ class Spud
     public function setDoctrineClient(?Connection $dbal): void
     {
         $this->dbal = $dbal;
+    }
+
+    public function setGuzzleClient(?Client $client): void
+    {
+        $this->client = $client;
     }
 
     public function loadBindableEventDirectory(string $path, array $excludedEvents = []): void

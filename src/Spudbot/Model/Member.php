@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -45,6 +45,25 @@ class Member extends IModel
             $member->setVerifiedBy($row['verified_by']);
             $member->setCreatedAt(Carbon::parse($row['created_at']));
             $member->setModifiedAt(Carbon::parse($row['modified_at']));
+        }
+
+        return $member;
+    }
+
+    public static function hydrateWithArray(array $row): self
+    {
+        $member = new self();
+
+        $member->setId($row['external_id']);
+        $member->setDiscordId($row['discord_id']);
+        $member->setTotalComments($row['total_comments']);
+        $member->setUsername($row['username']);
+        $member->setVerifiedBy($row['verified_by']);
+        $member->setCreatedAt(Carbon::parse($row['created_at']));
+        $member->setModifiedAt(Carbon::parse($row['updated_at']));
+
+        if (isset($row['guild'])) {
+            $member->setGuild(Guild::hydrateWithArray($row['guild']));
         }
 
         return $member;

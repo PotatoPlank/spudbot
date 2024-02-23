@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -16,6 +16,22 @@ class Channel extends IModel
 {
     private Guild $guild;
     private string $discordId;
+
+    public static function hydrateWithArray(array $row): self
+    {
+        $channel = new self();
+
+        $channel->setId($row['external_id']);
+        $channel->setDiscordId($row['discord_id']);
+        $channel->setCreatedAt(Carbon::parse($row['created_at']));
+        $channel->setModifiedAt(Carbon::parse($row['updated_at']));
+
+        if (isset($row['guild'])) {
+            $channel->setGuild(Guild::hydrateWithArray($row['guild']));
+        }
+
+        return $channel;
+    }
 
     public static function withDatabaseRow(array $row, ?Guild $guild = null): self
     {
