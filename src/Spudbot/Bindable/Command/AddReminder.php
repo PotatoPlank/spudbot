@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -62,12 +62,12 @@ class AddReminder extends IBindableCommand
             }
 
             try {
-                $channel = $this->spud->getChannelRepository()->findByPart($interaction->channel);
+                $channel = $this->spud->channelRepository->findByPart($interaction->channel);
             } catch (\OutOfBoundsException $exception) {
                 $channel = new Channel();
-                $channel->setGuild($this->spud->getGuildRepository()->findByPart($interaction->guild));
+                $channel->setGuild($this->spud->guildRepository->findByPart($interaction->guild));
                 $channel->setDiscordId($interaction->channel->id);
-                $this->spud->getChannelRepository()->save($channel);
+                $this->spud->channelRepository->save($channel);
             }
 
             $guildTimeZone = $channel->getGuild()->getTimeZone();
@@ -79,7 +79,7 @@ class AddReminder extends IBindableCommand
             $reminder->setRepeats($repeats);
             $reminder->setChannel($channel);
 
-            $this->spud->getReminderRepository()->save($reminder);
+            $this->spud->reminderRepository->save($reminder);
 
             $message = "The reminder will be sent out at {$reminder->getLocalScheduledAt()->toDayDateTimeString()}";
             if (!empty($reminder->getRepeats())) {

@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Spudbot\Bindable\Event\ScheduledEvent;
 
@@ -19,20 +24,19 @@ class RemovedUserFromNativeEvent extends IBindableEvent
 
     public function getListener(): callable
     {
-        return function ($event){
-            $guildRepository = $this->spud->getGuildRepository();
-            $eventRepository = $this->spud->getEventRepository();
-            $memberRepository = $this->spud->getMemberRepository();
+        return function ($event) {
+            $guildRepository = $this->spud->guildRepository;
+            $eventRepository = $this->spud->eventRepository;
+            $memberRepository = $this->spud->memberRepository;
             $builder = $this->spud->getSimpleResponseBuilder();
             $guildPart = $this->discord->guilds->get('id', $event->guild_id);
             $eventPart = $guildPart->guild_scheduled_events->get('id', $event->guild_scheduled_event_id);
 
-            if($eventPart && $eventPart->creator->id !== '616754792965865495'){
+            if ($eventPart && $eventPart->creator->id !== '616754792965865495') {
                 $guild = $guildRepository->findByPart($guildPart);
-                try{
+                try {
                     $eventModel = $eventRepository->findByPart($eventPart);
-                }catch(\OutOfBoundsException $exception){
-
+                } catch (\OutOfBoundsException $exception) {
                     $eventModel = new \Spudbot\Model\Event();
                     $eventModel->setNativeId($eventPart->id);
                     $eventModel->setType(EventType::Native);
@@ -43,16 +47,16 @@ class RemovedUserFromNativeEvent extends IBindableEvent
                     $eventRepository->save($eventModel);
                 }
                 $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
-                if($guild->isOutputLocationThread()){
+                if ($guild->isOutputLocationThread()) {
                     $output = $output->threads->get('id', $guild->getOutputThreadId());
                 }
 
                 $memberPart = $guildPart->members->get('id', $event->user_id);
                 $member = $memberRepository->findByPart($memberPart);
-                try{
+                try {
                     $eventAttendance = $eventRepository->getAttendanceByMemberAndEvent($member, $eventModel);
                     $eventAttendance->setStatus('No');
-                }catch (\Exception $exception){
+                } catch (\Exception $exception) {
                     $eventAttendance = new EventAttendance();
                     $eventAttendance->setEvent($eventModel);
                     $eventAttendance->setMember($member);
@@ -60,15 +64,16 @@ class RemovedUserFromNativeEvent extends IBindableEvent
                 }
 
                 $noShowDateTime = $eventPart->scheduled_start_time->modify($_ENV['EVENT_NO_SHOW_WINDOW']);
-                if($noShowDateTime->lte(Carbon::now()))
-                {
+                if ($noShowDateTime->lte(Carbon::now())) {
                     $eventAttendance->wasNoShow(true);
                 }
 
                 $memberRepository->saveMemberEventAttendance($eventAttendance);
 
                 $builder->setTitle('Native Event Attendee Removed');
-                $builder->setDescription("<@{$member->getDiscordId()}> removed their RSVP to {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}");
+                $builder->setDescription(
+                    "<@{$member->getDiscordId()}> removed their RSVP to {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}"
+                );
                 $output->sendMessage($builder->getEmbeddedMessage());
             }
         };

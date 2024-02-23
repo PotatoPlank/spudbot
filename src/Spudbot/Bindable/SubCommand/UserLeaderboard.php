@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 declare(strict_types=1);
 
@@ -23,8 +28,8 @@ class UserLeaderboard extends ISubCommand
             $limit = $this->max;
         }
 
-        $guild = $this->spud->getGuildRepository()->findByPart($interaction->guild);
-        $members = $this->spud->getMemberRepository()
+        $guild = $this->spud->guildRepository->findByPart($interaction->guild);
+        $members = $this->spud->memberRepository
             ->getTopCommentersByGuild($guild, $limit);
 
         $title = 'User Leaderboard';

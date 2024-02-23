@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Spudbot\Bindable\Event\ScheduledEvent;
 
@@ -17,21 +22,21 @@ class AddedUserToNativeSeshEvent extends IBindableEvent
 
     public function getListener(): callable
     {
-        return function ($event)
-        {
-            $guildRepository = $this->spud->getGuildRepository();
+        return function ($event) {
+            $guildRepository = $this->spud->guildRepository;
             $builder = $this->spud->getSimpleResponseBuilder();
             $builder->setTitle('Native Event RSVP Notification');
             $guildPart = $this->discord->guilds->get('id', $event->guild_id);
             $eventPart = $guildPart->guild_scheduled_events->get('id', $event->guild_scheduled_event_id);
 
-            if($eventPart && $eventPart->creator->id === '616754792965865495')
-            {
-                $this->discord->getLogger()->info("A user attempted to RSVP to a native event instead of the Sesh event.");
+            if ($eventPart && $eventPart->creator->id === '616754792965865495') {
+                $this->discord->getLogger()->info(
+                    "A user attempted to RSVP to a native event instead of the Sesh event."
+                );
 
                 $guild = $guildRepository->findByPart($guildPart);
                 $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
-                if($guild->isOutputLocationThread()){
+                if ($guild->isOutputLocationThread()) {
                     $output = $output->threads->get('id', $guild->getOutputThreadId());
                 }
 
@@ -39,14 +44,14 @@ class AddedUserToNativeSeshEvent extends IBindableEvent
                 $builder->setDescription($message);
                 $output->sendMessage($builder->getEmbeddedMessage());
 
-                $guildPart->members->fetch($event->user_id)->done(function (Member $member) use ($eventPart){
+                $guildPart->members->fetch($event->user_id)->done(function (Member $member) use ($eventPart) {
                     $context = [
                         'username' => $member->user->username,
                         'eventName' => $eventPart->name,
                         'guildName' => $member->guild->name,
                         'eventUrl' => $eventPart->entity_metadata->location,
                     ];
-                    $message = $this->spud->getTwig()->render('dm/native_event.twig', $context);
+                    $message = $this->spud->twig->render('dm/native_event.twig', $context);
                     $member->sendMessage($message);
                 });
             }

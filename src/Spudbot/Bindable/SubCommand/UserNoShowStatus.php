@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Spudbot\Bindable\SubCommand;
@@ -12,14 +18,15 @@ use Spudbot\Repository\SQL\MemberRepository;
 class UserNoShowStatus extends ISubCommand
 {
     protected string $subCommand = 'no_show';
+
     public function execute(?Interaction $interaction): void
     {
         /**
          * @var EventRepository $eventRepository
          * @var MemberRepository $memberRepository
          */
-        $eventRepository = $this->spud->getEventRepository();
-        $memberRepository = $this->spud->getMemberRepository();
+        $eventRepository = $this->spud->eventRepository;
+        $memberRepository = $this->spud->memberRepository;
         $builder = $this->spud->getSimpleResponseBuilder();
         $title = 'Event No Show';
 
@@ -30,7 +37,7 @@ class UserNoShowStatus extends ISubCommand
 
         $member = $memberRepository->findByPart($memberPart);
 
-        try{
+        try {
             $event = $eventRepository->findById($eventId);
             $eventAttendance = $eventRepository->getAttendanceByMemberAndEvent($member, $event);
 
@@ -39,7 +46,7 @@ class UserNoShowStatus extends ISubCommand
             $memberRepository->saveMemberEventAttendance($eventAttendance);
 
             $message = "<@{$member->getDiscordId()}>'s status was updated.";
-        }catch(\OutOfBoundsException $exception){
+        } catch (\OutOfBoundsException $exception) {
             $message = 'An event with that id and user could not be found.';
         }
 

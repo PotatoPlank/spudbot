@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -48,7 +48,7 @@ class Verify extends IBindableCommand
                 return;
             }
 
-            $guild = $this->spud->getGuildRepository()->findByPart($interaction->guild);
+            $guild = $this->spud->guildRepository->findByPart($interaction->guild);
             $output = $interaction->guild->channels->get('id', $guild->getOutputChannelId());
             if ($guild->isOutputLocationThread()) {
                 $output = $output->threads->get('id', $guild->getOutputThreadId());
@@ -66,12 +66,12 @@ class Verify extends IBindableCommand
                 $builder->setDescription($this->spud->twig->render('user/verification.twig', $context));
 
 
-                $verifyingMember = $this->spud->getMemberRepository()->findByPart($interaction->member);
+                $verifyingMember = $this->spud->memberRepository->findByPart($interaction->member);
                 try {
-                    $verifiedMember = $this->spud->getMemberRepository()->findByPart($memberToBeVerified);
+                    $verifiedMember = $this->spud->memberRepository->findByPart($memberToBeVerified);
                     $verifiedMember->setVerifiedBy($verifyingMember->getId());
 
-                    $this->spud->getMemberRepository()->save($verifiedMember);
+                    $this->spud->memberRepository->save($verifiedMember);
                 } catch (\OutOfBoundsException $exception) {
                     $builder->setDescription(
                         "Unable to verify <@{$memberToBeVerified->id}>, they haven't made any comments."

@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Spudbot\Bindable\SubCommand;
@@ -19,7 +25,7 @@ class UserEventReputation extends ISubCommand
         /**
          * @var MemberRepository $repository
          */
-        $repository = $this->spud->getMemberRepository();
+        $repository = $this->spud->memberRepository;
         $builder = $this->spud->getSimpleResponseBuilder();
         $builder->setTitle("Event Attendance");
         $userId = $this->options['user']->value;
@@ -29,18 +35,17 @@ class UserEventReputation extends ISubCommand
         $eventsAttended = $repository->getEventAttendance($member);
         $totalEvents = count($eventsAttended);
         $totalAttended = 0;
-        if($totalEvents > 0)
-        {
+        if ($totalEvents > 0) {
             /**
              * @var EventAttendance $event
              */
-            foreach ($eventsAttended as $event)
-            {
-                if($event->getEvent()->getScheduledAt()->gt(Carbon::now()))
-                {
+            foreach ($eventsAttended as $event) {
+                if ($event->getEvent()->getScheduledAt()->gt(Carbon::now())) {
                     $totalEvents--;
-                }else if(!$event->getNoShowStatus()){
-                    $totalAttended++;
+                } else {
+                    if (!$event->getNoShowStatus()) {
+                        $totalAttended++;
+                    }
                 }
             }
 
@@ -51,7 +56,7 @@ class UserEventReputation extends ISubCommand
                 'eventsAttended' => $totalAttended,
                 'eventsInterested' => $totalEvents,
             ];
-            $message = $this->spud->getTwig()->render('user/event_reputation.twig', $context);
+            $message = $this->spud->twig->render('user/event_reputation.twig', $context);
 
             $builder->setDescription($message);
         } else {

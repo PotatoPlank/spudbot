@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -29,8 +29,8 @@ class ApplyMemberRoleUpgrades extends IBindableEvent
             if ($message->member && !$message->member->user->bot && $message->member->joined_at instanceof Carbon && $message->guild_id == '1114365923625816155') {
                 $this->discord->getLogger()
                     ->info("Checking to upgrade the membership of {$message->member->displayname}");
-                $memberRepository = $this->spud->getMemberRepository();
-                $guildRepository = $this->spud->getGuildRepository();
+                $memberRepository = $this->spud->memberRepository;
+                $guildRepository = $this->spud->guildRepository;
                 $guild = $guildRepository->findByPart($message->member->guild);
                 $output = $message->guild->channels->get('id', $guild->getOutputChannelId());
                 if ($guild->isOutputLocationThread()) {

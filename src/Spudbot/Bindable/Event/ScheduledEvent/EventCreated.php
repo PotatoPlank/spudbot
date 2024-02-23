@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -23,8 +23,8 @@ class EventCreated extends IBindableEvent
     public function getListener(): callable
     {
         return function ($event) {
-            $eventRepository = $this->spud->getEventRepository();
-            $guildRepository = $this->spud->getGuildRepository();
+            $eventRepository = $this->spud->eventRepository;
+            $guildRepository = $this->spud->guildRepository;
 
             $guild = $this->discord->guilds->get('id', $event->guild_id);
             if ($guild) {

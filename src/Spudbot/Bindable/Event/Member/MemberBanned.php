@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -38,7 +38,7 @@ class MemberBanned extends IBindableEvent
                             'reason' => $ban->reason ?? 'N/A',
                             'timestamp' => Carbon::now()->timestamp,
                         ];
-                        $message = $this->spud->getTwig()->render('ban_alert.twig', $context);
+                        $message = $this->spud->twig->render('ban_alert.twig', $context);
 
                         $builder->setTitle('Member Banned');
                         $builder->setDescription($message);

@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -24,7 +24,7 @@ class CheckReminders extends IBindableEvent
     public function getListener(): callable
     {
         return function () {
-            $reminders = $this->spud->getReminderRepository()->findElapsed();
+            $reminders = $this->spud->reminderRepository->findElapsed();
             if (!$reminders->empty()) {
                 $builder = $this->spud->getSimpleResponseBuilder();
                 $builder->setTitle('Reminder');
@@ -48,9 +48,9 @@ class CheckReminders extends IBindableEvent
                                             $interval
                                         );
                                         $reminder->setScheduledAt($nextOccurrence);
-                                        $this->spud->getReminderRepository()->save($reminder);
+                                        $this->spud->reminderRepository->save($reminder);
                                     } else {
-                                        $this->spud->getReminderRepository()->remove($reminder);
+                                        $this->spud->reminderRepository->remove($reminder);
                                     }
                                 }
                             );

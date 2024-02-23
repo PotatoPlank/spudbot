@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -26,21 +26,21 @@ class LogThreadActivity extends IBindableEvent
     {
         return function (Message $message) {
             if ($message->thread) {
-                $guild = $this->spud->getGuildRepository()
+                $guild = $this->spud->guildRepository
                     ->findByPart($message->guild);
 
                 try {
-                    $channel = $this->spud->getChannelRepository()
+                    $channel = $this->spud->channelRepository
                         ->findByPart($message->thread->parent);
                 } catch (\OutOfBoundsException $exception) {
                     $channel = new Channel();
                     $channel->setDiscordId($message->thread->parent->id);
                     $channel->setGuild($guild);
-                    $this->spud->getChannelRepository()->save($channel);
+                    $this->spud->channelRepository->save($channel);
                 }
 
                 try {
-                    $thread = $this->spud->getThreadRepository()
+                    $thread = $this->spud->threadRepository
                         ->findByPart($message->thread);
                 } catch (\OutOfBoundsException $exception) {
                     $thread = new Thread();
@@ -48,7 +48,7 @@ class LogThreadActivity extends IBindableEvent
                     $thread->setGuild($guild);
                     $thread->setChannel($channel);
                 }
-                $this->spud->getThreadRepository()->save($thread);
+                $this->spud->threadRepository->save($thread);
             }
         };
     }

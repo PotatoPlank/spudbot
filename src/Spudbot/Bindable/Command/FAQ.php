@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Spudbot\Bindable\Command;
 
@@ -15,36 +20,19 @@ class FAQ extends IBindableCommand
     protected string $description = 'A list of frequently asked questions.';
     private array $templates = [];
 
-    private function loadTemplates(): void
-    {
-        if(empty($this->templates)){
-            $templatePaths = $this->spud->getTwig()->getLoader()->getPaths();
-            if(empty($templatePaths) || !isset($templatePaths[0])){
-                Throw New RuntimeException('Unable to locate a templating path used with Twig');
-            }
-            $faqPath = realpath($templatePaths[0]) . '/faq/';
-
-            $files = scandir($faqPath);
-            foreach($files as $file){
-                $path = $faqPath . $file;
-                $name = pathinfo($file, PATHINFO_FILENAME);
-                if($file && $file !== '..' && $file !== '.' && is_file($path)){
-                    $this->templates[$name] = $name;
-                }
-            }
-        }
-    }
-
     public function getListener(): callable
     {
         $this->loadTemplates();
-        return function (Interaction $interaction){
-            $this->observer->setDefaultListener(function (Interaction $interaction){
+        return function (Interaction $interaction) {
+            $this->observer->setDefaultListener(function (Interaction $interaction) {
                 $builder = $this->spud->getSimpleResponseBuilder();
                 $message = 'A related question resource was not found.';
-                foreach($this->templates as $name => $template){
-                    if($interaction->data->options->isset($name)){
-                        $message = $this->spud->getTwig()->render("faq/{$template}.twig", ['interaction' => $interaction]);
+                foreach ($this->templates as $name => $template) {
+                    if ($interaction->data->options->isset($name)) {
+                        $message = $this->spud->twig->render(
+                            "faq/{$template}.twig",
+                            ['interaction' => $interaction]
+                        );
                         break;
                     }
                 }
@@ -57,16 +45,36 @@ class FAQ extends IBindableCommand
         };
     }
 
+    private function loadTemplates(): void
+    {
+        if (empty($this->templates)) {
+            $templatePaths = $this->spud->twig->getLoader()->getPaths();
+            if (empty($templatePaths) || !isset($templatePaths[0])) {
+                throw new RuntimeException('Unable to locate a templating path used with Twig');
+            }
+            $faqPath = realpath($templatePaths[0]) . '/faq/';
+
+            $files = scandir($faqPath);
+            foreach ($files as $file) {
+                $path = $faqPath . $file;
+                $name = pathinfo($file, PATHINFO_FILENAME);
+                if ($file && $file !== '..' && $file !== '.' && is_file($path)) {
+                    $this->templates[$name] = $name;
+                }
+            }
+        }
+    }
+
     public function getCommand(): Command
     {
         $this->loadTemplates();
         $command = CommandBuilder::new();
         $command->setName($this->getName());
         $command->setDescription($this->getDescription());
-        foreach($this->templates as $name => $path){
+        foreach ($this->templates as $name => $path) {
             $subCommand = new Option($this->discord);
             $subCommand->setName($name);
-            $subCommand->setDescription($this->spud->getTwig()->render("faq_description/{$name}.twig"));
+            $subCommand->setDescription($this->spud->twig->render("faq_description/{$name}.twig"));
             $subCommand->setType(Option::SUB_COMMAND);
             $command->addOption($subCommand);
         }

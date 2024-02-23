@@ -28,7 +28,7 @@ $builder->addDefinitions(__DIR__ . '/config/bot.php');
 $container = $builder->build();
 
 $spud = $container->get(Spud::class);
-var_dump($spud->memberRepository);
+
 exit;
 
 $excludedCommands = [

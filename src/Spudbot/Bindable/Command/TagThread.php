@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -38,20 +38,20 @@ class TagThread extends IBindableCommand
             $isOwner = isset($interaction->channel->owner_id) && $interaction->channel->owner_id === $interaction->member->id;
             $isMod = $interaction->member->getPermissions()->manage_messages;
             if ($channelPart && ($isOwner || $isMod)) {
-                $guild = $this->spud->getGuildRepository()->findByPart($interaction->guild);
+                $guild = $this->spud->guildRepository->findByPart($interaction->guild);
                 try {
-                    $channel = $this->spud->getChannelRepository()
+                    $channel = $this->spud->channelRepository
                         ->findByDiscordId($channelPart->id, $channelPart->guild_id);
                 } catch (\OutOfBoundsException $exception) {
                     $channel = new \Spudbot\Model\Channel();
                     $channel->setGuild($guild);
                     $channel->setDiscordId($channelPart->id);
-                    $this->spud->getChannelRepository()
+                    $this->spud->channelRepository
                         ->save($channel);
                 }
 
                 try {
-                    $thread = $this->spud->getThreadRepository()
+                    $thread = $this->spud->threadRepository
                         ->findByDiscordId($threadId, $interaction->guild->id);
                     $thread->setTag($tag);
                 } catch (\OutOfBoundsException $exception) {
@@ -62,19 +62,19 @@ class TagThread extends IBindableCommand
                     $thread->setDiscordId($interaction->channel);
                 }
 
-                $this->spud->getThreadRepository()
+                $this->spud->threadRepository
                     ->save($thread);
                 $builder->setDescription("Your tag {$tag} was applied.");
 
                 try {
-                    $directory = $this->spud->getDirectoryRepository()
+                    $directory = $this->spud->directoryRepository
                         ->findByForumChannel($channel);
 
                     $forumDirectoryPart = $channelPart->guild->channels
                         ->get('id', $directory->getDirectoryChannel()->getDiscordId());
 
                     if ($forumDirectoryPart) {
-                        $directoryMessage = $this->spud->getDirectoryRepository()
+                        $directoryMessage = $this->spud->directoryRepository
                             ->getEmbedContentFromPart($channelPart);
 
                         $embed = $this->spud->getSimpleResponseBuilder();
@@ -91,7 +91,7 @@ class TagThread extends IBindableCommand
                                     function (Message $message) use ($directory) {
                                         $directory->setEmbedId($message->id);
 
-                                        $this->spud->getDirectoryRepository()
+                                        $this->spud->directoryRepository
                                             ->save($directory);
                                     }
                                 );

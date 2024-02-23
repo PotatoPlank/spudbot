@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -27,7 +27,7 @@ class CountMemberComments extends IBindableEvent
             $isBot = isset($message->member->user->bot) && $message->member->user->bot;
             if ($message->member && !$isBot) {
                 $username = $message->member->nick ?? $message->member->displayname;
-                $memberRepository = $this->spud->getMemberRepository();
+                $memberRepository = $this->spud->memberRepository;
 
                 try {
                     $member = $memberRepository->findByPart($message->member);
@@ -35,14 +35,14 @@ class CountMemberComments extends IBindableEvent
                     $member->setUsername($username);
                 } catch (\OutOfBoundsException) {
                     $member = new Member();
-                    $member->setGuild($this->spud->getGuildRepository()->findByPart($message->guild));
+                    $member->setGuild($this->spud->guildRepository->findByPart($message->guild));
                     $member->setDiscordId($message->member->id);
                     $member->setTotalComments(1);
                     $member->setUsername($username);
                 }
                 $memberRepository->save($member);
             } elseif ($isBot) {
-                $memberRepository = $this->spud->getMemberRepository();
+                $memberRepository = $this->spud->memberRepository;
                 try {
                     $member = $memberRepository->findByPart($message->member);
 

@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -27,8 +27,8 @@ class DeletedThread extends IBindableEvent
             // See SPUDBOT-23
             return;
             try {
-                $thread = $this->spud->getThreadRepository()->findByPart($threadPart);
-                $this->spud->getThreadRepository()->remove($thread);
+                $thread = $this->spud->threadRepository > findByPart($threadPart);
+                $this->spud->threadRepository->remove($thread);
             } catch (\Exception $exception) {
                 /**
                  * Already deleted
@@ -37,7 +37,7 @@ class DeletedThread extends IBindableEvent
 
             if ($threadPart) {
                 try {
-                    $forumChannel = $this->spud->getChannelRepository()
+                    $forumChannel = $this->spud->channelRepository
                         ->findByPart($threadPart->parent);
                 } catch (\OutOfBoundsException $exception) {
                     /**
@@ -48,14 +48,14 @@ class DeletedThread extends IBindableEvent
 
 
                 try {
-                    $directory = $this->spud->getDirectoryRepository()
+                    $directory = $this->spud->directoryRepository
                         ->findByForumChannel($forumChannel);
 
                     $forumDirectoryPart = $threadPart->guild->channels
                         ->get('id', $directory->getDirectoryChannel()->getDiscordId());
 
                     if ($forumDirectoryPart) {
-                        $directoryMessage = $this->spud->getDirectoryRepository()
+                        $directoryMessage = $this->spud->directoryRepository
                             ->getEmbedContentFromPart($threadPart->parent);
 
                         $embed = $this->spud->getSimpleResponseBuilder();
@@ -72,7 +72,7 @@ class DeletedThread extends IBindableEvent
                                     function (Message $message) use ($directory) {
                                         $directory->setEmbedId($message->id);
 
-                                        $this->spud->getDirectoryRepository()
+                                        $this->spud->directoryRepository
                                             ->save($directory);
                                     }
                                 );

@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -22,7 +22,7 @@ class UserInformation extends ISubCommand
         /**
          * @var MemberRepository $memberRepository
          */
-        $memberRepository = $this->spud->getMemberRepository();
+        $memberRepository = $this->spud->memberRepository;
         $title = 'User Information';
         $builder = $this->spud->getSimpleResponseBuilder();
         $userId = $this->options['user']->value;
@@ -62,7 +62,7 @@ class UserInformation extends ISubCommand
         ];
 
         $builder->setTitle($title);
-        $builder->setDescription($this->spud->getTwig()->render('user/information.twig', $context));
+        $builder->setDescription($this->spud->twig->render('user/information.twig', $context));
 
         $interaction->respondWithMessage($builder->getEmbeddedMessage());
     }

@@ -18,13 +18,6 @@ use Spudbot\Exception\BotTerminationException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IBindableCommand;
 use Spudbot\Interface\IBindableEvent;
-use Spudbot\Interface\IChannelRepository;
-use Spudbot\Interface\IDirectoryRepository;
-use Spudbot\Interface\IEventRepository;
-use Spudbot\Interface\IGuildRepository;
-use Spudbot\Interface\IMemberRepository;
-use Spudbot\Interface\IReminderRepository;
-use Spudbot\Interface\IThreadRepository;
 use Spudbot\Model\Guild;
 use Spudbot\Repository\Api\ChannelRepository;
 use Spudbot\Repository\Api\DirectoryRepository;
@@ -232,48 +225,4 @@ class Spud
         return new EmbeddedResponse($this->discord);
     }
 
-    public function getMemberRepository(): IMemberRepository
-    {
-        return $this->memberRepository;
-    }
-
-    public function getEventRepository(): IEventRepository
-    {
-        return $this->eventRepository;
-    }
-
-    public function getGuildRepository(): IGuildRepository
-    {
-        return $this->guildRepository;
-    }
-
-    public function getThreadRepository(): IThreadRepository
-    {
-        return $this->threadRepository;
-    }
-
-    /**
-     * @return Environment
-     * @deprecated v1.2.0 Removing accessors and mutators in favor of readonly properties
-     * @see Spud::$twig
-     */
-    public function getTwig(): Environment
-    {
-        return $this->twig;
-    }
-
-    public function getChannelRepository(): IChannelRepository
-    {
-        return $this->channelRepository;
-    }
-
-    public function getReminderRepository(): IReminderRepository
-    {
-        return $this->reminderRepository;
-    }
-
-    public function getDirectoryRepository(): IDirectoryRepository
-    {
-        return $this->directoryRepository;
-    }
 }

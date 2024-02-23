@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -24,7 +24,7 @@ class GenerateDirectory extends IBindableCommand
     public function getListener(): callable
     {
         return function (Interaction $interaction) {
-            $directoryRepository = $this->spud->getDirectoryRepository();
+            $directoryRepository = $this->spud->directoryRepository;
             $response = $this->spud->getSimpleResponseBuilder();
             $response->setTitle('Forum Directory');
 
@@ -36,28 +36,28 @@ class GenerateDirectory extends IBindableCommand
 
             if ($formChannelPart) {
                 try {
-                    $forumChannel = $this->spud->getChannelRepository()
+                    $forumChannel = $this->spud->channelRepository
                         ->findByPart($formChannelPart);
                 } catch (\OutOfBoundsException $exception) {
                     $this->discord->getLogger()->info($exception->getMessage());
-                    $guild = $this->spud->getGuildRepository()
+                    $guild = $this->spud->guildRepository
                         ->findByPart($interaction->guild);
 
                     $forumChannel = new Channel();
                     $forumChannel->setGuild($guild);
                     $forumChannel->setDiscordId($formChannelPart->id);
 
-                    $this->spud->getChannelRepository()
+                    $this->spud->channelRepository
                         ->save($forumChannel);
                 }
 
                 try {
-                    $directoryChannel = $this->spud->getChannelRepository()
+                    $directoryChannel = $this->spud->channelRepository
                         ->findByPart($directoryChannelPart);
                 } catch (\OutOfBoundsException $exception) {
                     $this->discord->getLogger()->info($exception->getMessage());
                     if (!isset($guild)) {
-                        $guild = $this->spud->getGuildRepository()
+                        $guild = $this->spud->guildRepository
                             ->findByPart($interaction->guild);
                     }
 
@@ -65,7 +65,7 @@ class GenerateDirectory extends IBindableCommand
                     $directoryChannel->setGuild($guild);
                     $directoryChannel->setDiscordId($directoryChannelPart->id);
 
-                    $this->spud->getChannelRepository()
+                    $this->spud->channelRepository
                         ->save($directoryChannel);
                 }
 
@@ -91,7 +91,7 @@ class GenerateDirectory extends IBindableCommand
                                 function (Message $message) use ($directory) {
                                     $directory->setEmbedId($message->id);
 
-                                    $this->spud->getDirectoryRepository()
+                                    $this->spud->directoryRepository
                                         ->save($directory);
                                 }
                             );
@@ -116,7 +116,7 @@ class GenerateDirectory extends IBindableCommand
                         ->done(function (Message $message) use ($directory) {
                             $directory->setEmbedId($message->id);
 
-                            $this->spud->getDirectoryRepository()
+                            $this->spud->directoryRepository
                                 ->save($directory);
                         }
                         );
