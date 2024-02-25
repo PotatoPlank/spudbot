@@ -10,8 +10,6 @@ namespace Spudbot\Bot;
 use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\Discord;
-use Doctrine\DBAL\Connection;
-use GuzzleHttp\Client;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Exception\BotTerminationException;
 use Spudbot\Model\Guild;
@@ -34,13 +32,11 @@ class Spud
     public const MAJOR = 2;
     public const MINOR = 0;
     public const REVISION = 0;
-    public static $buildNumber = null;
+    public static ?string $buildNumber = null;
     public readonly ?Guild $logGuild;
     #[Inject]
     public readonly Environment $twig;
     public readonly Discord $discord;
-    public readonly ?Connection $dbal;
-    public readonly ?Client $client;
     #[Inject]
     public readonly MemberRepository $memberRepository;
     #[Inject]
