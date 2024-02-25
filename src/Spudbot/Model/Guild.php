@@ -11,6 +11,8 @@ namespace Spudbot\Model;
 
 use Carbon\Carbon;
 use Carbon\CarbonTimeZone;
+use Discord\Discord;
+use Discord\Parts\Channel\Channel;
 use Spudbot\Interface\IModel;
 
 class Guild extends IModel
@@ -60,6 +62,39 @@ class Guild extends IModel
         $guild->setModifiedAt(Carbon::parse($row['updated_at']));
 
         return $guild;
+    }
+
+    public static function updateMemberCount(\Discord\Parts\Guild\Guild $guild, Discord $discord): void
+    {
+        $categoryName = 'Member Count 📈';
+
+        $memberCount = $guild->member_count;
+        $category = $guild->channels->get('name', $categoryName);
+        if (!$category) {
+            $category = new Channel($discord);
+            $category->type = Channel::TYPE_CATEGORY;
+            $category->name = $categoryName;
+            $guild->channels->save($category);
+        }
+        $channel = $guild->channels->get('parent_id', $category->id);
+        if (!$channel) {
+            $everyoneRole = $guild->roles->get('name', '@everyone');
+            $channel = new Channel($discord);
+            $channel->type = Channel::TYPE_VOICE;
+            $channel->name = "Member Count: {$memberCount}";
+            if ($everyoneRole) {
+                $channel->setPermissions($everyoneRole, [
+                    'view_channel',
+                ], [
+                    'connect',
+                ]);
+            }
+            $channel->parent_id = $category->id;
+        } else {
+            $channel->name = "Member Count: {$memberCount}";
+        }
+
+        $guild->channels->save($channel);
     }
 
     public function getDiscordId(): string

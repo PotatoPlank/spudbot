@@ -6,10 +6,12 @@
  */
 
 use DI\ContainerBuilder;
-use Spudbot\Bindable\Event\Member\MemberBanned;
-use Spudbot\Bindable\Event\Reactions\MessageHasManyReactions;
-use Spudbot\Bindable\Event\Thread\DeletedThread;
 use Spudbot\Bot\Spud;
+use Spudbot\Commands\About;
+use Spudbot\Events\Member\MemberBanned;
+use Spudbot\Events\Reactions\MessageHasManyReactions;
+use Spudbot\Events\Ready\ReadyMessage;
+use Spudbot\Events\Thread\DeletedThread;
 
 
 require_once "vendor/autoload.php";
@@ -29,8 +31,6 @@ $container = $builder->build();
 
 $spud = $container->get(Spud::class);
 
-exit;
-
 $excludedCommands = [
 
 ];
@@ -44,5 +44,8 @@ $excludedEvents = [
 ];
 //$spud->loadBindableEventDirectory(__DIR__ . '/src/Spudbot/Bindable/Event', $excludedEvents);
 
+$spud->loadBindableEvent(ReadyMessage::class);
+$spud->loadBindableCommand(About::class);
 
-//$spud->run();
+
+$spud->run();

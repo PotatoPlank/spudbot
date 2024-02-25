@@ -12,12 +12,8 @@ use DI\Attribute\Inject;
 use Discord\Discord;
 use Doctrine\DBAL\Connection;
 use GuzzleHttp\Client;
-use Spudbot\Bindable\Event\OnReadyExecuteBinds;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Exception\BotTerminationException;
-use Spudbot\Helpers\Collection;
-use Spudbot\Interface\IBindableCommand;
-use Spudbot\Interface\IBindableEvent;
 use Spudbot\Model\Guild;
 use Spudbot\Repository\Api\ChannelRepository;
 use Spudbot\Repository\Api\DirectoryRepository;
@@ -35,26 +31,16 @@ use function Sentry\init;
 
 class Spud
 {
-    public const MAJOR = 1;
-    public const MINOR = 2;
-    public const REVISION = 9;
-    public const BUILD = null;
+    public const MAJOR = 2;
+    public const MINOR = 0;
+    public const REVISION = 0;
+    public static $buildNumber = null;
     public readonly ?Guild $logGuild;
     #[Inject]
     public readonly Environment $twig;
     public readonly Discord $discord;
     public readonly ?Connection $dbal;
     public readonly ?Client $client;
-    /**
-     * @var Collection
-     * @deprecated v1.2.0 In v2, this will be replaced with an observer
-     */
-    public Collection $events;
-    /**
-     * @var Collection
-     * @deprecated v1.2.0 In v2, this will be replaced with an observer
-     */
-    public Collection $commands;
     #[Inject]
     public readonly MemberRepository $memberRepository;
     #[Inject]
@@ -69,13 +55,19 @@ class Spud
     public readonly ReminderRepository $reminderRepository;
     #[Inject]
     public readonly DirectoryRepository $directoryRepository;
+    #[Inject]
+    public readonly CommandObserver $commandObserver;
+    #[Inject]
+    public readonly EventObserver $eventObserver;
 
     public function __construct(SpudOptions $options)
     {
         date_default_timezone_set('UTC');
         $this->discord = new Discord($options->getOptions());
-        $this->events = new Collection();
-        $this->commands = new Collection();
+
+        $buildFile = dirname(__DIR__, 3) . '/build.json';
+        $buildDetails = json_decode(file_get_contents($buildFile), false, 512, JSON_THROW_ON_ERROR);
+        self::$buildNumber = $buildDetails->date ?? '';
 
         if (!empty($_ENV['SENTRY_DSN'])) {
             init(['dsn' => $_ENV['SENTRY_DSN'], 'environment' => $_ENV['SENTRY_ENV']]);
@@ -99,8 +91,8 @@ class Spud
     {
         $version = sprintf('v%d.%d.%d', self::MAJOR, self::MINOR, self::REVISION);
 
-        if (!empty(self::BUILD)) {
-            $version .= '-' . self::BUILD;
+        if (!empty(self::$buildNumber)) {
+            $version .= ' - ' . self::$buildNumber;
         }
 
         return $version;
@@ -125,16 +117,10 @@ class Spud
         }
     }
 
-    public function loadBindableCommand(IBindableCommand $command): void
+    public function loadBindableCommand(string $subscriberName): void
     {
-        $command->setDiscordClient($this->discord);
-        $command->setSpudClient($this);
-        $command->checkRequirements();
-        if (!empty($this->dbal)) {
-            $command->setDoctrineClient($this->dbal);
-        }
-
-        $this->commands->push($command);
+        $subscriber = new $subscriberName($this);
+        $subscriber->hook();
     }
 
     public function loadBindableEventDirectory(string $path, array $excludedEvents = []): void
@@ -158,21 +144,11 @@ class Spud
         }
     }
 
-    public function loadBindableEvent(IBindableEvent $event): void
+    public function loadBindableEvent(string $subscriberName): void
     {
-        if (!$event instanceof OnReadyExecuteBinds) {
-            $event->setDiscordClient($this->discord);
-            $event->setSpudClient($this);
-            $event->checkRequirements();
-            if (!empty($this->dbal)) {
-                $event->setDoctrineClient($this->dbal);
-            }
-
-            if (!isset($this->events[$event->getBoundEvent()])) {
-                $this->events->set($event->getBoundEvent(), new Collection());
-            }
-            $this->events->get($event->getBoundEvent())
-                ->push($event);
+        if ($subscriberName !== Boot::class) {
+            $subscriber = new $subscriberName($this);
+            $subscriber->hook();
         }
     }
 
@@ -184,18 +160,13 @@ class Spud
 
     public function run(): void
     {
-        $onReadyEvent = new OnReadyExecuteBinds();
-        $onReadyEvent->setDiscordClient($this->discord);
-        $onReadyEvent->setSpudClient($this);
-        $onReadyEvent->setEventCollection($this->events);
-        $onReadyEvent->setCommandCollection($this->commands);
+        $boot = new Boot($this);
+        $boot->hook();
+        $this->discord->on('ready', function () {
+            $this->eventObserver->emit('ready');
+        });
+        exit;
 
-        $this->discord->on($onReadyEvent->getBoundEvent(), $onReadyEvent->getListener());
-
-        $this->discord->getLoop()
-            ->addPeriodicTimer(60, function () {
-                $this->discord->emit(Events::EVERY_MINUTE->value);
-            });
 
         $this->discord->run();
 
@@ -213,11 +184,6 @@ class Spud
             $builder->setDescription('Bot started at ' . Carbon::now()->toIso8601String());
             $output->sendMessage($builder->getEmbeddedMessage());
         }
-    }
-
-    public function on(string $event, callable $listener): Discord
-    {
-        return $this->discord->on($event, $listener);
     }
 
     public function getSimpleResponseBuilder(): EmbeddedResponse

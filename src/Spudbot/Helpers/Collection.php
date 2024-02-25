@@ -94,6 +94,13 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
         }
     }
 
+    public function forEach(callable $callback): void
+    {
+        foreach ($this->collection as $key => $item) {
+            $callback($item, $key);
+        }
+    }
+
     public function has(callable $callback): bool
     {
         foreach ($this->collection as $key => $item) {

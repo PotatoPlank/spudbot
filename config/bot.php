@@ -8,6 +8,8 @@
 
 use Discord\WebSockets\Intents;
 use Psr\Container\ContainerInterface;
+use Spudbot\Bot\CommandObserver;
+use Spudbot\Bot\EventObserver;
 use Spudbot\Bot\Spud;
 use Spudbot\Bot\SpudOptions;
 use Spudbot\Repository\Api\ChannelRepository;
@@ -43,6 +45,8 @@ return [
         ->property('channelRepository', DI\get(ChannelRepository::class))
         ->property('reminderRepository', DI\get(ReminderRepository::class))
         ->property('directoryRepository', DI\get(DirectoryRepository::class))
+        ->property('commandObserver', DI\autowire(CommandObserver::class))
+        ->property('eventObserver', DI\autowire(EventObserver::class))
         ->property('twig', DI\get('spud.twig')),
 ];
 

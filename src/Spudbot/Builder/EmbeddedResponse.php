@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Spudbot\Builder;
 
@@ -12,25 +17,27 @@ class EmbeddedResponse
     private string $description;
     private array $allowedMentions = [];
     private array $options = [];
-    public function __construct(public Discord $discord) {}
 
-    public function setTitle(string $title): void
+    public function __construct(public Discord $discord)
+    {
+    }
+
+    public function setTitle(string $title): self
     {
         $this->title = $title;
+        return $this;
     }
 
-    public function setDescription(string $description): void
+    public function setDescription(string $description): self
     {
         $this->description = $description;
+        return $this;
     }
 
-    public function setOptions(array $options): void
+    public function setOptions(array $options): self
     {
         $this->options = $options;
-    }
-    public function setAllowedMentions(array $allowedMentions): void
-    {
-        $this->allowedMentions = $allowedMentions;
+        return $this;
     }
 
     public function getEmbeddedMessage(): MessageBuilder
@@ -39,10 +46,10 @@ class EmbeddedResponse
         $options = $this->options;
 
         $options['title'] = $this->title;
-        if(!empty($this->description)){
+        if (!empty($this->description)) {
             $options['description'] = $this->description;
         }
-        if(!empty($this->allowedMentions)){
+        if (!empty($this->allowedMentions)) {
             $builder->setAllowedMentions($this->allowedMentions);
         }
 
@@ -51,5 +58,10 @@ class EmbeddedResponse
         return $builder->setEmbeds([
             $embed
         ]);
+    }
+
+    public function setAllowedMentions(array $allowedMentions): void
+    {
+        $this->allowedMentions = $allowedMentions;
     }
 }
