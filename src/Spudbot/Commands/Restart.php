@@ -43,7 +43,7 @@ class Restart extends AbstractCommandSubscriber
         $builder->setDescription('The bot will now restart.');
 
         $interaction->respondWithMessage($builder->getEmbeddedMessage(), true)->done(function () {
-            $this->spud->kill();
+            $this->spud->terminate();
         });
     }
 }

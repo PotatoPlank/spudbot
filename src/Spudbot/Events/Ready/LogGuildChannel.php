@@ -7,8 +7,8 @@
 
 namespace Spudbot\Events\Ready;
 
+use Spudbot\Bot\ApplicationVersion;
 use Spudbot\Bot\Events;
-use Spudbot\Bot\Spud;
 use Spudbot\Interface\AbstractEventSubscriber;
 
 class LogGuildChannel extends AbstractEventSubscriber
@@ -34,7 +34,7 @@ class LogGuildChannel extends AbstractEventSubscriber
             }
             $builder = $this->spud->getSimpleResponseBuilder();
             $builder->setTitle('Bot started')
-                ->setDescription("Spudbot started. " . Spud::getVersionString());
+                ->setDescription("Spudbot started. " . ApplicationVersion::get());
             $output->sendMessage($builder->getEmbeddedMessage());
         }
     }

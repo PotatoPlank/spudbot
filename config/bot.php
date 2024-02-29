@@ -36,6 +36,16 @@ return [
         $loader = new FilesystemLoader(dirname(__DIR__) . '/src/views');
         return new Environment($loader);
     },
+    'spud.events' => function () {
+        return dirname(
+                __DIR__
+            ) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Spudbot' . DIRECTORY_SEPARATOR . 'Events';
+    },
+    'spud.commands' => function () {
+        return dirname(
+                __DIR__
+            ) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR . 'Spudbot' . DIRECTORY_SEPARATOR . 'Commands';
+    },
     Spud::class => DI\autowire()
         ->constructor(DI\get('spud.options'))
         ->property('memberRepository', DI\get(MemberRepository::class))

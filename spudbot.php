@@ -35,17 +35,16 @@ $excludedCommands = [
 
 ];
 
-//$spud->loadBindableCommandDirectory(__DIR__ . '/src/Spudbot/Bindable/Command');
-
 $excludedEvents = [
     MessageHasManyReactions::class,
     MemberBanned::class,
     DeletedThread::class,
 ];
-//$spud->loadBindableEventDirectory(__DIR__ . '/src/Spudbot/Bindable/Event', $excludedEvents);
+//$spud->attachAll($container->get('spud.commands'), $excludedCommands);
+//$spud->attachAll($container->get('spud.events'), $excludedEvents);
 
-$spud->loadBindableEvent(ReadyMessage::class);
-$spud->loadBindableCommand(About::class);
+$spud->attachSubscriber(ReadyMessage::class);
+$spud->attachSubscriber(About::class);
 
 
 $spud->run();

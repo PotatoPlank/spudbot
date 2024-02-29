@@ -12,6 +12,9 @@ use DI\Attribute\Inject;
 use Discord\Discord;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Exception\BotTerminationException;
+use Spudbot\Handler\ExceptionQueue;
+use Spudbot\Handler\SentryExceptions;
+use Spudbot\Handler\TerminationHandler;
 use Spudbot\Model\Guild;
 use Spudbot\Repository\Api\ChannelRepository;
 use Spudbot\Repository\Api\DirectoryRepository;
@@ -21,18 +24,10 @@ use Spudbot\Repository\Api\MemberRepository;
 use Spudbot\Repository\Api\ReminderRepository;
 use Spudbot\Repository\Api\ThreadRepository;
 use Spudbot\Util\Filesystem;
-use Throwable;
 use Twig\Environment;
-
-use function Sentry\captureException;
-use function Sentry\init;
 
 class Spud
 {
-    public const MAJOR = 2;
-    public const MINOR = 0;
-    public const REVISION = 0;
-    public static ?string $buildNumber = null;
     public readonly ?Guild $logGuild;
     #[Inject]
     public readonly Environment $twig;
@@ -60,96 +55,47 @@ class Spud
     {
         date_default_timezone_set('UTC');
         $this->discord = new Discord($options->getOptions());
-
-        $buildFile = dirname(__DIR__, 3) . '/build.json';
-        $buildDetails = json_decode(file_get_contents($buildFile), false, 512, JSON_THROW_ON_ERROR);
-        self::$buildNumber = $buildDetails->date ?? '';
-
+        $exceptionHandler = new ExceptionQueue();
         if (!empty($_ENV['SENTRY_DSN'])) {
-            init(['dsn' => $_ENV['SENTRY_DSN'], 'environment' => $_ENV['SENTRY_ENV']]);
+            $sentryHandler = new SentryExceptions($_ENV['SENTRY_DSN'], $_ENV['SENTRY_ENV']);
+            $exceptionHandler->addHandler([$sentryHandler, 'handler']);
         }
-
-        set_exception_handler(function (Throwable $exception) {
-            if (!$exception instanceof BotTerminationException || !empty($exception->getMessage())) {
-                if (!empty($_ENV['SENTRY_DSN'])) {
-                    captureException($exception);
-                }
-                print "An exception was encountered and the bot stopped: {$exception->getFile()}:{$exception->getLine()} {$exception->getMessage()}" . PHP_EOL;
-                exit();
-            }
-
-            print "Bot killed." . PHP_EOL;
-            exit();
-        });
+        $terminationHandler = new TerminationHandler();
+        $exceptionHandler->addHandler([$terminationHandler, 'handler']);
     }
 
-    public static function getVersionString(): string
+    public function attachAll(string $directory, array $excluded = []): void
     {
-        $version = sprintf('v%d.%d.%d', self::MAJOR, self::MINOR, self::REVISION);
+        $files = Filesystem::fetchFilesByDirectoryRecursively(realpath($directory));
 
-        if (!empty(self::$buildNumber)) {
-            $version .= ' - ' . self::$buildNumber;
-        }
-
-        return $version;
-    }
-
-    public function loadBindableCommandDirectory(string $path, array $excludedCommands = []): void
-    {
-        $files = Filesystem::fetchFilesByDirectoryRecursively(realpath($path));
         if (!$files->empty()) {
-            $files->transform(function ($event) use ($path) {
-                return Filesystem::getNamespaceFromPath($path . '\\' . $event);
+            $files->transform(function ($event) use ($directory) {
+                return Filesystem::getNamespaceFromPath($directory . '\\' . $event);
             });
-            if (!empty($excludedCommands)) {
-                $files->filter(function ($command) use ($excludedCommands) {
-                    return !in_array($command, $excludedCommands);
+
+            if (!empty($excluded)) {
+                $files->filter(function ($event) use ($excluded) {
+                    return !in_array($event, $excluded, true);
                 });
             }
 
             foreach ($files as $file) {
-                $this->loadBindableCommand(new $file());
+                $this->attachSubscriber($file);
             }
         }
     }
 
-    public function loadBindableCommand(string $subscriberName): void
+    public function attachSubscriber(string $name): void
     {
-        $subscriber = new $subscriberName($this);
-        $subscriber->hook();
-    }
-
-    public function loadBindableEventDirectory(string $path, array $excludedEvents = []): void
-    {
-        $files = Filesystem::fetchFilesByDirectoryRecursively(realpath($path));
-
-        if (!$files->empty()) {
-            $files->transform(function ($event) use ($path) {
-                return Filesystem::getNamespaceFromPath($path . '\\' . $event);
-            });
-
-            if (!empty($excludedEvents)) {
-                $files->filter(function ($event) use ($excludedEvents) {
-                    return !in_array($event, $excludedEvents);
-                });
-            }
-
-            foreach ($files as $file) {
-                $this->loadBindableEvent(new $file());
-            }
-        }
-    }
-
-    public function loadBindableEvent(string $subscriberName): void
-    {
-        if ($subscriberName !== Boot::class) {
-            $subscriber = new $subscriberName($this);
+        if ($name !== Boot::class) {
+            $subscriber = new $name($this);
             $subscriber->hook();
         }
     }
 
-    public function kill(string $message = ''): void
+    public function terminate(string $message = ''): void
     {
+        $this->discord->removeAllListeners();
         $this->discord->close();
         throw new BotTerminationException($message);
     }
@@ -161,7 +107,6 @@ class Spud
         $this->discord->on('ready', function () {
             $this->eventObserver->emit('ready');
         });
-        exit;
 
 
         $this->discord->run();
@@ -171,9 +116,15 @@ class Spud
             $channelId = $this->logGuild->getOutputChannelId();
             $threadId = $this->logGuild->getOutputThreadId();
             $guild = $this->discord->guilds->get('id', $this->logGuild->getDiscordId());
+            if (!$guild) {
+                return;
+            }
             $output = $guild->channels->get('id', $channelId);
             if (!empty($threadId)) {
                 $output = $output->threads->get('id', $threadId);
+            }
+            if (!$output) {
+                return;
             }
             $builder = $this->getSimpleResponseBuilder();
             $builder->setTitle('Bot Started');

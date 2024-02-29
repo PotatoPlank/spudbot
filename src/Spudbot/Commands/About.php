@@ -8,7 +8,7 @@
 namespace Spudbot\Commands;
 
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Bot\Spud;
+use Spudbot\Bot\ApplicationVersion;
 use Spudbot\Interface\AbstractCommandSubscriber;
 
 class About extends AbstractCommandSubscriber
@@ -32,7 +32,7 @@ class About extends AbstractCommandSubscriber
         $builder->setTitle('About');
 
         $context = [
-            'version' => Spud::getVersionString(),
+            'version' => ApplicationVersion::get(),
             'applicationOwnerId' => $this->spud->discord->application->owner->id,
         ];
 
