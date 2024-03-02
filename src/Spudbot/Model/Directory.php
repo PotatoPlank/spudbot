@@ -18,23 +18,6 @@ class Directory extends AbstractModel
     private Channel $forumChannel;
     private string $embedId;
 
-    public static function withDatabaseRow(
-        array $row,
-        Channel $directoryChannel,
-        Channel $forumChannel
-    ): self {
-        $channel = new self();
-
-        $channel->setId($row['id']);
-        $channel->setDirectoryChannel($directoryChannel);
-        $channel->setForumChannel($forumChannel);
-        $channel->setEmbedId($row['embed_id']);
-        $channel->setCreatedAt(Carbon::parse($row['created_at']));
-        $channel->setModifiedAt(Carbon::parse($row['modified_at']));
-
-        return $channel;
-    }
-
     public static function hydrateWithArray(array $row): self
     {
         $directory = new self();

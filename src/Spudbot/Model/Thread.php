@@ -19,37 +19,6 @@ class Thread extends AbstractModel
     private Channel $channel;
     private ?string $tag = '';
 
-    public static function withDatabaseRow(array $row, ?Guild $guild = null, ?Channel $channel = null): self
-    {
-        $thread = new self();
-
-        if (array_key_exists('t_id', $row)) {
-            $thread->setId($row['t_id']);
-            $thread->setDiscordId($row['t_discord_id']);
-            $thread->setGuild(Guild::withDatabaseRow($row));
-            $thread->setChannel(Channel::withDatabaseRow($row));
-            $thread->setTag($row['t_tag']);
-            $thread->setCreatedAt(Carbon::parse($row['t_created_at']));
-            $thread->setModifiedAt(Carbon::parse($row['t_modified_at']));
-        } else {
-            if (!isset($guild)) {
-                throw new \InvalidArgumentException('Guild is required when you\'re not using joins.');
-            }
-            if (!isset($channel)) {
-                throw new \InvalidArgumentException('Channel is required when you\'re not using joins.');
-            }
-            $thread->setId($row['t_id']);
-            $thread->setDiscordId($row['t_discord_id']);
-            $thread->setGuild($guild);
-            $thread->setChannel($channel);
-            $thread->setTag($row['t_tag']);
-            $thread->setCreatedAt(Carbon::parse($row['t_created_at']));
-            $thread->setModifiedAt(Carbon::parse($row['t_modified_at']));
-        }
-
-        return $thread;
-    }
-
     public static function hydrateWithArray(array $row): self
     {
         $thread = new self();

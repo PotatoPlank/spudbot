@@ -33,30 +33,6 @@ class Channel extends AbstractModel
         return $channel;
     }
 
-    public static function withDatabaseRow(array $row, ?Guild $guild = null): self
-    {
-        $channel = new self();
-
-        if (array_key_exists('c_id', $row)) {
-            $channel->setId($row['c_id']);
-            $channel->setDiscordId($row['c_discord_id']);
-            $channel->setGuild(Guild::withDatabaseRow($row));
-            $channel->setCreatedAt(Carbon::parse($row['c_created_at']));
-            $channel->setModifiedAt(Carbon::parse($row['c_modified_at']));
-        } else {
-            if (!isset($guild)) {
-                throw new \InvalidArgumentException('Guild is required when you\'re not using joins.');
-            }
-            $channel->setId($row['id']);
-            $channel->setDiscordId($row['discord_id']);
-            $channel->setGuild($guild);
-            $channel->setCreatedAt(Carbon::parse($row['created_at']));
-            $channel->setModifiedAt(Carbon::parse($row['modified_at']));
-        }
-
-        return $channel;
-    }
-
     /**
      * @return string
      */

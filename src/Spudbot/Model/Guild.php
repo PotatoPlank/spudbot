@@ -27,29 +27,6 @@ class Guild extends AbstractModel
         $this->timeZone = new CarbonTimeZone('America/New_York');
     }
 
-    public static function withDatabaseRow(array $row): self
-    {
-        $guild = new self();
-
-        if (array_key_exists('g_id', $row)) {
-            $guild->setId($row['g_id']);
-            $guild->setDiscordId($row['g_discord_id']);
-            $guild->setOutputChannelId($row['g_output_channel_id']);
-            $guild->setOutputThreadId($row['g_output_thread_id']);
-            $guild->setCreatedAt(Carbon::parse($row['g_created_at']));
-            $guild->setModifiedAt(Carbon::parse($row['g_modified_at']));
-        } else {
-            $guild->setId($row['id']);
-            $guild->setDiscordId($row['discord_id']);
-            $guild->setOutputChannelId($row['output_channel_id']);
-            $guild->setOutputThreadId($row['output_thread_id']);
-            $guild->setCreatedAt(Carbon::parse($row['created_at']));
-            $guild->setModifiedAt(Carbon::parse($row['modified_at']));
-        }
-
-        return $guild;
-    }
-
     public static function hydrateWithArray(array $row): self
     {
         $guild = new self();

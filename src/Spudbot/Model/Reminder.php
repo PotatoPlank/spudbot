@@ -22,41 +22,6 @@ class Reminder extends AbstractModel
     private string $description;
 
 
-    public static function withDatabaseRow(array $row, ?Guild $guild = null, ?Channel $channel = null): self
-    {
-        $reminder = new self();
-
-        if (array_key_exists('r_id', $row)) {
-            $reminder->setId($row['r_id']);
-            $reminder->setDescription($row['r_description']);
-            $reminder->setMentionableRole($row['r_mention_role']);
-            $reminder->setScheduledAt(Carbon::parse($row['r_scheduled_at']));
-            $reminder->setRepeats($row['r_repeats']);
-            $reminder->setChannel(Channel::withDatabaseRow($row));
-            $reminder->setGuild(Guild::withDatabaseRow($row));
-            $reminder->setCreatedAt(Carbon::parse($row['r_created_at']));
-            $reminder->setModifiedAt(Carbon::parse($row['r_modified_at']));
-        } else {
-            if (!isset($guild)) {
-                throw new \InvalidArgumentException('Guild is required when you\'re not using joins.');
-            }
-            if (!isset($channel)) {
-                throw new \InvalidArgumentException('Channel is required when you\'re not using joins.');
-            }
-            $reminder->setId($row['id']);
-            $reminder->setDescription($row['description']);
-            $reminder->setMentionableRole($row['mention_role']);
-            $reminder->setScheduledAt(Carbon::parse($row['scheduled_at']));
-            $reminder->setRepeats($row['repeats']);
-            $reminder->setChannel($channel);
-            $reminder->setGuild($guild);
-            $reminder->setCreatedAt(Carbon::parse($row['created_at']));
-            $reminder->setModifiedAt(Carbon::parse($row['modified_at']));
-        }
-
-        return $reminder;
-    }
-
     public static function hydrateWithArray(array $row): self
     {
         $reminder = new self();
