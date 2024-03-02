@@ -47,12 +47,10 @@ class SprayUser extends AbstractEventSubscriber
             return;
         }
 
-        $response = $this->spud->interact()
+        $this->spud->interact()
             ->setTitle('We\'ll Be Right Back')
             ->setOptions(['image' => ['url' => $this->refill]])
-            ->build();
-
-        $message->reply($response)
+            ->replyTo($message)
             ->done(function (Message $responseMessage) use ($message) {
                 $this->spud->discord->getLoop()
                     ->addTimer($this->getDelay(), function () use ($message, $responseMessage) {

@@ -33,10 +33,10 @@ class LogGuildChannel extends AbstractEventSubscriber
             return;
         }
 
-        $builder = $this->spud->interact()
+        $this->spud->interact()
             ->setTitle('Bot started')
-            ->setDescription("Spudbot started. " . ApplicationVersion::get());
-        $output->sendMessage($builder->build());
+            ->setDescription("Spudbot started. " . ApplicationVersion::get())
+            ->sendTo($output);
     }
 
     public function canRun(): bool

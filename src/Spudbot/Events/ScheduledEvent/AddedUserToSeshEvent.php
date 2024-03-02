@@ -116,11 +116,11 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
             }
             $messageContent = trim($messageContent);
             if (!empty($messageContent)) {
-                $builder = $this->spud->interact();
-                $builder->setTitle("{$eventInformation->getTitle()} {$eventInformation->getSeshTimeString()}");
-                $builder->setDescription($messageContent);
-                $builder->setAllowedMentions([]);
-                $output->sendMessage($builder->build());
+                $this->spud->interact()
+                    ->setTitle("{$eventInformation->getTitle()} {$eventInformation->getSeshTimeString()}")
+                    ->setDescription($messageContent)
+                    ->setAllowedMentions([])
+                    ->sendTo($output);
             }
         } catch (\Exception $exception) {
             /**

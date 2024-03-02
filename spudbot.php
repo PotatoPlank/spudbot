@@ -10,6 +10,7 @@ use Spudbot\Bot\Spud;
 use Spudbot\Commands\About;
 use Spudbot\Commands\User;
 use Spudbot\Events\Member\MemberBanned;
+use Spudbot\Events\Meme\SprayUser;
 use Spudbot\Events\Reactions\MessageHasManyReactions;
 use Spudbot\Events\Ready\ReadyMessage;
 use Spudbot\Events\Thread\DeletedThread;
@@ -52,6 +53,7 @@ $excludedEvents = [
 $spud->attachSubscriber(ReadyMessage::class);
 $spud->attachSubscriber(About::class);
 $spud->attachSubscriber(User::class);
+$spud->attachSubscriber(SprayUser::class);
 
 
 $spud->run();

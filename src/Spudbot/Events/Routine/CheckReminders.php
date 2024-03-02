@@ -45,8 +45,8 @@ class CheckReminders extends AbstractEventSubscriber
                 continue;
             }
 
-            $builder->setDescription($reminder->getDescription());
-            $channel->sendMessage($builder->build())
+            $builder->setDescription($reminder->getDescription())
+                ->sendTo($channel)
                 ->done(function () use ($reminder) {
                     if (empty($reminder->getRepeats())) {
                         $this->spud->reminderRepository->remove($reminder);
@@ -60,8 +60,7 @@ class CheckReminders extends AbstractEventSubscriber
                     );
                     $reminder->setScheduledAt($nextOccurrence);
                     $this->spud->reminderRepository->save($reminder);
-                }
-                );
+                });
         }
     }
 }

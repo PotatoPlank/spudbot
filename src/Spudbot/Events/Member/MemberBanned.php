@@ -48,10 +48,10 @@ class MemberBanned extends AbstractEventSubscriber
                     ]);
 
 
-                    $builder = $this->spud->interact()
+                    $this->spud->interact()
                         ->setTitle('Member Banned')
-                        ->setDescription($message);
-                    $publicModLogChannel->sendMessage($builder->build());
+                        ->setDescription($message)
+                        ->sendTo($publicModLogChannel);
                 }
                 );
         };

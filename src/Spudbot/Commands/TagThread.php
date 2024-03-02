@@ -95,7 +95,7 @@ class TagThread extends AbstractCommandSubscriber
             };
 
             $rejected = function () use ($forumDirectoryPart, $embed, $directory) {
-                $forumDirectoryPart->sendMessage($embed->build())
+                $embed->sendTo($forumDirectoryPart)
                     ->done(function (Message $message) use ($directory) {
                         $directory->setEmbedId($message->id);
 

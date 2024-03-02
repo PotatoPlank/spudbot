@@ -68,7 +68,7 @@ class GenerateDirectory extends AbstractCommandSubscriber
             };
 
             $rejected = function () use ($directoryChannelPart, $embed, $directory) {
-                $directoryChannelPart->sendMessage($embed->build())
+                $embed->sendTo($directoryChannelPart)
                     ->done(function (Message $message) use ($directory) {
                         $directory->setEmbedId($message->id);
 
@@ -92,7 +92,7 @@ class GenerateDirectory extends AbstractCommandSubscriber
                 ->setTitle($formChannelPart->name . ' Directory')
                 ->setDescription($directoryMessage);
 
-            $directoryChannelPart->sendMessage($embed->build())
+            $embed->sendTo($directoryChannelPart)
                 ->done(function (Message $message) use ($directory) {
                     $directory->setEmbedId($message->id);
 

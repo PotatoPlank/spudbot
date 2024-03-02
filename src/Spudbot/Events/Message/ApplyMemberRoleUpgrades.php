@@ -80,12 +80,11 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
 
         $message->guild->roles->fetch(self::LEVEL_ONE_ROLE)
             ->done(function (Role $role) use ($member, $output) {
-                $builder = $this->spud->interact()
+                $this->spud->interact()
                     ->setTitle("Member Given {$role->name}")
                     ->setDescription(
                         "<@{$member->getDiscordId()}> met requirements to be given this role."
-                    );
-                $output->sendMessage($builder->build());
+                    )->sendTo($output);
             });
     }
 }

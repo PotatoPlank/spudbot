@@ -69,9 +69,7 @@ class MessageHasManyReactions extends AbstractEventSubscriber
                             'cacheCount' => count($this->reactedCache),
                             'cacheLimit' => $this->cacheLimit,
                         ])
-                    );
-
-                $outputChannel->sendMessage($builder->build());
+                    )->sendTo($outputChannel);
             });
     }
 

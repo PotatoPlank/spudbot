@@ -45,10 +45,7 @@ class Verify extends AbstractCommandSubscriber
         }
 
         $guild = $this->spud->guildRepository->findByPart($interaction->guild);
-        $output = $interaction->guild->channels->get('id', $guild->getOutputChannelId());
-        if ($guild->isOutputLocationThread()) {
-            $output = $output->threads->get('id', $guild->getOutputThreadId());
-        }
+        $output = $guild->getOutputPart($interaction->guild);
 
         $context = [
             'sourceMemberId' => $interaction->member->id,
@@ -61,7 +58,7 @@ class Verify extends AbstractCommandSubscriber
                 ->respondTo($interaction, true);
 
             $builder->setDescription($this->spud->twig->render('user/verification_error.twig', $context));
-            $output->sendMessage($builder->build());
+            $builder->sendTo($output);
             return;
         }
 
@@ -83,7 +80,7 @@ class Verify extends AbstractCommandSubscriber
         }
 
         $builder->respondTo($interaction);
-        $output->sendMessage($builder->build());
+        $builder->sendTo($output);
     }
 
     public function getCommand(): Command

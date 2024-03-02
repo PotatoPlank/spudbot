@@ -67,9 +67,9 @@ class RemovedUserFromNativeEvent extends AbstractEventSubscriber
         $message = "<@{$member->getDiscordId()}> removed their RSVP to {$eventModel->getName()}";
         $message .= " scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}";
 
-        $builder = $this->spud->interact()
+        $this->spud->interact()
             ->setTitle('Native Event Attendee Removed')
-            ->setDescription($message);
-        $output->sendMessage($builder->build());
+            ->setDescription($message)
+            ->sendTo($output);
     }
 }

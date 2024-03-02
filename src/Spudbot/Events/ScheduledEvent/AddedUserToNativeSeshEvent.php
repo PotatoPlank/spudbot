@@ -45,10 +45,10 @@ class AddedUserToNativeSeshEvent extends AbstractEventSubscriber
         $output = $guild->getOutputPart($guildPart);
 
         $message = "<@{$event->user_id}> was sent a DM with the link to the sesh event for {$eventPart->name}.";
-        $builder = $this->spud->interact()
+        $this->spud->interact()
             ->setTitle('Native Event RSVP Notification')
-            ->setDescription($message);
-        $output->sendMessage($builder->build());
+            ->setDescription($message)
+            ->sendTo($output);
 
         $guildPart->members->fetch($event->user_id)
             ->done(function (Member $member) use ($eventPart) {

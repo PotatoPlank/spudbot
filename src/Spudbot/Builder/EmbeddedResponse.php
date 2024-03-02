@@ -79,9 +79,10 @@ class EmbeddedResponse
         ]);
     }
 
-    public function setAllowedMentions(array $allowedMentions): void
+    public function setAllowedMentions(array $allowedMentions): self
     {
         $this->allowedMentions = $allowedMentions;
+        return $this;
     }
 
     public function sendTo(User|Member|Thread|Channel $target): ExtendedPromiseInterface

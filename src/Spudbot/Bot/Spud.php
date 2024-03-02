@@ -130,10 +130,10 @@ class Spud
             if (!$output) {
                 return;
             }
-            $builder = $this->interact();
-            $builder->setTitle('Bot Started');
-            $builder->setDescription('Bot started at ' . Carbon::now()->toIso8601String());
-            $output->sendMessage($builder->build());
+            $this->interact()
+                ->setTitle('Bot Started')
+                ->setDescription('Bot started at ' . Carbon::now()->toIso8601String())
+                ->sendTo($output);
         }
     }
 
