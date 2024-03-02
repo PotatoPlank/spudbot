@@ -5,13 +5,13 @@
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
-use Spudbot\Repository\Api\ChannelRepository;
-use Spudbot\Repository\Api\DirectoryRepository;
-use Spudbot\Repository\Api\EventRepository;
-use Spudbot\Repository\Api\GuildRepository;
-use Spudbot\Repository\Api\MemberRepository;
-use Spudbot\Repository\Api\ReminderRepository;
-use Spudbot\Repository\Api\ThreadRepository;
+use Spudbot\Repositories\ChannelRepository;
+use Spudbot\Repositories\DirectoryRepository;
+use Spudbot\Repositories\EventRepository;
+use Spudbot\Repositories\GuildRepository;
+use Spudbot\Repositories\MemberRepository;
+use Spudbot\Repositories\ReminderRepository;
+use Spudbot\Repositories\ThreadRepository;
 
 return [
     MemberRepository::class => DI\autowire(),

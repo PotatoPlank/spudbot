@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Spudbot\Repository\Api;
+namespace Spudbot\Repositories;
 
 use Carbon\Carbon;
 use Discord\Parts\Guild\ScheduledEvent;

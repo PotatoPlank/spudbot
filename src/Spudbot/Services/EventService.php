@@ -11,7 +11,7 @@ use Discord\Parts\Guild\ScheduledEvent;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Model\Event;
-use Spudbot\Repository\Api\EventRepository;
+use Spudbot\Repositories\EventRepository;
 use Spudbot\Types\EventType;
 
 class EventService

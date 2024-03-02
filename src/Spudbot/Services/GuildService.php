@@ -9,7 +9,7 @@ namespace Spudbot\Services;
 
 use OutOfBoundsException;
 use Spudbot\Model\Guild;
-use Spudbot\Repository\Api\GuildRepository;
+use Spudbot\Repositories\GuildRepository;
 
 class GuildService
 {

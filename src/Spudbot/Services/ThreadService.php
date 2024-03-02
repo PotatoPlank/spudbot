@@ -9,7 +9,7 @@ namespace Spudbot\Services;
 
 use OutOfBoundsException;
 use Spudbot\Model\Thread;
-use Spudbot\Repository\Api\ThreadRepository;
+use Spudbot\Repositories\ThreadRepository;
 
 class ThreadService
 {

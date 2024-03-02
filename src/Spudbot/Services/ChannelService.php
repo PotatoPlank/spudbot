@@ -9,7 +9,7 @@ namespace Spudbot\Services;
 
 use OutOfBoundsException;
 use Spudbot\Model\Channel;
-use Spudbot\Repository\Api\ChannelRepository;
+use Spudbot\Repositories\ChannelRepository;
 
 class ChannelService
 {

@@ -5,7 +5,7 @@
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
-namespace Spudbot\Repository\Api;
+namespace Spudbot\Repositories;
 
 use Exception;
 

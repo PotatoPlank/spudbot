@@ -9,7 +9,7 @@ namespace Spudbot\Services;
 
 use OutOfBoundsException;
 use Spudbot\Model\Member;
-use Spudbot\Repository\Api\MemberRepository;
+use Spudbot\Repositories\MemberRepository;
 
 class MemberService
 {

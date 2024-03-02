@@ -11,8 +11,8 @@ use OutOfBoundsException;
 use Spudbot\Model\Event;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Model\Member;
-use Spudbot\Repository\Api\EventRepository;
-use Spudbot\Repository\Api\MemberRepository;
+use Spudbot\Repositories\EventRepository;
+use Spudbot\Repositories\MemberRepository;
 
 class EventAttendanceService
 {
