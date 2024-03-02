@@ -17,13 +17,6 @@ use Spudbot\Handler\ExceptionQueue;
 use Spudbot\Handler\SentryExceptions;
 use Spudbot\Handler\TerminationHandler;
 use Spudbot\Model\Guild;
-use Spudbot\Repositories\ChannelRepository;
-use Spudbot\Repositories\DirectoryRepository;
-use Spudbot\Repositories\EventRepository;
-use Spudbot\Repositories\GuildRepository;
-use Spudbot\Repositories\MemberRepository;
-use Spudbot\Repositories\ReminderRepository;
-use Spudbot\Repositories\ThreadRepository;
 use Spudbot\Util\Filesystem;
 use Twig\Environment;
 
@@ -33,20 +26,6 @@ class Spud
     #[Inject('spud.twig')]
     public readonly Environment $twig;
     public readonly Discord $discord;
-    #[Inject]
-    public readonly MemberRepository $memberRepository;
-    #[Inject]
-    public readonly EventRepository $eventRepository;
-    #[Inject]
-    public readonly GuildRepository $guildRepository;
-    #[Inject]
-    public readonly ThreadRepository $threadRepository;
-    #[Inject]
-    public readonly ChannelRepository $channelRepository;
-    #[Inject]
-    public readonly ReminderRepository $reminderRepository;
-    #[Inject]
-    public readonly DirectoryRepository $directoryRepository;
     #[Inject]
     public readonly CommandObserver $commandObserver;
     #[Inject]

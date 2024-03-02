@@ -15,7 +15,9 @@ use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractCommandSubscriber;
+use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Services\ChannelService;
+use Spudbot\Services\DirectoryService;
 use Spudbot\Services\GuildService;
 use Spudbot\Services\ThreadService;
 
@@ -27,6 +29,10 @@ class TagThread extends AbstractCommandSubscriber
     protected GuildService $guildService;
     #[Inject]
     protected ThreadService $threadService;
+    #[Inject]
+    protected DirectoryService $directoryService;
+    #[Inject]
+    protected DirectoryParser $directoryParser;
 
     public function update(?Interaction $interaction = null): void
     {
@@ -60,21 +66,23 @@ class TagThread extends AbstractCommandSubscriber
             return;
         }
 
-        $channel = $this->channelService->findWithPart($channelPart);
-        $guild = $this->guildService->findWithPart($interaction->guild);
+        $channel = $this->channelService->findOrCreateWithPart($channelPart);
+        $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
         $thread = $this->threadService->findWithDiscordId($threadId, $interaction->guild->id);
         $thread->setTag($tag);
         $thread->setGuild($guild);
         $thread->setChannel($channel);
 
-        $this->spud->threadRepository
+        $this->threadService
             ->save($thread);
 
         $builder->setDescription("Your tag {$tag} was applied.");
 
         try {
-            $directory = $this->spud->directoryRepository
-                ->findByForumChannel($channel);
+            $directory = $this->directoryService->findWithForumChannel($channel);
+            if (!$directory) {
+                throw new \OutOfBoundsException('Directory does not exist.');
+            }
 
             $forumDirectoryPart = $channelPart->guild->channels
                 ->get('id', $directory->getDirectoryChannel()->getDiscordId());
@@ -83,8 +91,8 @@ class TagThread extends AbstractCommandSubscriber
                 throw new \RuntimeException('The specified directory channel does not exist.');
             }
 
-            $directoryMessage = $this->spud->directoryRepository
-                ->getEmbedContentFromPart($channelPart);
+            $directoryMessage = $this->directoryParser->fromPart($channelPart)
+                ->getBody();
 
             $embed = $this->spud->interact()
                 ->setTitle($forumDirectoryPart->name . ' thread directory')
@@ -99,7 +107,7 @@ class TagThread extends AbstractCommandSubscriber
                     ->done(function (Message $message) use ($directory) {
                         $directory->setEmbedId($message->id);
 
-                        $this->spud->directoryRepository
+                        $this->directoryService
                             ->save($directory);
                     });
             };

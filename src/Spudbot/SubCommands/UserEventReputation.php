@@ -10,11 +10,9 @@ declare(strict_types=1);
 namespace Spudbot\SubCommands;
 
 
-use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractSubCommandSubscriber;
-use Spudbot\Model\EventAttendance;
 use Spudbot\Services\MemberService;
 
 class UserEventReputation extends AbstractSubCommandSubscriber
@@ -43,27 +41,14 @@ class UserEventReputation extends AbstractSubCommandSubscriber
         }
 
         $member = $this->memberService->findOrCreateWithPart($memberPart);
-        $eventsAttended = $this->spud->memberRepository->getEventAttendance($member);
-        $totalEvents = count($eventsAttended);
-        $totalAttended = 0;
-        if ($totalEvents > 0) {
-            /**
-             * @var EventAttendance $event
-             */
-            foreach ($eventsAttended as $event) {
-                if ($event->getEvent()->getScheduledAt()->gt(Carbon::now())) {
-                    $totalEvents--;
-                } elseif (!$event->getNoShowStatus()) {
-                    $totalAttended++;
-                }
-            }
+        $eventStatistics = $this->memberService->getAttendanceStatistics($member);
 
-            $reputation = $this->spud->memberRepository->getEventReputation($eventsAttended);
+        if ($eventStatistics['interested'] > 0) {
             $message = $this->spud->twig->render('user/event_reputation.twig', [
                 'memberId' => $memberPart->id,
-                'reputation' => $reputation,
-                'eventsAttended' => $totalAttended,
-                'eventsInterested' => $totalEvents,
+                'reputation' => $eventStatistics['reputation'],
+                'eventsAttended' => $eventStatistics['attended'],
+                'eventsInterested' => $eventStatistics['interested'],
             ]);
 
             $builder->setDescription($message);

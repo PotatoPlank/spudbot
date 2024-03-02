@@ -7,10 +7,12 @@
 
 
 use Spudbot\Services\ChannelService;
+use Spudbot\Services\DirectoryService;
 use Spudbot\Services\EventAttendanceService;
 use Spudbot\Services\EventService;
 use Spudbot\Services\GuildService;
 use Spudbot\Services\MemberService;
+use Spudbot\Services\ReminderService;
 
 return [
     ChannelService::class => DI\autowire(),
@@ -18,4 +20,6 @@ return [
     GuildService::class => DI\autowire(),
     EventService::class => DI\autowire(),
     EventAttendanceService::class => DI\autowire(),
+    DirectoryService::class => DI\autowire(),
+    ReminderService::class => DI\autowire(),
 ];

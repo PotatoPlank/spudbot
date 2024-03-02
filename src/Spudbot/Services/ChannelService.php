@@ -17,15 +17,20 @@ class ChannelService
     {
     }
 
-    public function findWithPart(\Discord\Parts\Channel\Channel $channel): Channel
+    public function findOrCreateWithPart(\Discord\Parts\Channel\Channel $channel): Channel
     {
         try {
             return $this->channelRepository->findByPart($channel);
         } catch (OutOfBoundsException $exception) {
-            return $this->channelRepository->save(Channel::create([
+            return $this->save(Channel::create([
                 'discordId' => $channel->id,
-                'guild' => $this->guildService->findWithPart($channel->guild),
+                'guild' => $this->guildService->findOrCreateWithPart($channel->guild),
             ]));
         }
+    }
+
+    public function save(Channel $channel): Channel
+    {
+        return $this->channelRepository->save($channel);
     }
 }

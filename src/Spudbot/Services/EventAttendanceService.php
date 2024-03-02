@@ -35,4 +35,9 @@ class EventAttendanceService
             ]));
         }
     }
+
+    public function save(EventAttendance $attendance): EventAttendance
+    {
+        return $this->memberRepository->saveMemberEventAttendance($attendance);
+    }
 }

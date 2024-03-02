@@ -12,6 +12,7 @@ use Spudbot\Bot\CommandObserver;
 use Spudbot\Bot\EventObserver;
 use Spudbot\Bot\Spud;
 use Spudbot\Bot\SpudOptions;
+use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Repositories\ChannelRepository;
 use Spudbot\Repositories\DirectoryRepository;
 use Spudbot\Repositories\EventRepository;
@@ -58,5 +59,6 @@ return [
         ->property('commandObserver', DI\autowire(CommandObserver::class))
         ->property('eventObserver', DI\autowire(EventObserver::class))
         ->property('twig', DI\get('spud.twig')),
+    DirectoryParser::class => DI\autowire(),
 ];
 

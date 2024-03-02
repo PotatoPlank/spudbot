@@ -41,7 +41,7 @@ class AddedUserToNativeSeshEvent extends AbstractEventSubscriber
             "A user attempted to RSVP to a native event instead of the Sesh event."
         );
 
-        $guild = $this->guildService->findWithPart($guildPart);
+        $guild = $this->guildService->findOrCreateWithPart($guildPart);
         $output = $guild->getOutputPart($guildPart);
 
         $message = "<@{$event->user_id}> was sent a DM with the link to the sesh event for {$eventPart->name}.";

@@ -30,8 +30,8 @@ class LogThreadActivity extends AbstractEventSubscriber
             return;
         }
 
-        $thread = $this->threadService->findWithPart($message->thread);
+        $thread = $this->threadService->findOrCreateWithPart($message->thread);
 
-        $this->spud->threadRepository->save($thread);
+        $this->threadService->save($thread);
     }
 }

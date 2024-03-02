@@ -43,7 +43,7 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
         $this->spud->discord->getLogger()
             ->info("Checking to upgrade the membership of {$message->member->displayname}");
 
-        $guild = $this->guildService->findWithPart($message->member->guild);
+        $guild = $this->guildService->findOrCreateWithPart($message->member->guild);
 
         try {
             $output = $guild->getOutputPart($message->guild);

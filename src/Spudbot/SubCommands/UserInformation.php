@@ -52,9 +52,8 @@ class UserInformation extends AbstractSubCommandSubscriber
         $isEligible = $hasMetMembershipLength && $hasEnoughComments;
 
         if ($member->getVerifiedBy()) {
-            $verifier = $this->spud->memberRepository->findById($member->getVerifiedBy());
-            $verifierName = $verifier->getUsername();
-            $verifierId = $verifier->getDiscordId();
+            $verifierName = $member->getVerifiedBy()->getUsername();
+            $verifierId = $member->getVerifiedBy()->getDiscordId();
         }
 
         $botStatus = $memberPart->user->bot ? 'Yes' : 'No';

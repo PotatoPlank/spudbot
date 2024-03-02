@@ -45,7 +45,6 @@ class CountMemberComments extends AbstractEventSubscriber
         $member->setTotalComments($member->getTotalComments() + 1);
         $member->setUsername($username);
 
-        $this->spud->memberRepository
-            ->save($member);
+        $this->memberService->save($member);
     }
 }

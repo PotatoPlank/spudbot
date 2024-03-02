@@ -36,8 +36,6 @@ class RemovedUserFromNativeEvent extends AbstractEventSubscriber
 
     public function update($event = null): void
     {
-        $memberRepository = $this->spud->memberRepository;
-
         $guildPart = $this->spud->discord->guilds->get('id', $event->guild_id);
         if (!$guildPart) {
             return;
@@ -48,7 +46,7 @@ class RemovedUserFromNativeEvent extends AbstractEventSubscriber
         if (!$memberPart || !$eventPart || $eventPart->creator->id === self::SESH_BOT_ID) {
             return;
         }
-        $guild = $this->guildService->findWithPart($guildPart);
+        $guild = $this->guildService->findOrCreateWithPart($guildPart);
         $output = $guild->getOutputPart($guildPart);
 
         $eventModel = $this->eventService->findOrCreateNativeWithPart($eventPart);
@@ -62,7 +60,7 @@ class RemovedUserFromNativeEvent extends AbstractEventSubscriber
             $eventAttendance->wasNoShow(true);
         }
 
-        $memberRepository->saveMemberEventAttendance($eventAttendance);
+        $this->attendanceService->save($eventAttendance);
 
         $message = "<@{$member->getDiscordId()}> removed their RSVP to {$eventModel->getName()}";
         $message .= " scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}";

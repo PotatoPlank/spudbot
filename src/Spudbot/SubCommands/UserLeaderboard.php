@@ -33,9 +33,8 @@ class UserLeaderboard extends AbstractSubCommandSubscriber
             $limit = $this->max;
         }
 
-        $guild = $this->guildService->findWithPart($interaction->guild);
-        $members = $this->spud->memberRepository
-            ->getTopCommentersByGuild($guild, $limit);
+        $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
+        $members = $this->guildService->getTopPosters($guild, $limit);
 
         $message = 'Unable to retrieve leaderboard.';
         if (!$members->empty()) {

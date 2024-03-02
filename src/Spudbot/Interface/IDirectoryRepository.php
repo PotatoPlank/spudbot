@@ -24,8 +24,6 @@ abstract class IDirectoryRepository
 
     abstract public function findByDirectoryChannel(Channel $channel): Collection;
 
-    abstract public function getEmbedContentFromPart(\Discord\Parts\Channel\Channel $forumChannel): string;
-
     abstract public function getAll(): Collection;
 
 

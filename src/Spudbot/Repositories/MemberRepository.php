@@ -96,27 +96,6 @@ class MemberRepository extends IMemberRepository
         return $collection;
     }
 
-    public function getEventReputation(Collection $eventsAttended)
-    {
-        $totalEvents = count($eventsAttended);
-        $totalAttended = 0;
-        if ($totalEvents > 0) {
-            /**
-             * @var EventAttendance $event
-             */
-            foreach ($eventsAttended as $event) {
-                if ($event->getEvent()->getScheduledAt()->gt(Carbon::now())) {
-                    $totalEvents--;
-                } elseif (!$event->getNoShowStatus()) {
-                    $totalAttended++;
-                }
-            }
-
-            return round(($totalAttended / $totalEvents) * 100);
-        }
-        return 0;
-    }
-
     public function getEventAttendance(Member $member): Collection
     {
         $collection = new Collection();

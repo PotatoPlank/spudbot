@@ -7,14 +7,22 @@
 
 namespace Spudbot\Commands;
 
+use DI\Attribute\Inject;
 use Discord\Builders\CommandBuilder;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractCommandSubscriber;
+use Spudbot\Services\GuildService;
+use Spudbot\Services\MemberService;
 
 class Verify extends AbstractCommandSubscriber
 {
+    #[Inject]
+    protected GuildService $guildService;
+    #[Inject]
+    protected MemberService $memberService;
+
     public function update(?Interaction $interaction = null): void
     {
         if (!$interaction) {
@@ -44,7 +52,7 @@ class Verify extends AbstractCommandSubscriber
             return;
         }
 
-        $guild = $this->spud->guildRepository->findByPart($interaction->guild);
+        $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
         $output = $guild->getOutputPart($interaction->guild);
 
         $context = [
@@ -67,12 +75,12 @@ class Verify extends AbstractCommandSubscriber
         $builder->setDescription($this->spud->twig->render('user/verification.twig', $context));
 
 
-        $verifyingMember = $this->spud->memberRepository->findByPart($interaction->member);
+        $verifyingMember = $this->memberService->findOrCreateWithPart($interaction->member);
         try {
-            $verifiedMember = $this->spud->memberRepository->findByPart($memberToBeVerified);
+            $verifiedMember = $this->memberService->findOrCreateWithPart($memberToBeVerified);
             $verifiedMember->setVerifiedBy($verifyingMember->getId());
 
-            $this->spud->memberRepository->save($verifiedMember);
+            $this->memberService->save($verifiedMember);
         } catch (\OutOfBoundsException $exception) {
             $builder->setDescription(
                 "Unable to verify <@{$memberToBeVerified->id}>, they haven't made any comments."

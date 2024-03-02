@@ -17,12 +17,15 @@ use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\Model\Reminder;
 use Spudbot\Services\ChannelService;
+use Spudbot\Services\ReminderService;
 use Spudbot\Util\Recurrence;
 
 class AddReminder extends AbstractCommandSubscriber
 {
     #[Inject]
     protected ChannelService $channelService;
+    #[Inject]
+    protected ReminderService $reminderService;
 
     public function update(?Interaction $interaction = null): void
     {
@@ -66,7 +69,7 @@ class AddReminder extends AbstractCommandSubscriber
             }
         }
 
-        $channel = $this->channelService->findWithPart($interaction->channel);
+        $channel = $this->channelService->findOrCreateWithPart($interaction->channel);
 
         $guildTimeZone = $channel->getGuild()->getTimeZone();
         $scheduledAt = Carbon::parse($scheduledAt, $guildTimeZone);
@@ -78,7 +81,7 @@ class AddReminder extends AbstractCommandSubscriber
         $reminder->setRepeats($repeats);
         $reminder->setChannel($channel);
 
-        $this->spud->reminderRepository->save($reminder);
+        $this->reminderService->save($reminder);
 
         $message = "The reminder will be sent out at {$reminder->getLocalScheduledAt()->toDayDateTimeString()}";
         if (!empty($reminder->getRepeats())) {

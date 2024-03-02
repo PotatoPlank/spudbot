@@ -13,12 +13,19 @@ namespace Spudbot\SubCommands;
 use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractSubCommandSubscriber;
+use Spudbot\Services\EventAttendanceService;
+use Spudbot\Services\EventService;
 use Spudbot\Services\MemberService;
+use Spudbot\Util\DiscordFormatter;
 
 class UserNoShowStatus extends AbstractSubCommandSubscriber
 {
     #[Inject]
     protected MemberService $memberService;
+    #[Inject]
+    protected EventAttendanceService $eventAttendanceService;
+    #[Inject]
+    protected EventService $eventService;
 
     public function update(?Interaction $interaction = null): void
     {
@@ -39,14 +46,17 @@ class UserNoShowStatus extends AbstractSubCommandSubscriber
         $member = $this->memberService->findOrCreateWithPart($memberPart);
 
         try {
-            $event = $this->spud->eventRepository->findById($eventId);
-            $eventAttendance = $this->spud->eventRepository->getAttendanceByMemberAndEvent($member, $event);
+            $event = $this->eventService->findWhereId($eventId);
+            if (!$event) {
+                throw new \OutOfBoundsException();
+            }
+            $eventAttendance = $this->eventAttendanceService->findOrCreateByMemberAndEvent($member, $event);
 
             $eventAttendance->wasNoShow($noShowStatus);
 
-            $this->spud->memberRepository->saveMemberEventAttendance($eventAttendance);
+            $this->eventAttendanceService->save($eventAttendance);
 
-            $message = "<@{$member->getDiscordId()}>'s status was updated.";
+            $message = DiscordFormatter::mentionUser($member->getDiscordId()) . "'s status was updated.";
         } catch (\OutOfBoundsException $exception) {
             $message = 'An event with that id and user could not be found.';
         }

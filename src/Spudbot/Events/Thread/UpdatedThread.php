@@ -13,12 +13,18 @@ use Discord\Parts\Channel\Message;
 use Discord\Parts\Thread\Thread;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Services\ChannelService;
+use Spudbot\Services\DirectoryService;
 
 class UpdatedThread extends AbstractEventSubscriber
 {
     #[Inject]
     protected ChannelService $channelService;
+    #[Inject]
+    protected DirectoryService $directoryService;
+    #[Inject]
+    protected DirectoryParser $directoryParser;
 
     public function getEventName(): string
     {
@@ -32,7 +38,7 @@ class UpdatedThread extends AbstractEventSubscriber
         }
 
         try {
-            $forumChannel = $this->channelService->findWithPart($threadPart->parent);
+            $forumChannel = $this->channelService->findOrCreateWithPart($threadPart->parent);
         } catch (\OutOfBoundsException $exception) {
             /**
              * There is no forum channel or directory
@@ -42,8 +48,11 @@ class UpdatedThread extends AbstractEventSubscriber
 
 
         try {
-            $directory = $this->spud->directoryRepository
-                ->findByForumChannel($forumChannel);
+            $directory = $this->directoryService
+                ->findWithForumChannel($forumChannel);
+            if (!$directory) {
+                throw new \OutOfBoundsException('Unable to find directory.');
+            }
 
             $forumDirectoryPart = $threadPart->guild->channels
                 ->get('id', $directory->getDirectoryChannel()->getDiscordId());
@@ -52,8 +61,9 @@ class UpdatedThread extends AbstractEventSubscriber
                 throw new \BadMethodCallException('The specified directory channel does not exist.');
             }
 
-            $directoryMessage = $this->spud->directoryRepository
-                ->getEmbedContentFromPart($threadPart->parent);
+            $directoryMessage = $this->directoryParser->fromPart($threadPart->parent)
+                ->getBody();
+
 
             $embed = $this->spud->interact()
                 ->setTitle("{$threadPart->parent->name} thread directory")
@@ -68,7 +78,7 @@ class UpdatedThread extends AbstractEventSubscriber
                     ->done(function (Message $message) use ($directory) {
                         $directory->setEmbedId($message->id);
 
-                        $this->spud->directoryRepository
+                        $this->directoryService
                             ->save($directory);
                     });
             };

@@ -8,13 +8,18 @@
 namespace Spudbot\Events\Routine;
 
 
+use DI\Attribute\Inject;
 use Spudbot\Bot\Events;
 use Spudbot\Interface\AbstractEventSubscriber;
 use Spudbot\Model\Reminder;
+use Spudbot\Services\ReminderService;
 use Spudbot\Util\Recurrence;
 
 class CheckReminders extends AbstractEventSubscriber
 {
+    #[Inject]
+    protected ReminderService $reminderService;
+
     public function getEventName(): string
     {
         return Events::EVERY_MINUTE->value;
@@ -22,7 +27,7 @@ class CheckReminders extends AbstractEventSubscriber
 
     public function update(): void
     {
-        $reminders = $this->spud->reminderRepository->findElapsed();
+        $reminders = $this->reminderService->findElapsed();
         if ($reminders->empty()) {
             return;
         }
@@ -49,7 +54,7 @@ class CheckReminders extends AbstractEventSubscriber
                 ->sendTo($channel)
                 ->done(function () use ($reminder) {
                     if (empty($reminder->getRepeats())) {
-                        $this->spud->reminderRepository->remove($reminder);
+                        $this->reminderService->remove($reminder);
                         return;
                     }
                     $scheduled = $reminder->getScheduledAt();
@@ -59,7 +64,7 @@ class CheckReminders extends AbstractEventSubscriber
                         $interval
                     );
                     $reminder->setScheduledAt($nextOccurrence);
-                    $this->spud->reminderRepository->save($reminder);
+                    $this->reminderService->save($reminder);
                 });
         }
     }

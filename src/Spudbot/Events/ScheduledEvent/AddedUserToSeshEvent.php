@@ -49,7 +49,7 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
         try {
             $eventInformation = new SeshEmbedParser($message);
 
-            $guild = $this->guildService->findWithPart($message->guild);
+            $guild = $this->guildService->findOrCreateWithPart($message->guild);
             $output = $guild->getOutputPart($message->guild);
 
             $event = $this->eventService->findOrCreateSesh($eventInformation->getId(), [
@@ -91,7 +91,7 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
                         if (str_contains($eventStatus, 'No')) {
                             $eventAttendance->wasNoShow($noShowBoolean);
                         }
-                        $this->spud->memberRepository->saveMemberEventAttendance($eventAttendance);
+                        $this->attendanceService->save($eventAttendance);
                         $statusContentText .= "<@{$eventAttendance->getMember()->getDiscordId()}>" . PHP_EOL;
                     }
                     unset($originalAttendees[$id]);
@@ -106,7 +106,7 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
                     if ($originalAttendee->getStatus() !== 'No') {
                         $originalAttendee->wasNoShow($noShowBoolean);
                         $originalAttendee->setStatus('No');
-                        $this->spud->memberRepository->saveMemberEventAttendance($originalAttendee);
+                        $this->attendanceService->save($originalAttendee);
                         $statusContentText .= "<@{$originalAttendee->getMember()->getDiscordId()}>" . PHP_EOL;
                     }
                 }

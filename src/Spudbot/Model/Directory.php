@@ -102,4 +102,9 @@ class Directory extends AbstractModel
         $this->embedId = $embedId;
     }
 
+    public function getTitle(\Discord\Parts\Channel\Channel $channel): string
+    {
+        return $channel->name . ' thread directory';
+    }
+
 }

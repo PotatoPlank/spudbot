@@ -28,10 +28,19 @@ class EventService
             return $this->eventRepository->save(Event::create([
                 'nativeId' => $event->guild_scheduled_event_id ?? $event->id,
                 'type' => EventType::Native,
-                'guild' => $this->guildService->findWithPart($event->guild),
+                'guild' => $this->guildService->findOrCreateWithPart($event->guild),
                 'name' => $event->name ?? '',
                 'scheduledAt' => $event->scheduled_start_time,
             ]));
+        }
+    }
+
+    public function findWhereId(string $eventId): ?Event
+    {
+        try {
+            return $this->eventRepository->findById($eventId);
+        } catch (OutOfBoundsException) {
+            return null;
         }
     }
 

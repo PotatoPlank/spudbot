@@ -20,18 +20,28 @@ class ThreadService
     ) {
     }
 
-    public function findWithPart(\Discord\Parts\Thread\Thread $thread): Thread
+    public function findOrCreateWithPart(\Discord\Parts\Thread\Thread $thread): Thread
     {
         try {
             return $this->threadRepository->findByPart($thread);
         } catch (OutOfBoundsException $exception) {
             return $this->threadRepository->save(Thread::create([
                 'discordId' => $thread->id,
-                'guild' => $this->guildService->findWithPart($thread->guild),
-                'channel' => $this->channelService->findWithPart($thread->parent),
+                'guild' => $this->guildService->findOrCreateWithPart($thread->guild),
+                'channel' => $this->channelService->findOrCreateWithPart($thread->parent),
                 'tag' => '',
             ]));
         }
+    }
+
+    public function save(Thread $thread): Thread
+    {
+        return $this->threadRepository->save($thread);
+    }
+
+    public function remove(Thread $thread): bool
+    {
+        return $this->threadRepository->remove($thread);
     }
 
     public function findWithDiscordId(string $discordId, string $discordGuildId): Thread

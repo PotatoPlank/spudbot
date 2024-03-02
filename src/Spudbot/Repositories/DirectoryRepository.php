@@ -17,7 +17,6 @@ use Spudbot\Interface\IDirectoryRepository;
 use Spudbot\Model\Channel;
 use Spudbot\Model\Directory;
 use Spudbot\Model\Guild;
-use Spudbot\Model\Thread;
 use Spudbot\Traits\UsesApi;
 
 class DirectoryRepository extends IDirectoryRepository
@@ -128,70 +127,6 @@ class DirectoryRepository extends IDirectoryRepository
         }
 
         return true;
-    }
-
-    public function getEmbedContentFromPart(\Discord\Parts\Channel\Channel $forumChannel): string
-    {
-        $embedContent = '';
-        if ($forumChannel->threads->count() === 0) {
-            throw new \InvalidArgumentException('The provided forum channel does not have any threads.');
-        }
-        $threadRepository = new ThreadRepository($this->client);
-        $channelRepository = new ChannelRepository($this->client);
-        $guildRepository = new GuildRepository($this->client);
-        $guild = $guildRepository->findByPart($forumChannel->guild);
-
-        try {
-            $channel = $channelRepository->findByPart($forumChannel);
-        } catch (\OutOfBoundsException $exception) {
-            $channel = new Channel();
-            $channel->setGuild($guild);
-            $channel->setDiscordId($forumChannel->id);
-            $channelRepository->save($channel);
-        }
-
-        $categories = [
-            'General' => [],
-        ];
-        /**
-         * @var \Discord\Parts\Thread\Thread $threadPart
-         */
-        foreach ($forumChannel->threads as $threadPart) {
-            if ($threadPart->locked || ($threadPart->archived && $threadPart->archive_timestamp->diffInWeeks() >= 2)) {
-                continue;
-            }
-            try {
-                $thread = $threadRepository->findByPart($threadPart);
-            } catch (\OutOfBoundsException $exception) {
-                print $exception->getMessage() . PHP_EOL;
-                $thread = new Thread();
-                $thread->setChannel($channel);
-                $thread->setGuild($guild);
-                $thread->setDiscordId($threadPart->id);
-                $threadRepository->save($thread);
-            }
-            if (empty($thread->getTag())) {
-                $categories['General'][] = $threadPart->id;
-            } else {
-                if (!isset($categories[$thread->getTag()])) {
-                    $categories[$thread->getTag()] = [];
-                }
-                $categories[$thread->getTag()][] = $threadPart->id;
-            }
-        }
-        if (!empty($categories)) {
-            foreach ($categories as $category => $threads) {
-                if (!empty($threads)) {
-                    $embedContent .= "**{$category}**" . PHP_EOL;
-                    foreach ($threads as $threadId) {
-                        $embedContent .= "<#$threadId>" . PHP_EOL;
-                    }
-                    $embedContent .= PHP_EOL;
-                }
-            }
-        }
-
-        return !empty($embedContent) ? $embedContent : 'No threads found.';
     }
 
     /**

@@ -15,12 +15,18 @@ use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\Model\Directory;
+use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Services\ChannelService;
+use Spudbot\Services\DirectoryService;
 
 class GenerateDirectory extends AbstractCommandSubscriber
 {
     #[Inject]
     protected ChannelService $channelService;
+    #[Inject]
+    protected DirectoryService $directoryService;
+    #[Inject]
+    protected DirectoryParser $directoryParser;
 
     public function update(?Interaction $interaction = null): void
     {
@@ -33,20 +39,23 @@ class GenerateDirectory extends AbstractCommandSubscriber
 
 
         $formChannelId = $interaction->data->options['channel']->value;
-        $formChannelPart = $interaction->guild->channels->get('id', $formChannelId);
+        $forumChannelPart = $interaction->guild->channels->get('id', $formChannelId);
         $directoryChannelPart = $interaction->channel;
 
-        if (!$formChannelPart) {
+        if (!$forumChannelPart) {
             $response->error('Unable to locate the specified forum channel')
                 ->respondTo($interaction);
             return;
         }
 
-        $forumChannel = $this->channelService->findWithPart($formChannelPart);
-        $directoryChannel = $this->channelService->findWithPart($directoryChannelPart);
+        $forumChannel = $this->channelService->findOrCreateWithPart($forumChannelPart);
+        $directoryChannel = $this->channelService->findOrCreateWithPart($directoryChannelPart);
 
         try {
-            $directory = $this->spud->directoryRepository->findByForumChannel($forumChannel);
+            $directory = $this->directoryService->findWithForumChannel($forumChannel);
+            if (!$directory) {
+                throw new \OutOfBoundsException('Directory does not exist.');
+            }
             $forumDirectoryPart = $interaction->guild
                 ->channels->get('id', $directory->getDirectoryChannel()->getDiscordId());
 
@@ -55,12 +64,11 @@ class GenerateDirectory extends AbstractCommandSubscriber
                     ->respondTo($interaction);
                 return;
             }
-
-            $directoryMessage = $this->spud->directoryRepository
-                ->getEmbedContentFromPart($formChannelPart);
+            $directoryMessage = $this->directoryParser->fromPart($forumChannelPart)
+                ->getBody();
 
             $embed = $this->spud->interact()
-                ->setTitle($formChannelPart->name . ' thread directory')
+                ->setTitle($directory->getTitle($forumChannelPart))
                 ->setDescription($directoryMessage);
 
             $success = function (Message $message) use ($embed) {
@@ -72,12 +80,13 @@ class GenerateDirectory extends AbstractCommandSubscriber
                     ->done(function (Message $message) use ($directory) {
                         $directory->setEmbedId($message->id);
 
-                        $this->spud->directoryRepository
+                        $this->directoryService
                             ->save($directory);
                     });
             };
 
-            $forumDirectoryPart->messages->fetch($directory->getEmbedId())->done($success, $rejected);
+            $forumDirectoryPart->messages->fetch($directory->getEmbedId())
+                ->done($success, $rejected);
 
             $response->setDescription('Updated the directory.');
         } catch (\OutOfBoundsException $exception) {
@@ -87,17 +96,17 @@ class GenerateDirectory extends AbstractCommandSubscriber
             $directory->setDirectoryChannel($directoryChannel);
             $directory->setForumChannel($forumChannel);
 
-            $directoryMessage = $this->spud->directoryRepository->getEmbedContentFromPart($formChannelPart);
-            $embed = $this->spud->interact()
-                ->setTitle($formChannelPart->name . ' Directory')
-                ->setDescription($directoryMessage);
+            $directoryMessage = $this->directoryParser->fromPart($forumChannelPart)
+                ->getBody();
 
-            $embed->sendTo($directoryChannelPart)
+            $this->spud->interact()
+                ->setTitle($directory->getTitle($forumChannelPart))
+                ->setDescription($directoryMessage)
+                ->sendTo($directoryChannelPart)
                 ->done(function (Message $message) use ($directory) {
                     $directory->setEmbedId($message->id);
 
-                    $this->spud->directoryRepository
-                        ->save($directory);
+                    $this->directoryService->save($directory);
                 });
 
             $response->setDescription('Directory generated.');

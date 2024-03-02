@@ -49,7 +49,7 @@ class AddedUserToNativeEvent extends AbstractEventSubscriber
             return;
         }
 
-        $guild = $this->guildService->findWithPart($guildPart);
+        $guild = $this->guildService->findOrCreateWithPart($guildPart);
         $output = $guild->getOutputPart($guildPart);
         $eventModel = $this->eventService->findOrCreateNativeWithPart($eventPart);
         $member = $this->memberService->findOrCreateWithPart($memberPart);

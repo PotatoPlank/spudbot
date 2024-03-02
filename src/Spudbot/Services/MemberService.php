@@ -7,7 +7,10 @@
 
 namespace Spudbot\Services;
 
+use Carbon\Carbon;
 use OutOfBoundsException;
+use Spudbot\Helpers\Collection;
+use Spudbot\Model\EventAttendance;
 use Spudbot\Model\Member;
 use Spudbot\Repositories\MemberRepository;
 
@@ -22,14 +25,52 @@ class MemberService
         try {
             return $this->memberRepository->findByPart($member);
         } catch (OutOfBoundsException $exception) {
-            return $this->memberRepository->save(Member::create([
+            return $this->save(Member::create([
                 'discordId' => $member->id,
                 'totalComments' => 0,
                 'username' => Member::getUsernameWithPart($member),
                 'verifiedBy' => null,
-                'guild' => $this->guildService->findWithPart($member->guild),
+                'guild' => $this->guildService->findOrCreateWithPart($member->guild),
             ]));
         }
+    }
+
+    public function save(Member $member): Member
+    {
+        return $this->memberRepository->save($member);
+    }
+
+    public function getAttendanceStatistics(Member $member): array
+    {
+        $attendances = $this->getEventAttendance($member);
+        $totalInterested = count($attendances);
+        $totalAttended = 0;
+        $reputation = 0;
+        if ($totalInterested > 0) {
+            /**
+             * @var EventAttendance $event
+             */
+            foreach ($attendances as $event) {
+                if ($event->getEvent()->getScheduledAt()->gt(Carbon::now())) {
+                    $totalInterested--;
+                } elseif (!$event->getNoShowStatus()) {
+                    $totalAttended++;
+                }
+            }
+
+            $reputation = round(($totalAttended / $totalInterested) * 100);
+        }
+
+        return [
+            'interested' => $totalInterested,
+            'attended' => $totalAttended,
+            'reputation' => $reputation,
+        ];
+    }
+
+    public function getEventAttendance(Member $member): Collection
+    {
+        return $this->memberRepository->getEventAttendance($member);
     }
 
     public function findWithPart(\Discord\Parts\User\Member $member): ?Member
