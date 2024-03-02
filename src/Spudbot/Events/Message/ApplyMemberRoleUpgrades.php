@@ -39,12 +39,6 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
         if (!$message) {
             return;
         }
-        $isRegularMember = $message->member && !$message->member->user->bot;
-        $correctGuild = $message->guild_id === self::APPLIES_TO_GUILD;
-        $hasJoinDate = $message->member->joined_at instanceof Carbon;
-        if (!$isRegularMember || !$correctGuild || !$hasJoinDate) {
-            return;
-        }
 
         $this->spud->discord->getLogger()
             ->info("Checking to upgrade the membership of {$message->member->displayname}");
@@ -86,5 +80,19 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
                         "<@{$member->getDiscordId()}> met requirements to be given this role."
                     )->sendTo($output);
             });
+    }
+
+    public function canRun(?Message $message = null): bool
+    {
+        if (!$message) {
+            return false;
+        }
+        $isRegularMember = $message->member && !$message->member->user->bot;
+        $correctGuild = $message->guild_id === self::APPLIES_TO_GUILD;
+        $hasJoinDate = $message->member->joined_at instanceof Carbon;
+        if (!$isRegularMember || !$correctGuild || !$hasJoinDate) {
+            return false;
+        }
+        return true;
     }
 }
