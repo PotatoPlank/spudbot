@@ -10,15 +10,15 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Interface\IModel;
+use Spudbot\Interface\AbstractModel;
 
-class Member extends IModel
+class Member extends AbstractModel
 {
     private string $discordId;
     private Guild $guild;
     private int $totalComments = 0;
     private ?string $username = null;
-    private ?int $verifiedBy = null;
+    private ?Member $verifiedBy = null;
 
     public static function withDatabaseRow(array $row, ?Guild $guild = null): self
     {
@@ -58,7 +58,7 @@ class Member extends IModel
         $member->setDiscordId($row['discord_id']);
         $member->setTotalComments($row['total_comments']);
         $member->setUsername($row['username']);
-        $member->setVerifiedBy($row['verified_by']);
+        $member->setVerifiedBy($row['verified_by'] ? self::hydrateWithArray($row['verified_by']) : null);
         $member->setCreatedAt(Carbon::parse($row['created_at']));
         $member->setModifiedAt(Carbon::parse($row['updated_at']));
 
@@ -67,6 +67,11 @@ class Member extends IModel
         }
 
         return $member;
+    }
+
+    public static function getUsernameWithPart(\Discord\Parts\User\Member $member): string
+    {
+        return $member->nick ?? $member->displayname;
     }
 
     /**
@@ -121,19 +126,18 @@ class Member extends IModel
     }
 
     /**
-     * @return int|null
+     * @return Member|null
      */
-    public function getVerifiedBy(): ?int
+    public function getVerifiedBy(): ?Member
     {
         return $this->verifiedBy;
     }
 
     /**
-     * @param int|null $verifiedBy
+     * @param Member|null $verifiedBy
      */
-    public function setVerifiedBy(?int $verifiedBy): void
+    public function setVerifiedBy(?Member $verifiedBy): void
     {
         $this->verifiedBy = $verifiedBy;
     }
-
 }

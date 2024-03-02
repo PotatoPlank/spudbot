@@ -8,12 +8,18 @@
 namespace Spudbot\Events\ScheduledEvent;
 
 
+use DI\Attribute\Inject;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
-use Spudbot\Types\EventType;
+use Spudbot\Services\EventService;
+use Spudbot\Services\GuildService;
 
 class EventCreated extends AbstractEventSubscriber
 {
+    #[Inject]
+    protected GuildService $guildService;
+    #[Inject]
+    protected EventService $eventService;
 
     public function getEventName(): string
     {
@@ -22,9 +28,6 @@ class EventCreated extends AbstractEventSubscriber
 
     public function update($event = null): void
     {
-        $eventRepository = $this->spud->eventRepository;
-        $guildRepository = $this->spud->guildRepository;
-
         $guild = $this->spud->discord->guilds->get('id', $event->guild_id);
         if (!$guild) {
             return;
@@ -33,18 +36,6 @@ class EventCreated extends AbstractEventSubscriber
         if (!$eventPart) {
             return;
         }
-        $guild = $guildRepository->findByPart($guild);
-
-        try {
-            $eventRepository->findByPart($eventPart);
-        } catch (\OutOfBoundsException $exception) {
-            $event = new \Spudbot\Model\Event();
-            $event->setName($eventPart->name);
-            $event->setGuild($guild);
-            $event->setType(EventType::Native);
-            $event->setNativeId($eventPart->guild_scheduled_event_id);
-
-            $eventRepository->save($event);
-        }
+        $this->eventService->findOrCreateNativeWithPart($eventPart);
     }
 }

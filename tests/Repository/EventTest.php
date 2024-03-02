@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Repository;
@@ -36,11 +42,11 @@ class EventTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\EventRepository
-     * @uses \Spudbot\Helpers\Collection
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Event
-     * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Repository\SQL\GuildRepository
+     * @uses   \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Event
+     * @uses   \Spudbot\Model\Guild
+     * @uses   \Spudbot\Repository\SQL\GuildRepository
      */
     public function successfullyGetAllRepositoryRecords(): void
     {
@@ -53,11 +59,11 @@ class EventTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\EventRepository
-     * @uses \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Event
-     * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Repository\SQL\GuildRepository
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Event
+     * @uses   \Spudbot\Model\Guild
+     * @uses   \Spudbot\Helpers\Collection
      * @doesNotPerformAssertions
      */
     public function successfullyFindEventById(): void
@@ -70,8 +76,8 @@ class EventTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\EventRepository
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Event
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Event
      */
     public function cannotRetrieveInvalidEventId(): void
     {
@@ -85,14 +91,14 @@ class EventTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\EventRepository
-     * @uses \Spudbot\Model\EventAttendance
-     * @uses \Spudbot\Helpers\Collection
-     * @uses \Spudbot\Repository\SQL\MemberRepository
-     * @uses \Spudbot\Model\Member
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Event
-     * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Repository\SQL\GuildRepository
+     * @uses   \Spudbot\Model\EventAttendance
+     * @uses   \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Repository\SQL\MemberRepository
+     * @uses   \Spudbot\Model\Member
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Event
+     * @uses   \Spudbot\Model\Guild
+     * @uses   \Spudbot\Repository\SQL\GuildRepository
      * @doesNotPerformAssertions
      */
     public function successfullyRetrievesAttendanceByEvent(): void
@@ -105,14 +111,14 @@ class EventTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\EventRepository
-     * @uses \Spudbot\Model\EventAttendance
-     * @uses \Spudbot\Helpers\Collection
-     * @uses \Spudbot\Repository\SQL\MemberRepository
-     * @uses \Spudbot\Model\Member
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Event
-     * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Repository\SQL\GuildRepository
+     * @uses   \Spudbot\Model\EventAttendance
+     * @uses   \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Repository\SQL\MemberRepository
+     * @uses   \Spudbot\Model\Member
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Event
+     * @uses   \Spudbot\Model\Guild
+     * @uses   \Spudbot\Repository\SQL\GuildRepository
      * @doesNotPerformAssertions
      */
     public function successfullyRetrievesAttendanceByEventAndMember(): void

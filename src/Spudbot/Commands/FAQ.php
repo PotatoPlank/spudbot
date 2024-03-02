@@ -25,7 +25,6 @@ class FAQ extends AbstractCommandSubscriber
         }
         $this->loadTemplates();
         $this->subCommandObserver->setDefaultListener(function (Interaction $interaction) {
-            $builder = $this->spud->getSimpleResponseBuilder();
             $message = 'A related question resource was not found.';
             foreach ($this->templates as $name => $template) {
                 if ($interaction->data->options->isset($name)) {
@@ -36,9 +35,10 @@ class FAQ extends AbstractCommandSubscriber
                     break;
                 }
             }
-            $builder->setTitle('Frequently Asked Questions');
-            $builder->setDescription($message);
-            $interaction->respondWithMessage($builder->getEmbeddedMessage());
+            $this->spud->interact()
+                ->setTitle('Frequently Asked Questions')
+                ->setDescription($message)
+                ->respondTo($interaction);
         });
 
         $this->subCommandObserver->notify($interaction->data->options, $interaction);

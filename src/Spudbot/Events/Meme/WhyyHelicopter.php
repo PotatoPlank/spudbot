@@ -11,11 +11,16 @@ namespace Spudbot\Events\Meme;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Util\Str;
 
 class WhyyHelicopter extends AbstractEventSubscriber
 {
     private string $whyy = ':whyy:1115394039815090196';
     private string $helicopter = '🚁';
+    private array $triggerKeywords = [
+        'why helicopter',
+        'whyy',
+    ];
 
     public function getEventName(): string
     {
@@ -27,24 +32,11 @@ class WhyyHelicopter extends AbstractEventSubscriber
         if (!$message) {
             return;
         }
-        $keywords = [
-            'why helicopter',
-            'whyy',
-        ];
-
-        if ($this->stringContains(strtolower($message->content), $keywords)) {
-            $message->react($this->whyy);
-            $message->react($this->helicopter);
+        if (!Str::containsOnePhrase(strtolower($message->content), $this->triggerKeywords)) {
+            return;
         }
-    }
 
-    private function stringContains($string, array $array)
-    {
-        foreach ($array as $a) {
-            if (stripos($string, $a) !== false) {
-                return true;
-            }
-        }
-        return false;
+        $message->react($this->whyy);
+        $message->react($this->helicopter);
     }
 }

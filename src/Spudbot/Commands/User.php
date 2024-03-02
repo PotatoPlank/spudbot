@@ -26,11 +26,13 @@ class User extends AbstractCommandSubscriber
         if (!$interaction) {
             return;
         }
-        $this->subCommandObserver->subscribe(TotalUserComments::class);
-        $this->subCommandObserver->subscribe(UserEventReputation::class);
-        $this->subCommandObserver->subscribe(UserInformation::class);
-        $this->subCommandObserver->subscribe(UserLeaderboard::class);
-        $this->subCommandObserver->subscribe(UserNoShowStatus::class);
+        $this->subCommandObserver->subscribeAll([
+            TotalUserComments::class,
+            UserEventReputation::class,
+            UserInformation::class,
+            UserLeaderboard::class,
+            UserNoShowStatus::class,
+        ]);
 //        $this->subCommandObserver->setDefaultListener(function (Interaction $interaction) {
 //            $builder = $this->spud->getSimpleResponseBuilder();
 //            $builder->setTitle('Test');
@@ -121,7 +123,7 @@ class User extends AbstractCommandSubscriber
 
     public function getCommandName(): string
     {
-        return 'user';
+        return 'user_test';
     }
 
     public function getCommandDescription(): string

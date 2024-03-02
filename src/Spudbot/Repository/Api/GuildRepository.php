@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Spudbot\Repository\Api;
 
 use Carbon\Carbon;
+use GuzzleHttp\Exception\GuzzleException;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IGuildRepository;
@@ -46,11 +47,11 @@ class GuildRepository extends IGuildRepository
         ]);
         $json = $this->getResponseJson($response);
 
-        if (!$json) {
+        if (empty($json['data'])) {
             throw new OutOfBoundsException("Guild with id {$discordId} does not exist.");
         }
 
-        return Guild::hydrateWithArray($json['data']);
+        return Guild::hydrateWithArray($json['data'][0]);
     }
 
     public function getAll(): Collection
@@ -72,7 +73,11 @@ class GuildRepository extends IGuildRepository
         return $collection;
     }
 
-    public function save(Guild $guild): bool
+    /**
+     * @throws ApiException
+     * @throws GuzzleException
+     */
+    public function save(Guild $guild): Guild
     {
         $guild->setModifiedAt(Carbon::now());
 
@@ -96,9 +101,11 @@ class GuildRepository extends IGuildRepository
                 'json' => $params,
             ]);
         }
-        $json = $this->getResponseJson($response);
+        if (!$this->wasSuccessful($response)) {
+            throw new ApiException();
+        }
 
-        return (bool)$json['success'];
+        return $guild;
     }
 
     public function remove(Guild $guild): bool

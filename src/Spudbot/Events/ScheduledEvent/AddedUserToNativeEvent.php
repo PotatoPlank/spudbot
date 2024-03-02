@@ -8,14 +8,25 @@
 namespace Spudbot\Events\ScheduledEvent;
 
 
+use DI\Attribute\Inject;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
-use Spudbot\Model\EventAttendance;
-use Spudbot\Types\EventType;
+use Spudbot\Services\EventAttendanceService;
+use Spudbot\Services\EventService;
+use Spudbot\Services\GuildService;
+use Spudbot\Services\MemberService;
 
 class AddedUserToNativeEvent extends AbstractEventSubscriber
 {
     public const SESH_BOT_ID = '616754792965865495';
+    #[Inject]
+    protected GuildService $guildService;
+    #[Inject]
+    protected MemberService $memberService;
+    #[Inject]
+    protected EventService $eventService;
+    #[Inject]
+    protected EventAttendanceService $attendanceService;
 
     public function getEventName(): string
     {
@@ -24,61 +35,32 @@ class AddedUserToNativeEvent extends AbstractEventSubscriber
 
     public function update($event = null): void
     {
-        $guildRepository = $this->spud->guildRepository;
-        $eventRepository = $this->spud->eventRepository;
-        $memberRepository = $this->spud->memberRepository;
-        $builder = $this->spud->getSimpleResponseBuilder();
-
+        if (!$event) {
+            return;
+        }
         $guildPart = $this->spud->discord->guilds->get('id', $event->guild_id);
         if (!$guildPart) {
             return;
         }
-        $guild = $guildRepository->findByPart($guildPart);
-
-        $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
-        if ($guild->isOutputLocationThread()) {
-            $output = $output->threads->get('id', $guild->getOutputThreadId());
-        }
-        if (!$output) {
-            return;
-        }
         $eventPart = $guildPart->guild_scheduled_events->get('id', $event->guild_scheduled_event_id);
+        $memberPart = $guildPart->members->get('id', $event->user_id);
 
-        if (!$eventPart || $eventPart->creator->id === self::SESH_BOT_ID) {
+        if (!$eventPart || !$memberPart || $eventPart->creator->id === self::SESH_BOT_ID) {
             return;
         }
 
-        try {
-            $eventModel = $eventRepository->findByPart($eventPart);
-        } catch (\OutOfBoundsException $exception) {
-            $eventModel = new \Spudbot\Model\Event();
-            $eventModel->setNativeId($eventPart->id);
-            $eventModel->setType(EventType::Native);
-            $eventModel->setGuild($guild);
-            $eventModel->setName($eventPart->name);
-            $eventModel->setScheduledAt($eventPart->scheduled_start_time);
+        $guild = $this->guildService->findWithPart($guildPart);
+        $output = $guild->getOutputPart($guildPart);
+        $eventModel = $this->eventService->findOrCreateNativeWithPart($eventPart);
+        $member = $this->memberService->findOrCreateWithPart($memberPart);
+        $this->attendanceService->findOrCreateByMemberAndEvent($member, $eventModel);
 
-            $eventRepository->save($eventModel);
-        }
+        $message = "<@{$member->getDiscordId()}> marked they were interested in {$eventModel->getName()}";
+        $message .= " scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}";
 
-        $memberPart = $guildPart->members->get('id', $event->user_id);
-        $member = $memberRepository->findByPart($memberPart);
-        try {
-            $eventAttendance = $eventRepository->getAttendanceByMemberAndEvent($member, $eventModel);
-            $eventAttendance->setStatus('Attendees');
-        } catch (\OutOfBoundsException $exception) {
-            $eventAttendance = new EventAttendance();
-            $eventAttendance->setEvent($eventModel);
-            $eventAttendance->setMember($member);
-            $eventAttendance->setStatus('Attendees');
-        }
-
-        $memberRepository->saveMemberEventAttendance($eventAttendance);
-
-        $builder->setTitle('Native Event Attendee');
-        $builder->setDescription(
-            "<@{$member->getDiscordId()}> marked they were interested in {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}"
-        );
-        $output->sendMessage($builder->getEmbeddedMessage());
+        $builder = $this->spud->interact()
+            ->setTitle('Native Event Attendee')
+            ->setDescription($message);
+        $output->sendMessage($builder->build());
     }
 }

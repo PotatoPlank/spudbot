@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Repository;
@@ -34,11 +40,11 @@ class MemberTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\MemberRepository
-     * @uses \Spudbot\Helpers\Collection
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Member
-     * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Repository\SQL\GuildRepository
+     * @uses   \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Member
+     * @uses   \Spudbot\Model\Guild
+     * @uses   \Spudbot\Repository\SQL\GuildRepository
      */
     public function successfullyGetAllRepositoryRecords(): void
     {
@@ -51,11 +57,11 @@ class MemberTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\MemberRepository
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Member
-     * @uses \Spudbot\Helpers\Collection
-     * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Repository\SQL\GuildRepository
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Member
+     * @uses   \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Model\Guild
+     * @uses   \Spudbot\Repository\SQL\GuildRepository
      * @doesNotPerformAssertions
      */
     public function successfullyFindMemberById(): void
@@ -68,10 +74,10 @@ class MemberTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\MemberRepository
-     * @uses \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Member
-     * @uses \Spudbot\Model\Guild
+     * @uses   \Spudbot\Repository\SQL\GuildRepository
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Member
+     * @uses   \Spudbot\Model\Guild
      */
     public function cannotRetrieveInvalidMemberId(): void
     {

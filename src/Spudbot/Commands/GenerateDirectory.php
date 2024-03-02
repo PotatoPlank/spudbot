@@ -7,126 +7,102 @@
 
 namespace Spudbot\Commands;
 
+use DI\Attribute\Inject;
 use Discord\Builders\CommandBuilder;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractCommandSubscriber;
-use Spudbot\Model\Channel;
 use Spudbot\Model\Directory;
+use Spudbot\Services\ChannelService;
 
 class GenerateDirectory extends AbstractCommandSubscriber
 {
+    #[Inject]
+    protected ChannelService $channelService;
+
     public function update(?Interaction $interaction = null): void
     {
         if (!$interaction) {
             return;
         }
-        $directoryRepository = $this->spud->directoryRepository;
-        $response = $this->spud->getSimpleResponseBuilder();
-        $response->setTitle('Forum Directory');
+
+        $response = $this->spud->interact()
+            ->setTitle('Forum Directory');
 
 
         $formChannelId = $interaction->data->options['channel']->value;
         $formChannelPart = $interaction->guild->channels->get('id', $formChannelId);
         $directoryChannelPart = $interaction->channel;
 
+        if (!$formChannelPart) {
+            $response->error('Unable to locate the specified forum channel')
+                ->respondTo($interaction);
+            return;
+        }
 
-        if ($formChannelPart) {
-            try {
-                $forumChannel = $this->spud->channelRepository
-                    ->findByPart($formChannelPart);
-            } catch (\OutOfBoundsException $exception) {
-                $this->spud->discord->getLogger()->info($exception->getMessage());
-                $guild = $this->spud->guildRepository
-                    ->findByPart($interaction->guild);
+        $forumChannel = $this->channelService->findWithPart($formChannelPart);
+        $directoryChannel = $this->channelService->findWithPart($directoryChannelPart);
 
-                $forumChannel = new Channel();
-                $forumChannel->setGuild($guild);
-                $forumChannel->setDiscordId($formChannelPart->id);
+        try {
+            $directory = $this->spud->directoryRepository->findByForumChannel($forumChannel);
+            $forumDirectoryPart = $interaction->guild
+                ->channels->get('id', $directory->getDirectoryChannel()->getDiscordId());
 
-                $this->spud->channelRepository
-                    ->save($forumChannel);
+            if (!$forumDirectoryPart) {
+                $response->error('Unable to locate the specified forum directory')
+                    ->respondTo($interaction);
+                return;
             }
 
-            try {
-                $directoryChannel = $this->spud->channelRepository
-                    ->findByPart($directoryChannelPart);
-            } catch (\OutOfBoundsException $exception) {
-                $this->spud->discord->getLogger()->info($exception->getMessage());
-                if (!isset($guild)) {
-                    $guild = $this->spud->guildRepository
-                        ->findByPart($interaction->guild);
-                }
+            $directoryMessage = $this->spud->directoryRepository
+                ->getEmbedContentFromPart($formChannelPart);
 
-                $directoryChannel = new Channel();
-                $directoryChannel->setGuild($guild);
-                $directoryChannel->setDiscordId($directoryChannelPart->id);
+            $embed = $this->spud->interact()
+                ->setTitle($formChannelPart->name . ' thread directory')
+                ->setDescription($directoryMessage);
 
-                $this->spud->channelRepository
-                    ->save($directoryChannel);
-            }
+            $success = function (Message $message) use ($embed) {
+                $message->edit($embed->build());
+            };
 
-            try {
-                $directory = $directoryRepository->findByForumChannel($forumChannel);
-                $forumDirectoryPart = $interaction->guild
-                    ->channels->get('id', $directory->getDirectoryChannel()->getDiscordId());
-
-                $directoryMessage = $directoryRepository
-                    ->getEmbedContentFromPart($formChannelPart);
-
-                $embed = $this->spud->getSimpleResponseBuilder();
-                $embed->setTitle($formChannelPart->name . ' thread directory');
-                $embed->setDescription($directoryMessage);
-
-                $success = function (Message $message) use ($embed) {
-                    $message->edit($embed->getEmbeddedMessage());
-                };
-
-                $rejected = function () use ($directoryChannelPart, $embed, $directory) {
-                    $directoryChannelPart
-                        ->sendMessage($embed->getEmbeddedMessage())->done(
-                            function (Message $message) use ($directory) {
-                                $directory->setEmbedId($message->id);
-
-                                $this->spud->directoryRepository
-                                    ->save($directory);
-                            }
-                        );
-                };
-
-                $forumDirectoryPart->messages->fetch($directory->getEmbedId())->done($success, $rejected);
-
-                $response->setDescription('Updated the directory.');
-            } catch (\OutOfBoundsException $exception) {
-                $this->spud->discord->getLogger()->info($exception->getMessage());
-
-                $directory = new Directory();
-                $directory->setDirectoryChannel($directoryChannel);
-                $directory->setForumChannel($forumChannel);
-
-                $directoryMessage = $directoryRepository->getEmbedContentFromPart($formChannelPart);
-                $embed = $this->spud->getSimpleResponseBuilder();
-                $embed->setTitle($formChannelPart->name . ' Directory');
-                $embed->setDescription($directoryMessage);
-
-                $directoryChannelPart->sendMessage($embed->getEmbeddedMessage())
+            $rejected = function () use ($directoryChannelPart, $embed, $directory) {
+                $directoryChannelPart->sendMessage($embed->build())
                     ->done(function (Message $message) use ($directory) {
                         $directory->setEmbedId($message->id);
 
                         $this->spud->directoryRepository
                             ->save($directory);
-                    }
-                    );
+                    });
+            };
 
-                $response->setDescription('Directory generated.');
-            }
-        } else {
-            $response->setDescription('Unable to locate the specified forum channel.');
+            $forumDirectoryPart->messages->fetch($directory->getEmbedId())->done($success, $rejected);
+
+            $response->setDescription('Updated the directory.');
+        } catch (\OutOfBoundsException $exception) {
+            $this->spud->discord->getLogger()->info($exception->getMessage());
+
+            $directory = new Directory();
+            $directory->setDirectoryChannel($directoryChannel);
+            $directory->setForumChannel($forumChannel);
+
+            $directoryMessage = $this->spud->directoryRepository->getEmbedContentFromPart($formChannelPart);
+            $embed = $this->spud->interact()
+                ->setTitle($formChannelPart->name . ' Directory')
+                ->setDescription($directoryMessage);
+
+            $directoryChannelPart->sendMessage($embed->build())
+                ->done(function (Message $message) use ($directory) {
+                    $directory->setEmbedId($message->id);
+
+                    $this->spud->directoryRepository
+                        ->save($directory);
+                });
+
+            $response->setDescription('Directory generated.');
         }
-
-        $interaction->respondWithMessage($response->getEmbeddedMessage(), true);
+        $response->respondTo($interaction, true);
     }
 
     public function getCommand(): Command

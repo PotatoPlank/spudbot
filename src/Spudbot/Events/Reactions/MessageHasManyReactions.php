@@ -29,41 +29,54 @@ class MessageHasManyReactions extends AbstractEventSubscriber
         if (!$messageReaction) {
             return;
         }
-        $messageReaction->channel->messages->fetch($messageReaction->message_id, true)->done(
-            function (Message $message) {
+        $messageReaction->channel->messages->fetch($messageReaction->message_id, true)
+            ->done(function (Message $message) {
                 $isModerator = $message->member->getPermissions()->moderate_members;
                 $isBot = $message->member->user->bot;
-                if ($isModerator || $isBot || $message->guild_id !== self::APPLIED_TO_GUILD_ID) {
-                    return;
-                }
-                $totalReactions = 0;
-                if ($message->reactions->count() > 0) {
-                    foreach ($message->reactions as $reaction) {
-                        $totalReactions += $reaction->count;
-                    }
-                }
-                if (isset($this->reactedCache[$message->id]) || $totalReactions <= $_ENV['REACTION_ALERT_THRESHOLD']) {
+                $appliesToGuild = $message->guild_id === self::APPLIED_TO_GUILD_ID;
+                $hasReactions = $message->reactions->count();
+
+                if ($isModerator || $isBot || !$appliesToGuild || !$hasReactions) {
                     return;
                 }
 
-                $builder = $this->spud->getSimpleResponseBuilder();
-                $builder->setTitle('Reaction Count Alert');
+                $totalReactions = 0;
+                foreach ($message->reactions as $reaction) {
+                    $totalReactions += $reaction->count;
+                }
+
+                $alreadyReacted = isset($this->reactedCache[$message->id]);
+                $underThreshold = $totalReactions <= $_ENV['REACTION_ALERT_THRESHOLD'];
+                if ($alreadyReacted || $underThreshold) {
+                    return;
+                }
+
                 $outputChannel = $message->guild->channels->get('id', $_ENV['MOD_ALERT_CHANNEL']);
                 if (!$outputChannel) {
+                    $this->spud->discord->getLogger()
+                        ->error('Unable to access the mod alerts channel.');
                     return;
                 }
                 $this->reactedCache[$message->id] = 0;
 
-                $builder->setDescription($this->spud->twig->render('reaction_alert.twig', [
-                    'reactionCount' => $totalReactions,
-                    'userId' => $message->member->id,
-                    'link' => $message->link,
-                    'cacheCount' => count($this->reactedCache),
-                    'cacheLimit' => $this->cacheLimit,
-                ]));
+                $builder = $this->spud->interact()
+                    ->setTitle('Reaction Count Alert')
+                    ->setDescription(
+                        $this->spud->twig->render('reaction_alert.twig', [
+                            'reactionCount' => $totalReactions,
+                            'userId' => $message->member->id,
+                            'link' => $message->link,
+                            'cacheCount' => count($this->reactedCache),
+                            'cacheLimit' => $this->cacheLimit,
+                        ])
+                    );
 
-                $outputChannel->sendMessage($builder->getEmbeddedMessage());
-            }
-        );
+                $outputChannel->sendMessage($builder->build());
+            });
+    }
+
+    public function canRun(?MessageReaction $messageReaction = null): bool
+    {
+        return isset($_ENV['MOD_ALERT_CHANNEL']);
     }
 }

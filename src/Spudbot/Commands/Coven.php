@@ -23,8 +23,10 @@ class Coven extends AbstractCommandSubscriber
         if (!$interaction) {
             return;
         }
-        $this->subCommandObserver->subscribe(Give::class);
-        $this->subCommandObserver->subscribe(Remove::class);
+        $this->subCommandObserver->subscribeAll([
+            Give::class,
+            Remove::class
+        ]);
         $this->subCommandObserver->notify($interaction->data->options, $interaction);
     }
 

@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Repository;
@@ -34,11 +40,11 @@ class ThreadTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\ThreadRepository
-     * @uses \Spudbot\Helpers\Collection
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Thread
-     * @uses \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Model\Guild
+     * @uses   \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Thread
+     * @uses   \Spudbot\Repository\SQL\GuildRepository
+     * @uses   \Spudbot\Model\Guild
      */
     public function successfullyGetAllRepositoryRecords(): void
     {
@@ -51,11 +57,11 @@ class ThreadTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\ThreadRepository
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Thread
-     * @uses \Spudbot\Helpers\Collection
-     * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Repository\SQL\GuildRepository
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Thread
+     * @uses   \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Model\Guild
+     * @uses   \Spudbot\Repository\SQL\GuildRepository
      * @doesNotPerformAssertions
      */
     public function successfullyFindThreadById(): void
@@ -68,8 +74,8 @@ class ThreadTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\ThreadRepository
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Thread
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Thread
      */
     public function cannotRetrieveInvalidThreadId(): void
     {

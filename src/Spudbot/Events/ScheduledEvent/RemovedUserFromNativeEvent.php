@@ -9,14 +9,25 @@ namespace Spudbot\Events\ScheduledEvent;
 
 
 use Carbon\Carbon;
+use DI\Attribute\Inject;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
-use Spudbot\Model\EventAttendance;
-use Spudbot\Types\EventType;
+use Spudbot\Services\EventAttendanceService;
+use Spudbot\Services\EventService;
+use Spudbot\Services\GuildService;
+use Spudbot\Services\MemberService;
 
 class RemovedUserFromNativeEvent extends AbstractEventSubscriber
 {
     public const SESH_BOT_ID = '616754792965865495';
+    #[Inject]
+    protected GuildService $guildService;
+    #[Inject]
+    protected EventService $eventService;
+    #[Inject]
+    protected MemberService $memberService;
+    #[Inject]
+    protected EventAttendanceService $attendanceService;
 
     public function getEventName(): string
     {
@@ -25,56 +36,26 @@ class RemovedUserFromNativeEvent extends AbstractEventSubscriber
 
     public function update($event = null): void
     {
-        $guildRepository = $this->spud->guildRepository;
-        $eventRepository = $this->spud->eventRepository;
         $memberRepository = $this->spud->memberRepository;
-        $builder = $this->spud->getSimpleResponseBuilder();
 
         $guildPart = $this->spud->discord->guilds->get('id', $event->guild_id);
         if (!$guildPart) {
             return;
         }
         $eventPart = $guildPart->guild_scheduled_events->get('id', $event->guild_scheduled_event_id);
-
-        if (!$eventPart || $eventPart->creator->id === self::SESH_BOT_ID) {
-            return;
-        }
-        $guild = $guildRepository->findByPart($guildPart);
-        $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
-        if ($guild->isOutputLocationThread()) {
-            $output = $output->threads->get('id', $guild->getOutputThreadId());
-        }
-        if (!$output) {
-            return;
-        }
-
-        try {
-            $eventModel = $eventRepository->findByPart($eventPart);
-        } catch (\OutOfBoundsException $exception) {
-            $eventModel = new \Spudbot\Model\Event();
-            $eventModel->setNativeId($eventPart->id);
-            $eventModel->setType(EventType::Native);
-            $eventModel->setGuild($guild);
-            $eventModel->setName($eventPart->name);
-            $eventModel->setScheduledAt($eventPart->scheduled_start_time);
-
-            $eventRepository->save($eventModel);
-        }
-
         $memberPart = $guildPart->members->get('id', $event->user_id);
-        if (!$memberPart) {
+
+        if (!$memberPart || !$eventPart || $eventPart->creator->id === self::SESH_BOT_ID) {
             return;
         }
-        $member = $memberRepository->findByPart($memberPart);
-        try {
-            $eventAttendance = $eventRepository->getAttendanceByMemberAndEvent($member, $eventModel);
-            $eventAttendance->setStatus('No');
-        } catch (\Exception $exception) {
-            $eventAttendance = new EventAttendance();
-            $eventAttendance->setEvent($eventModel);
-            $eventAttendance->setMember($member);
-            $eventAttendance->setStatus('No');
-        }
+        $guild = $this->guildService->findWithPart($guildPart);
+        $output = $guild->getOutputPart($guildPart);
+
+        $eventModel = $this->eventService->findOrCreateNativeWithPart($eventPart);
+
+        $member = $this->memberService->findOrCreateWithPart($memberPart);
+        $eventAttendance = $this->attendanceService->findOrCreateByMemberAndEvent($member, $eventModel);
+        $eventAttendance->setStatus('No');
 
         $noShowDateTime = $eventPart->scheduled_start_time->modify($_ENV['EVENT_NO_SHOW_WINDOW']);
         if ($noShowDateTime->lte(Carbon::now())) {
@@ -83,10 +64,12 @@ class RemovedUserFromNativeEvent extends AbstractEventSubscriber
 
         $memberRepository->saveMemberEventAttendance($eventAttendance);
 
-        $builder->setTitle('Native Event Attendee Removed');
-        $builder->setDescription(
-            "<@{$member->getDiscordId()}> removed their RSVP to {$eventModel->getName()} scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}"
-        );
-        $output->sendMessage($builder->getEmbeddedMessage());
+        $message = "<@{$member->getDiscordId()}> removed their RSVP to {$eventModel->getName()}";
+        $message .= " scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}";
+
+        $builder = $this->spud->interact()
+            ->setTitle('Native Event Attendee Removed')
+            ->setDescription($message);
+        $output->sendMessage($builder->build());
     }
 }

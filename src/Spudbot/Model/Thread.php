@@ -10,9 +10,9 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Interface\IModel;
+use Spudbot\Interface\AbstractModel;
 
-class Thread extends IModel
+class Thread extends AbstractModel
 {
     private string $discordId;
     private Guild $guild;

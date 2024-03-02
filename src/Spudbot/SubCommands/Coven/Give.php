@@ -25,10 +25,10 @@ class Give extends AbstractSubCommandSubscriber
     public function update(?Interaction $interaction = null): void
     {
         if (!$interaction) {
-            throw new \RuntimeException('Give Coven requires an interaction.');
+            throw new \BadMethodCallException('Give Coven requires an interaction.');
         }
-        $builder = $this->spud->getSimpleResponseBuilder();
-        $builder->setTitle('Give Coven');
+        $builder = $this->spud->interact()
+            ->setTitle('Give Coven');
 
         $memberId = $this->options['user']->value;
         $sourceMemberId = $interaction->member->id;
@@ -48,7 +48,6 @@ class Give extends AbstractSubCommandSubscriber
         } else {
             $builder->setDescription('Discord member and/or channel is not yet cached, please try again later.');
         }
-
-        $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
+        $builder->respondTo($interaction, true);
     }
 }

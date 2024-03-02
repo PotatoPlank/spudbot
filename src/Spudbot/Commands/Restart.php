@@ -29,21 +29,19 @@ class Restart extends AbstractCommandSubscriber
             return;
         }
 
-        $builder = $this->spud->getSimpleResponseBuilder();
-
         if ($this->spud->discord->application->owner->id !== $interaction->user->id) {
-            $builder->setTitle('Invalid Permissions for Restart');
-            $builder->setDescription('You don\'t have the necessary permissions to run this command.');
-
-            $interaction->respondWithMessage($builder->getEmbeddedMessage());
+            $this->spud->interact()
+                ->error('You don\'t have the necessary permissions to run this command.')
+                ->respondTo($interaction);
             return;
         }
 
-        $builder->setTitle('Restart');
-        $builder->setDescription('The bot will now restart.');
-
-        $interaction->respondWithMessage($builder->getEmbeddedMessage(), true)->done(function () {
-            $this->spud->terminate();
-        });
+        $this->spud->interact()
+            ->setTitle('Restart')
+            ->setDescription('The bot will now restart.')
+            ->respondTo($interaction, true)
+            ->done(function () {
+                $this->spud->terminate();
+            });
     }
 }

@@ -8,13 +8,17 @@
 namespace Spudbot\Events\Message;
 
 
+use DI\Attribute\Inject;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
 use Spudbot\Model\Member;
+use Spudbot\Services\MemberService;
 
 class CountMemberComments extends AbstractEventSubscriber
 {
+    #[Inject]
+    protected MemberService $memberService;
 
     public function getEventName(): string
     {
@@ -28,34 +32,20 @@ class CountMemberComments extends AbstractEventSubscriber
         }
 
         $isBot = isset($message->member->user->bot) && $message->member->user->bot;
-        if (!$isBot) {
-            $username = $message->member->nick ?? $message->member->displayname;
-            $memberRepository = $this->spud->memberRepository;
-
-            try {
-                $member = $memberRepository->findByPart($message->member);
-                $member->setTotalComments($member->getTotalComments() + 1);
-                $member->setUsername($username);
-            } catch (\OutOfBoundsException) {
-                $member = new Member();
-                $member->setGuild($this->spud->guildRepository->findByPart($message->guild));
-                $member->setDiscordId($message->member->id);
-                $member->setTotalComments(1);
-                $member->setUsername($username);
+        if ($isBot) {
+            $botMember = $this->memberService->findWithPart($message->member);
+            if ($botMember) {
+                $this->memberService->remove($botMember);
             }
-            $memberRepository->save($member);
             return;
         }
+        $username = Member::getUsernameWithPart($message->member);
 
-        $memberRepository = $this->spud->memberRepository;
-        try {
-            $member = $memberRepository->findByPart($message->member);
+        $member = $this->memberService->findOrCreateWithPart($message->member);
+        $member->setTotalComments($member->getTotalComments() + 1);
+        $member->setUsername($username);
 
-            $memberRepository->remove($member);
-        } catch (\OutOfBoundsException) {
-            /**
-             * Don't add the bot
-             */
-        }
+        $this->spud->memberRepository
+            ->save($member);
     }
 }

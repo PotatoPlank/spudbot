@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -25,7 +25,7 @@ abstract class IThreadRepository
 
     abstract public function getAll(): Collection;
 
-    abstract public function save(Thread $thread): bool;
+    abstract public function save(Thread $thread): Thread;
 
     abstract public function remove(Thread $thread): bool;
 }

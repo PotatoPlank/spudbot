@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Spudbot\Repository\Api;
 
 use Carbon\Carbon;
+use GuzzleHttp\Exception\GuzzleException;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IChannelRepository;
@@ -73,7 +74,11 @@ class ChannelRepository extends IChannelRepository
         return $collection;
     }
 
-    public function save(Channel $channel): bool
+    /**
+     * @throws ApiException
+     * @throws GuzzleException
+     */
+    public function save(Channel $channel): Channel
     {
         $channel->setModifiedAt(Carbon::now());
 
@@ -92,9 +97,12 @@ class ChannelRepository extends IChannelRepository
                 'json' => $params,
             ]);
         }
-        $json = $this->getResponseJson($response);
 
-        return (bool)$json['success'];
+        if (!$this->wasSuccessful($response)) {
+            throw new ApiException();
+        }
+
+        return $channel;
     }
 
     public function remove(Channel $channel): bool
@@ -130,6 +138,6 @@ class ChannelRepository extends IChannelRepository
             throw new OutOfBoundsException("Channel with discord id {$discordId} does not exist.");
         }
 
-        return Channel::hydrateWithArray($json['data']);
+        return Channel::hydrateWithArray($json['data'][0]);
     }
 }

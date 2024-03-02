@@ -28,10 +28,8 @@ class MemberBanned extends AbstractEventSubscriber
             return;
         }
         $getBan = function () use ($ban) {
-            $this->spud->discord->guilds->get('id', $ban->guild_id)->bans->fetch($ban->user_id)->done(
-                function (Ban $ban) {
-                    $builder = $this->spud->getSimpleResponseBuilder();
-
+            $this->spud->discord->guilds->get('id', $ban->guild_id)->bans->fetch($ban->user_id)
+                ->done(function (Ban $ban) {
                     $publicModLogChannel = $ban->guild->channels->get('id', self::MOD_LOG_CHANNEL_ID);
                     if (!$publicModLogChannel) {
                         return;
@@ -49,12 +47,13 @@ class MemberBanned extends AbstractEventSubscriber
                         'timestamp' => $time,
                     ]);
 
-                    $builder->setTitle('Member Banned');
-                    $builder->setDescription($message);
 
-                    $publicModLogChannel->sendMessage($builder->getEmbeddedMessage());
+                    $builder = $this->spud->interact()
+                        ->setTitle('Member Banned')
+                        ->setDescription($message);
+                    $publicModLogChannel->sendMessage($builder->build());
                 }
-            );
+                );
         };
         $this->spud->discord->getLoop()->addTimer(10, $getBan);
     }

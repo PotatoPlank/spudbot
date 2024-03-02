@@ -7,6 +7,7 @@
 
 namespace Spudbot\Commands;
 
+use DI\Attribute\Inject;
 use Discord\Builders\CommandBuilder;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\Channel\Message;
@@ -14,16 +15,26 @@ use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractCommandSubscriber;
-use Spudbot\Model\Thread;
+use Spudbot\Services\ChannelService;
+use Spudbot\Services\GuildService;
+use Spudbot\Services\ThreadService;
 
 class TagThread extends AbstractCommandSubscriber
 {
+    #[Inject]
+    protected ChannelService $channelService;
+    #[Inject]
+    protected GuildService $guildService;
+    #[Inject]
+    protected ThreadService $threadService;
+
     public function update(?Interaction $interaction = null): void
     {
         if (!$interaction) {
             return;
         }
-        $builder = $this->spud->getSimpleResponseBuilder();
+        $builder = $this->spud->interact()
+            ->setTitle('Applied Tag');
         $tag = $interaction->data->options['tag']->value;
         $threadId = $interaction->data->options['thread']->value;
 
@@ -32,9 +43,9 @@ class TagThread extends AbstractCommandSubscriber
         });
 
         if (!$channelPart) {
-            $builder->setTitle('Error');
-            $builder->setDescription("Unable to locate the relevant parent channel.");
-            $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
+            $this->spud->interact()
+                ->error("Unable to locate the relevant parent channel.")
+                ->respondTo($interaction, true);
             return;
         }
 
@@ -43,40 +54,22 @@ class TagThread extends AbstractCommandSubscriber
         $isMod = $interaction->member->getPermissions()->manage_messages;
 
         if (!$isOwner && !$isMod) {
-            $builder->setTitle('Error');
-            $builder->setDescription("You do not have correct permissions to apply the tag.");
-            $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
+            $this->spud->interact()
+                ->error("You do not have correct permissions to apply the tag.")
+                ->respondTo($interaction, true);
             return;
         }
 
-        $builder->setTitle('Applied Tag');
-
-        $guild = $this->spud->guildRepository->findByPart($interaction->guild);
-        try {
-            $channel = $this->spud->channelRepository
-                ->findByDiscordId($channelPart->id, $channelPart->guild_id);
-        } catch (\OutOfBoundsException $exception) {
-            $channel = new \Spudbot\Model\Channel();
-            $channel->setGuild($guild);
-            $channel->setDiscordId($channelPart->id);
-            $this->spud->channelRepository
-                ->save($channel);
-        }
-
-        try {
-            $thread = $this->spud->threadRepository
-                ->findByDiscordId($threadId, $interaction->guild->id);
-            $thread->setTag($tag);
-        } catch (\OutOfBoundsException $exception) {
-            $thread = new Thread();
-            $thread->setGuild($guild);
-            $thread->setChannel($channel);
-            $thread->setTag($tag);
-            $thread->setDiscordId($interaction->channel);
-        }
+        $channel = $this->channelService->findWithPart($channelPart);
+        $guild = $this->guildService->findWithPart($interaction->guild);
+        $thread = $this->threadService->findWithDiscordId($threadId, $interaction->guild->id);
+        $thread->setTag($tag);
+        $thread->setGuild($guild);
+        $thread->setChannel($channel);
 
         $this->spud->threadRepository
             ->save($thread);
+
         $builder->setDescription("Your tag {$tag} was applied.");
 
         try {
@@ -86,42 +79,40 @@ class TagThread extends AbstractCommandSubscriber
             $forumDirectoryPart = $channelPart->guild->channels
                 ->get('id', $directory->getDirectoryChannel()->getDiscordId());
 
-            if ($forumDirectoryPart) {
-                $directoryMessage = $this->spud->directoryRepository
-                    ->getEmbedContentFromPart($channelPart);
-
-                $embed = $this->spud->getSimpleResponseBuilder();
-                $embed->setTitle($forumDirectoryPart->name . ' thread directory');
-                $embed->setDescription($directoryMessage);
-
-                $success = function (Message $message) use ($embed) {
-                    $message->edit($embed->getEmbeddedMessage());
-                };
-
-                $rejected = function () use ($forumDirectoryPart, $embed, $directory) {
-                    $forumDirectoryPart
-                        ->sendMessage($embed->getEmbeddedMessage())->done(
-                            function (Message $message) use ($directory) {
-                                $directory->setEmbedId($message->id);
-
-                                $this->spud->directoryRepository
-                                    ->save($directory);
-                            }
-                        );
-                };
-
-                $forumDirectoryPart->messages
-                    ->fetch($directory->getEmbedId())->done($success, $rejected);
-            } else {
+            if (!$forumDirectoryPart) {
                 throw new \RuntimeException('The specified directory channel does not exist.');
             }
+
+            $directoryMessage = $this->spud->directoryRepository
+                ->getEmbedContentFromPart($channelPart);
+
+            $embed = $this->spud->interact()
+                ->setTitle($forumDirectoryPart->name . ' thread directory')
+                ->setDescription($directoryMessage);
+
+            $success = function (Message $message) use ($embed) {
+                $message->edit($embed->build());
+            };
+
+            $rejected = function () use ($forumDirectoryPart, $embed, $directory) {
+                $forumDirectoryPart->sendMessage($embed->build())
+                    ->done(function (Message $message) use ($directory) {
+                        $directory->setEmbedId($message->id);
+
+                        $this->spud->directoryRepository
+                            ->save($directory);
+                    });
+            };
+
+            $forumDirectoryPart->messages
+                ->fetch($directory->getEmbedId())->done($success, $rejected);
         } catch (\OutOfBoundsException $exception) {
             /**
              * There is no directory for this channel
              */
         }
 
-        $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
+        $builder->respondTo($interaction, true);
     }
 
     public function getCommand(): Command

@@ -26,8 +26,8 @@ class BotMentioned extends AbstractEventSubscriber
         if (!$message) {
             return;
         }
-        $botMentions = $message->mentions->get('id', $this->spud->discord->application->id);
-        if (!$botMentions) {
+        $botMentioned = $message->mentions->get('id', $this->spud->discord->application->id);
+        if (!$botMentioned) {
             return;
         }
         $message->react(self::REACT_ACKNOWLEDGE);

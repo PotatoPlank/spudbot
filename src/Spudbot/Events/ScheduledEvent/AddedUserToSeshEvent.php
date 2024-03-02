@@ -9,17 +9,30 @@ namespace Spudbot\Events\ScheduledEvent;
 
 
 use Carbon\Carbon;
+use DI\Attribute\Inject;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
 use Spudbot\Helpers\SeshEmbedParser;
 use Spudbot\Interface\AbstractEventSubscriber;
 use Spudbot\Model\EventAttendance;
+use Spudbot\Services\EventAttendanceService;
+use Spudbot\Services\EventService;
+use Spudbot\Services\GuildService;
+use Spudbot\Services\MemberService;
 use Spudbot\Types\EventType;
 
 class AddedUserToSeshEvent extends AbstractEventSubscriber
 {
     public const SESH_BOT_ID = '616754792965865495';
+    #[Inject]
+    protected GuildService $guildService;
+    #[Inject]
+    protected EventService $eventService;
+    #[Inject]
+    protected MemberService $memberService;
+    #[Inject]
+    protected EventAttendanceService $attendanceService;
 
     public function getEventName(): string
     {
@@ -31,43 +44,29 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
         if (!$message || $message->user_id !== self::SESH_BOT_ID) {
             return;
         }
+        $messageContent = '';
+        $originalAttendees = [];
         try {
             $eventInformation = new SeshEmbedParser($message);
 
-            $guild = $this->spud->guildRepository->findByPart($message->guild);
-            $output = $message->guild->channels->get('id', $guild->getOutputChannelId());
-            $messageContent = '';
+            $guild = $this->guildService->findWithPart($message->guild);
+            $output = $guild->getOutputPart($message->guild);
 
-            if ($guild->isOutputLocationThread()) {
-                $output = $output->threads->get('id', $guild->getOutputThreadId());
-            }
+            $event = $this->eventService->findOrCreateSesh($eventInformation->getId(), [
+                'seshId' => $message->id,
+                'channelId' => $message->channel_id,
+                'type' => EventType::Sesh,
+                'guild' => $guild,
+                'name' => $eventInformation->getTitle(),
+                'scheduledAt' => $eventInformation->getScheduledAt(),
+            ]);
 
-            if (!$output) {
-                return;
-            }
-
-            try {
-                $event = $this->spud->eventRepository->findBySeshId($eventInformation->getId());
-                $event->setName($eventInformation->getTitle());
-                $event->setScheduledAt($eventInformation->getScheduledAt());
-            } catch (\Exception $exception) {
-                $event = new \Spudbot\Model\Event();
-                $event->setGuild($guild);
-                $event->setName($eventInformation->getTitle());
-                $event->setType(EventType::Sesh);
-                $event->setScheduledAt($eventInformation->getScheduledAt());
-                $event->setSeshId($message->id);
-                $event->setChannelId($message->channel_id);
-            }
-            $this->spud->eventRepository->save($event);
-
-            $noShowDateTime = Carbon::parse($event->getScheduledAt())->modify(
-                $_ENV['EVENT_NO_SHOW_WINDOW'] ?? '-8 hours'
-            );
+            $noShowDateTime = Carbon::parse($event->getScheduledAt())
+                ->modify($_ENV['EVENT_NO_SHOW_WINDOW'] ?? '-8 hours');
             $noShowBoolean = $noShowDateTime->lte(Carbon::now());
-            $originalAttendees = [];
-            $currentAttendees = $this->spud->eventRepository->getAttendanceByEvent($event);
-            if (!empty($currentAttendees)) {
+
+            $currentAttendees = $this->eventService->getAttendance($event);
+            if (!$currentAttendees->empty()) {
                 /**
                  * @var EventAttendance $attendee
                  */
@@ -81,30 +80,25 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
                  * @var Member $attendee
                  */
                 foreach ($attendees as $attendee) {
-                    if (!isset($originalAttendees[$attendee->id]) || $eventStatus !== $originalAttendees[$attendee->id]->getStatus(
-                        )) {
-                        $member = $this->spud->memberRepository->findByPart($attendee);
-                        try {
-                            $eventAttendance = $this->spud->eventRepository->getAttendanceByMemberAndEvent(
-                                $member,
-                                $event
-                            );
-                        } catch (\Exception $exception) {
-                            $eventAttendance = new EventAttendance();
-                            $eventAttendance->setEvent($event);
-                            $eventAttendance->setMember($member);
-                            $eventAttendance->setStatus($eventStatus);
-                            $eventAttendance->wasNoShow(false);
-                        }
+                    $id = $attendee->id;
+                    $shouldAdd = !isset($originalAttendees[$id]) ||
+                        $eventStatus !== $originalAttendees[$id]->getStatus();
+
+                    if ($shouldAdd) {
+                        $member = $this->memberService->findOrCreateWithPart($attendee);
+                        $eventAttendance = $this->attendanceService->findOrCreateByMemberAndEvent($member, $event);
+                        $eventAttendance->wasNoShow(false);
                         if (str_contains($eventStatus, 'No')) {
                             $eventAttendance->wasNoShow($noShowBoolean);
                         }
                         $this->spud->memberRepository->saveMemberEventAttendance($eventAttendance);
                         $statusContentText .= "<@{$eventAttendance->getMember()->getDiscordId()}>" . PHP_EOL;
                     }
-                    unset($originalAttendees[$attendee->id]);
+                    unset($originalAttendees[$id]);
                 }
-                $messageContent .= empty($statusContentText) ? '' : "{$eventStatus}:" . PHP_EOL . PHP_EOL . $statusContentText;
+                if (!empty($statusContentText)) {
+                    $messageContent .= "{$eventStatus}:" . PHP_EOL . PHP_EOL . $statusContentText;
+                }
             }
             if (!empty($originalAttendees)) {
                 $statusContentText = '';
@@ -116,15 +110,17 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
                         $statusContentText .= "<@{$originalAttendee->getMember()->getDiscordId()}>" . PHP_EOL;
                     }
                 }
-                $messageContent .= empty($statusContentText) ? '' : 'Removed From List:' . PHP_EOL . PHP_EOL . $statusContentText;
+                if (!empty($statusContentText)) {
+                    $messageContent .= 'Removed From List:' . PHP_EOL . PHP_EOL . $statusContentText;
+                }
             }
-
-            if (!empty(trim($messageContent))) {
-                $builder = $this->spud->getSimpleResponseBuilder();
+            $messageContent = trim($messageContent);
+            if (!empty($messageContent)) {
+                $builder = $this->spud->interact();
                 $builder->setTitle("{$eventInformation->getTitle()} {$eventInformation->getSeshTimeString()}");
                 $builder->setDescription($messageContent);
                 $builder->setAllowedMentions([]);
-                $output->sendMessage($builder->getEmbeddedMessage());
+                $output->sendMessage($builder->build());
             }
         } catch (\Exception $exception) {
             /**

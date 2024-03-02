@@ -10,9 +10,9 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Interface\IModel;
+use Spudbot\Interface\AbstractModel;
 
-class Directory extends IModel
+class Directory extends AbstractModel
 {
     private Channel $directoryChannel;
     private Channel $forumChannel;

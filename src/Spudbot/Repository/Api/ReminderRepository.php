@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Spudbot\Repository\Api;
 
 use Carbon\Carbon;
+use GuzzleHttp\Exception\GuzzleException;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IReminderRepository;
@@ -74,7 +75,11 @@ class ReminderRepository extends IReminderRepository
         return $collection;
     }
 
-    public function save(Reminder $reminder): bool
+    /**
+     * @throws ApiException
+     * @throws GuzzleException
+     */
+    public function save(Reminder $reminder): Reminder
     {
         $reminder->setModifiedAt(Carbon::now());
 
@@ -103,10 +108,11 @@ class ReminderRepository extends IReminderRepository
                 'json' => $params,
             ]);
         }
+        if (!$this->wasSuccessful($response)) {
+            throw new ApiException();
+        }
 
-        $json = $this->getResponseJson($response);
-
-        return (bool)$json['success'];
+        return $reminder;
     }
 
     public function remove(Reminder $reminder): bool

@@ -25,20 +25,18 @@ class About extends AbstractCommandSubscriber
 
     public function update(Interaction $interaction = null): void
     {
-        if ($interaction === null) {
+        if (!$interaction) {
             $this->throwMissingArgs(['interaction']);
         }
-        $builder = $this->spud->getSimpleResponseBuilder();
-        $builder->setTitle('About');
 
-        $context = [
+        $message = $this->spud->twig->render('about.twig', [
             'version' => ApplicationVersion::get(),
             'applicationOwnerId' => $this->spud->discord->application->owner->id,
-        ];
+        ]);
 
-        $message = $this->spud->twig->render('about.twig', $context);
-        $builder->setDescription($message);
-
-        $interaction->respondWithMessage($builder->getEmbeddedMessage());
+        $this->spud->interact()
+            ->setTitle('About')
+            ->setDescription($message)
+            ->respondTo($interaction);
     }
 }

@@ -9,6 +9,7 @@ namespace Spudbot\Events\Ready;
 
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Repository\Interaction\GlobalCommandRepository;
+use Spudbot\Bot\Events;
 use Spudbot\Interface\AbstractEventSubscriber;
 
 class FreshenCommands extends AbstractEventSubscriber
@@ -17,29 +18,31 @@ class FreshenCommands extends AbstractEventSubscriber
 
     public function getEventName(): string
     {
-        return 'ready';
+        return Events::READY->value;
     }
 
     public function update(): void
     {
-        if ($_ENV['SENTRY_ENV'] === 'production') {
-            $this->spud->discord->application->commands->freshen()->done(
-                function (GlobalCommandRepository $commandRepository) {
-                    /**
-                     * @var Command $command
-                     */
-                    foreach ($commandRepository as $command) {
-                        $commandRegistered = $this->spud->commandObserver->hasCommand($command->name);
-                        if ($commandRegistered) {
-                            return;
-                        }
-                        $this->spud->discord->getLogger()
-                            ->notice("Removed command {$command->name}");
-                        $this->spud->discord->application->commands
-                            ->delete($command);
+        $this->spud->discord->application->commands->freshen()
+            ->done(function (GlobalCommandRepository $commandRepository) {
+                /**
+                 * @var Command $command
+                 */
+                foreach ($commandRepository as $command) {
+                    $commandRegistered = $this->spud->commandObserver->hasCommand($command->name);
+                    if ($commandRegistered) {
+                        continue;
                     }
+                    $this->spud->discord->getLogger()
+                        ->notice("Removed command {$command->name}");
+                    $this->spud->discord->application->commands
+                        ->delete($command);
                 }
-            );
-        }
+            });
+    }
+
+    public function canRun(): bool
+    {
+        return $_ENV['SENTRY_ENV'] === 'production';
     }
 }

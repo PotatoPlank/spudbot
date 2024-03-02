@@ -8,6 +8,7 @@
 use DI\ContainerBuilder;
 use Spudbot\Bot\Spud;
 use Spudbot\Commands\About;
+use Spudbot\Commands\User;
 use Spudbot\Events\Member\MemberBanned;
 use Spudbot\Events\Reactions\MessageHasManyReactions;
 use Spudbot\Events\Ready\ReadyMessage;
@@ -25,8 +26,13 @@ if (!isset($_ENV['DATABASE_NAME'])) {
 }
 
 $builder = new ContainerBuilder();
-$builder->addDefinitions(__DIR__ . '/config/api.php');
-$builder->addDefinitions(__DIR__ . '/config/bot.php');
+$builder->useAttributes(true);
+$builder->addDefinitions(
+    __DIR__ . '/config/api.php',
+    __DIR__ . '/config/bot.php',
+    __DIR__ . '/config/repositories.php',
+    __DIR__ . '/config/services.php',
+);
 $container = $builder->build();
 
 $spud = $container->get(Spud::class);
@@ -45,6 +51,7 @@ $excludedEvents = [
 
 $spud->attachSubscriber(ReadyMessage::class);
 $spud->attachSubscriber(About::class);
+$spud->attachSubscriber(User::class);
 
 
 $spud->run();

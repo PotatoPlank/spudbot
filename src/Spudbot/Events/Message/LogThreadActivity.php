@@ -8,14 +8,17 @@
 namespace Spudbot\Events\Message;
 
 
+use DI\Attribute\Inject;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
-use Spudbot\Model\Channel;
-use Spudbot\Model\Thread;
+use Spudbot\Services\ThreadService;
 
 class LogThreadActivity extends AbstractEventSubscriber
 {
+    #[Inject]
+    protected ThreadService $threadService;
+
     public function getEventName(): string
     {
         return Event::MESSAGE_CREATE;
@@ -27,28 +30,8 @@ class LogThreadActivity extends AbstractEventSubscriber
             return;
         }
 
-        $guild = $this->spud->guildRepository
-            ->findByPart($message->guild);
+        $thread = $this->threadService->findWithPart($message->thread);
 
-        try {
-            $channel = $this->spud->channelRepository
-                ->findByPart($message->thread->parent);
-        } catch (\OutOfBoundsException $exception) {
-            $channel = new Channel();
-            $channel->setDiscordId($message->thread->parent->id);
-            $channel->setGuild($guild);
-            $this->spud->channelRepository->save($channel);
-        }
-
-        try {
-            $thread = $this->spud->threadRepository
-                ->findByPart($message->thread);
-        } catch (\OutOfBoundsException $exception) {
-            $thread = new Thread();
-            $thread->setDiscordId($message->thread->id);
-            $thread->setGuild($guild);
-            $thread->setChannel($channel);
-        }
         $this->spud->threadRepository->save($thread);
     }
 }

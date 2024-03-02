@@ -9,29 +9,42 @@ namespace Spudbot\SubCommands;
 
 
 use Carbon\Carbon;
+use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractSubCommandSubscriber;
-use Spudbot\Repository\SQL\MemberRepository;
+use Spudbot\Services\MemberService;
 
 class UserInformation extends AbstractSubCommandSubscriber
 {
+    #[Inject]
+    protected MemberService $memberService;
 
     public function update(?Interaction $interaction = null): void
     {
-        /**
-         * @var MemberRepository $memberRepository
-         */
-        $memberRepository = $this->spud->memberRepository;
+        if (!$interaction) {
+            return;
+        }
         $title = 'User Information';
-        $builder = $this->spud->getSimpleResponseBuilder();
         $userId = $this->options['user']->value;
         $memberPart = $interaction->guild->members->get('id', $userId);
-        $member = $memberRepository->findByPart($memberPart);
-        $memberName = $member->getUsername();
-
-        $memberLength = $memberPart->joined_at->diff(Carbon::now());
+        if (!$memberPart) {
+            $this->spud->interact()
+                ->error("Unable to find member $userId");
+            return;
+        }
         $levelOneRole = $interaction->guild->roles->get('id', 1114365923730665481);
         $verificationRole = $interaction->guild->roles->get('id', 1114365923730665482);
+        if (!$levelOneRole || !$verificationRole) {
+            $this->spud->interact()
+                ->error("Unable to find role levels.")
+                ->respondTo($interaction);
+            return;
+        }
+
+        $member = $this->memberService->findOrCreateWithPart($memberPart);
+
+        $memberName = $member->getUsername();
+        $memberLength = $memberPart->joined_at->diff(Carbon::now());
         $isLevelOne = $memberPart->roles->isset($levelOneRole->id);
         $isVerified = $memberPart->roles->isset($verificationRole->id);
         $hasMetMembershipLength = $memberLength >= $_ENV['MEMBER_TENURE'];
@@ -39,31 +52,37 @@ class UserInformation extends AbstractSubCommandSubscriber
         $isEligible = $hasMetMembershipLength && $hasEnoughComments;
 
         if ($member->getVerifiedBy()) {
-            $verifier = $memberRepository->findById($member->getVerifiedBy());
+            $verifier = $this->spud->memberRepository->findById($member->getVerifiedBy());
             $verifierName = $verifier->getUsername();
             $verifierId = $verifier->getDiscordId();
         }
 
-        $context = [
-            'memberId' => $member->getDiscordId(),
-            'memberName' => $memberName,
-            'tenureDays' => $memberLength->days,
-            'requiredTenureDays' => $_ENV['MEMBER_TENURE'],
-            'totalComments' => $member->getTotalComments(),
-            'requiredCommentCount' => $_ENV['MEMBER_COMMENT_THRESHOLD'],
-            'isLevelOne' => $isLevelOne,
-            'isVerified' => $isVerified,
-            'isEligible' => $isEligible,
-            'levelOneRoleName' => $levelOneRole->name,
-            'verifiedRoleName' => $verificationRole->name,
-            'verifiedById' => $verifierId ?? null,
-            'verifiedByName' => $verifierName ?? null,
-        ];
+        $botStatus = $memberPart->user->bot ? 'Yes' : 'No';
+        if ($memberPart->user->bot === null) {
+            $botStatus = 'Not flagged';
+        }
 
-        $builder->setTitle($title);
-        $builder->setDescription($this->spud->twig->render('user/information.twig', $context));
-
-        $interaction->respondWithMessage($builder->getEmbeddedMessage());
+        $this->spud->interact()
+            ->setTitle($title)
+            ->setDescription(
+                $this->spud->twig->render('user/information.twig', [
+                    'memberId' => $member->getDiscordId(),
+                    'memberName' => $memberName,
+                    'tenureDays' => $memberLength->days,
+                    'requiredTenureDays' => $_ENV['MEMBER_TENURE'],
+                    'totalComments' => $member->getTotalComments(),
+                    'requiredCommentCount' => $_ENV['MEMBER_COMMENT_THRESHOLD'],
+                    'isLevelOne' => $isLevelOne,
+                    'isVerified' => $isVerified,
+                    'isEligible' => $isEligible,
+                    'levelOneRoleName' => $levelOneRole->name,
+                    'verifiedRoleName' => $verificationRole->name,
+                    'verifiedById' => $verifierId ?? null,
+                    'verifiedByName' => $verifierName ?? null,
+                    'isBot' => $botStatus,
+                ])
+            )
+            ->respondTo($interaction);
     }
 
     public function getCommandName(): string

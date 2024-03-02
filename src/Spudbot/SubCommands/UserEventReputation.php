@@ -11,13 +11,17 @@ namespace Spudbot\SubCommands;
 
 
 use Carbon\Carbon;
+use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractSubCommandSubscriber;
 use Spudbot\Model\EventAttendance;
-use Spudbot\Repository\SQL\MemberRepository;
+use Spudbot\Services\MemberService;
 
 class UserEventReputation extends AbstractSubCommandSubscriber
 {
+    #[Inject]
+    protected MemberService $memberService;
+
     public function getCommandName(): string
     {
         return 'reputation';
@@ -25,17 +29,21 @@ class UserEventReputation extends AbstractSubCommandSubscriber
 
     public function update(?Interaction $interaction = null): void
     {
-        /**
-         * @var MemberRepository $repository
-         */
-        $repository = $this->spud->memberRepository;
-        $builder = $this->spud->getSimpleResponseBuilder();
-        $builder->setTitle("Event Attendance");
+        if (!$interaction) {
+            return;
+        }
+        $builder = $this->spud->interact()
+            ->setTitle("Event Attendance");
         $userId = $this->options['user']->value;
         $memberPart = $interaction->guild->members->get('id', $userId);
+        if (!$memberPart) {
+            $builder->error("Unable to find member $userId")
+                ->respondTo($interaction);
+            return;
+        }
 
-        $member = $repository->findByPart($memberPart);
-        $eventsAttended = $repository->getEventAttendance($member);
+        $member = $this->memberService->findOrCreateWithPart($memberPart);
+        $eventsAttended = $this->spud->memberRepository->getEventAttendance($member);
         $totalEvents = count($eventsAttended);
         $totalAttended = 0;
         if ($totalEvents > 0) {
@@ -45,26 +53,23 @@ class UserEventReputation extends AbstractSubCommandSubscriber
             foreach ($eventsAttended as $event) {
                 if ($event->getEvent()->getScheduledAt()->gt(Carbon::now())) {
                     $totalEvents--;
-                } else {
-                    if (!$event->getNoShowStatus()) {
-                        $totalAttended++;
-                    }
+                } elseif (!$event->getNoShowStatus()) {
+                    $totalAttended++;
                 }
             }
 
-            $reputation = round(($totalAttended / $totalEvents) * 100);
-            $context = [
+            $reputation = $this->spud->memberRepository->getEventReputation($eventsAttended);
+            $message = $this->spud->twig->render('user/event_reputation.twig', [
                 'memberId' => $memberPart->id,
                 'reputation' => $reputation,
                 'eventsAttended' => $totalAttended,
                 'eventsInterested' => $totalEvents,
-            ];
-            $message = $this->spud->twig->render('user/event_reputation.twig', $context);
+            ]);
 
             $builder->setDescription($message);
         } else {
             $builder->setDescription("<@{$memberPart->id}> hasn't attended an event yet.");
         }
-        $interaction->respondWithMessage($builder->getEmbeddedMessage());
+        $builder->respondTo($interaction);
     }
 }

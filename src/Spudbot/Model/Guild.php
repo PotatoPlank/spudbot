@@ -13,9 +13,9 @@ use Carbon\Carbon;
 use Carbon\CarbonTimeZone;
 use Discord\Discord;
 use Discord\Parts\Channel\Channel;
-use Spudbot\Interface\IModel;
+use Spudbot\Interface\AbstractModel;
 
-class Guild extends IModel
+class Guild extends AbstractModel
 {
     private string $discordId;
     private ?string $outputChannelId = null;
@@ -133,6 +133,28 @@ class Guild extends IModel
     public function setOutputChannelId(?string $channelId): void
     {
         $this->outputChannelId = $channelId;
+    }
+
+    public function getOutputPart(\Discord\Parts\Guild\Guild $guild): Channel
+    {
+        $channelId = $this->getOutputChannelId();
+        $threadId = $this->getOutputThreadId();
+
+        $outputPart = $guild->channels->get('id', $channelId);
+        if (!$outputPart) {
+            throw new \BadMethodCallException(
+                "Failed locating channel {$channelId} for {$guild->id}."
+            );
+        }
+        if ($this->isOutputLocationThread()) {
+            $outputPart = $outputPart->threads->get('id', $threadId);
+            if (!$outputPart) {
+                throw new \BadMethodCallException(
+                    "Failed locating thread {$threadId} in channel {$channelId} for {$guild->id}"
+                );
+            }
+        }
+        return $outputPart;
     }
 
     public function isOutputLocationThread(): bool

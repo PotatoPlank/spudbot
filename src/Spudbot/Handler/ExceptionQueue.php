@@ -7,7 +7,8 @@
 
 namespace Spudbot\Handler;
 
-use PHPUnit\Event\Code\Throwable;
+
+use Throwable;
 
 class ExceptionQueue
 {

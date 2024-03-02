@@ -10,11 +10,11 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Interface\IModel;
+use Spudbot\Interface\AbstractModel;
 use Spudbot\Types\EventType;
 
 class
-Event extends IModel
+Event extends AbstractModel
 {
     private Guild $guild;
     private ?string $channelId;

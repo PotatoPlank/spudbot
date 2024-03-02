@@ -8,13 +8,19 @@
 namespace Spudbot\Events\Meme;
 
 
+use Carbon\Carbon;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Util\Str;
 
 class GoodMorning extends AbstractEventSubscriber
 {
     private string $reaction = ':sun_with_face:';
+    private string $guildTimezone = 'America/New_York';
+    private array $triggerPhrases = [
+        'good morning',
+    ];
 
     public function getEventName(): string
     {
@@ -26,22 +32,12 @@ class GoodMorning extends AbstractEventSubscriber
         if (!$message) {
             return;
         }
-        $keywords = [
-            'good morning',
-        ];
-
-        if ($this->stringContains(strtolower($message->content), $keywords)) {
+        $hasGreeted = Str::containsOnePhrase(strtolower($message->content), $this->triggerPhrases);
+        $morningStart = Carbon::now($this->guildTimezone)->setTime(3, 0);
+        $morningEnd = Carbon::now($this->guildTimezone)->setTime(12, 0);
+        $isMorning = $message->timestamp->setTimezone($this->guildTimezone)->between($morningStart, $morningEnd);
+        if ($hasGreeted && $isMorning) {
             $message->react($this->reaction);
         }
-    }
-
-    private function stringContains($string, array $array): bool
-    {
-        foreach ($array as $a) {
-            if (stripos($string, $a) !== false) {
-                return true;
-            }
-        }
-        return false;
     }
 }

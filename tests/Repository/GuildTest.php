@@ -1,4 +1,10 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
+
 declare(strict_types=1);
 
 namespace Repository;
@@ -34,9 +40,9 @@ class GuildTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Helpers\Collection
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Guild
+     * @uses   \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Guild
      */
     public function successfullyGetAllRepositoryRecords(): void
     {
@@ -49,9 +55,9 @@ class GuildTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Guild
-     * @uses \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Guild
+     * @uses   \Spudbot\Helpers\Collection
      * @doesNotPerformAssertions
      */
     public function successfullyFindGuildById(): void
@@ -64,9 +70,9 @@ class GuildTest extends TestCase
     /**
      * @test
      * @covers \Spudbot\Repository\SQL\GuildRepository
-     * @uses \Spudbot\Interface\IModel
-     * @uses \Spudbot\Model\Guild
-     * @uses  \Spudbot\Helpers\Collection
+     * @uses   \Spudbot\Interface\AbstractModel
+     * @uses   \Spudbot\Model\Guild
+     * @uses   \Spudbot\Helpers\Collection
      */
     public function cannotRetrieveInvalidGuildId(): void
     {

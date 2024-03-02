@@ -7,13 +7,16 @@
 
 namespace Spudbot\Commands;
 
+use DI\Attribute\Inject;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractCommandSubscriber;
-use Spudbot\Model\Guild;
+use Spudbot\Services\GuildService;
 
 class Setup extends AbstractCommandSubscriber
 {
+    #[Inject]
+    protected GuildService $guildService;
 
     public function getCommandName(): string
     {
@@ -30,17 +33,15 @@ class Setup extends AbstractCommandSubscriber
         if (!$interaction) {
             return;
         }
-        $builder = $this->spud->getSimpleResponseBuilder();
         if (!$interaction->member->permissions->manage_guild) {
-            $builder->setTitle('Invalid Permissions for Setup');
-            $builder->setDescription('You don\'t have the necessary permissions to run this command.');
-
-            $interaction->respondWithMessage($builder->getEmbeddedMessage());
+            $this->spud->interact()
+                ->error('You don\'t have the necessary permissions to run this command.')
+                ->respondTo($interaction);
             return;
         }
 
-        $interaction->guild->channels->fetch($interaction->channel_id)->done(
-            function (Channel $channel) use ($interaction, $builder) {
+        $interaction->guild->channels->fetch($interaction->channel_id)
+            ->done(function (Channel $channel) use ($interaction) {
                 $channelId = $channel->id;
                 $threadTypes = [
                     Channel::TYPE_ANNOUNCEMENT_THREAD,
@@ -54,12 +55,7 @@ class Setup extends AbstractCommandSubscriber
                     $threadId = $channel->id;
                 }
 
-                try {
-                    $guild = $this->spud->guildRepository->findByPart($interaction->guild);
-                } catch (\OutOfBoundsException $exception) {
-                    $guild = new Guild();
-                    $guild->setDiscordId($interaction->guild_id);
-                }
+                $guild = $this->guildService->findWithPart($interaction->guild);
 
                 $guild->setOutputChannelId($channelId);
                 if ($isThread) {
@@ -67,13 +63,11 @@ class Setup extends AbstractCommandSubscriber
                 }
                 $this->spud->guildRepository->save($guild);
 
-                $builder->setTitle('Setup complete');
-                $builder->setDescription(
-                    "Set the guild output location to <#{$guild->getOutputLocationId()}>."
-                );
-
-                $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
-            }
-        );
+                $this->spud->interact()
+                    ->setTitle('Setup complete')
+                    ->setDescription(
+                        "Set the guild output location to <#{$guild->getOutputLocationId()}>."
+                    )->respondTo($interaction, true);
+            });
     }
 }

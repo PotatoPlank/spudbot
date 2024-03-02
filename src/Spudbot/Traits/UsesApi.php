@@ -16,7 +16,12 @@ trait UsesApi
     {
     }
 
-    public function getResponseJson(ResponseInterface $response)
+    public function wasSuccessful(ResponseInterface $response): bool
+    {
+        return (bool)$this->getResponseJson($response)['success'];
+    }
+
+    public function getResponseJson(ResponseInterface $response): mixed
     {
         return json_decode($response->getBody()->__toString(), true, 512, JSON_THROW_ON_ERROR);
     }

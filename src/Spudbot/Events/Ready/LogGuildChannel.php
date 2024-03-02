@@ -21,21 +21,26 @@ class LogGuildChannel extends AbstractEventSubscriber
 
     public function update(): void
     {
-        if (!empty($this->spud->logGuild) && $_ENV['SENTRY_ENV'] !== 'dev') {
-            $output = $this->spud->discord->guilds->get('id', $this->spud->logGuild->getDiscordId())->channels->get(
-                'id',
-                $this->spud->logGuild->getOutputChannelId()
-            );
-            if (!empty($this->spud->logGuild->getOutputThreadId())) {
-                $output = $output->threads->get('id', $this->spud->logGuild->getOutputThreadId());
+        try {
+            $part = $this->spud->discord->guilds->get('id', $this->spud->logGuild->getDiscordId());
+            if (!$part) {
+                throw new \BadMethodCallException("Invalid guild {$this->spud->logGuild->getDiscordId()}");
             }
-            if (!$output) {
-                return;
-            }
-            $builder = $this->spud->getSimpleResponseBuilder();
-            $builder->setTitle('Bot started')
-                ->setDescription("Spudbot started. " . ApplicationVersion::get());
-            $output->sendMessage($builder->getEmbeddedMessage());
+            $output = $this->spud->logGuild->getOutputPart($part);
+        } catch (\Exception $exception) {
+            $this->spud->discord->getLogger()
+                ->error($exception->getMessage());
+            return;
         }
+
+        $builder = $this->spud->interact()
+            ->setTitle('Bot started')
+            ->setDescription("Spudbot started. " . ApplicationVersion::get());
+        $output->sendMessage($builder->build());
+    }
+
+    public function canRun(): bool
+    {
+        return !empty($this->spud->logGuild) && $_ENV['SENTRY_ENV'] !== 'dev';
     }
 }

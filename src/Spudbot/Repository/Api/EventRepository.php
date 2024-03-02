@@ -11,6 +11,7 @@ namespace Spudbot\Repository\Api;
 
 use Carbon\Carbon;
 use Discord\Parts\Guild\ScheduledEvent;
+use GuzzleHttp\Exception\GuzzleException;
 use InvalidArgumentException;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
@@ -62,7 +63,7 @@ class EventRepository extends IEventRepository
             throw new OutOfBoundsException("Event with id {$discordId} does not exist.");
         }
 
-        return Event::hydrateWithArray($json['data']);
+        return Event::hydrateWithArray($json['data'][0]);
     }
 
     public function findBySeshId(string $seshId): Event
@@ -78,7 +79,7 @@ class EventRepository extends IEventRepository
             throw new OutOfBoundsException("Event with id {$seshId} does not exist.");
         }
 
-        return Event::hydrateWithArray($json['data']);
+        return Event::hydrateWithArray($json['data'][0]);
     }
 
     public function findByGuild(Guild $guild): Collection
@@ -153,7 +154,11 @@ class EventRepository extends IEventRepository
         return $collection;
     }
 
-    public function save(Event $event): bool
+    /**
+     * @throws ApiException
+     * @throws GuzzleException
+     */
+    public function save(Event $event): Event
     {
         $event->setModifiedAt(Carbon::now());
 
@@ -183,9 +188,11 @@ class EventRepository extends IEventRepository
             ]);
         }
 
-        $json = $this->getResponseJson($response);
+        if (!$this->wasSuccessful($response)) {
+            throw new ApiException();
+        }
 
-        return (bool)$json['success'];
+        return $event;
     }
 
     public function remove(Event $event): bool

@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Spudbot\Repository\Api;
 
 use Carbon\Carbon;
+use GuzzleHttp\Exception\GuzzleException;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IThreadRepository;
@@ -51,10 +52,14 @@ class ThreadRepository extends IThreadRepository
             throw new OutOfBoundsException("Thread with id {$discordId} does not exist.");
         }
 
-        return Thread::hydrateWithArray($json['data']);
+        return Thread::hydrateWithArray($json['data'][0]);
     }
 
-    public function save(Thread $thread): bool
+    /**
+     * @throws ApiException
+     * @throws GuzzleException
+     */
+    public function save(Thread $thread): Thread
     {
         $thread->setModifiedAt(Carbon::now());
 
@@ -80,10 +85,12 @@ class ThreadRepository extends IThreadRepository
             ]);
         }
 
-        $json = $this->getResponseJson($response);
+        if (!$this->wasSuccessful($response)) {
+            throw new ApiException();
+        }
 
 
-        return (bool)$json['success'];
+        return $thread;
     }
 
     public function findByGuild(Guild $guild): Collection

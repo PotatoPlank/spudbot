@@ -10,12 +10,15 @@ declare(strict_types=1);
 namespace Spudbot\SubCommands;
 
 
+use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractSubCommandSubscriber;
-use Spudbot\Repository\SQL\MemberRepository;
+use Spudbot\Services\MemberService;
 
 class TotalUserComments extends AbstractSubCommandSubscriber
 {
+    #[Inject]
+    protected MemberService $memberService;
 
     public function getCommandName(): string
     {
@@ -24,24 +27,27 @@ class TotalUserComments extends AbstractSubCommandSubscriber
 
     public function update(?Interaction $interaction = null): void
     {
-        /**
-         * @var MemberRepository $repository
-         */
-        $repository = $this->spud->memberRepository;
-        $builder = $this->spud->getSimpleResponseBuilder();
+        if (!$interaction) {
+            return;
+        }
+        $builder = $this->spud->interact();
         $userId = $this->options['user']->value;
         $memberPart = $interaction->guild->members->get('id', $userId);
+        if (!$memberPart) {
+            $builder->error("Unable to find member $userId")
+                ->respondTo($interaction);
+            return;
+        }
 
-        $member = $repository->findByPart($memberPart);
+        $member = $this->memberService->findOrCreateWithPart($memberPart);
 
         $context = [
             'memberId' => $memberPart->user->id,
             'totalComments' => $member->getTotalComments(),
         ];
 
-        $builder->setTitle("{$memberPart->user->displayname} Comment Count");
-        $builder->setDescription($this->spud->twig->render('user/comment_count.twig', $context));
-
-        $interaction->respondWithMessage($builder->getEmbeddedMessage());
+        $builder->setTitle("{$memberPart->user->displayname} Comment Count")
+            ->setDescription($this->spud->twig->render('user/comment_count.twig', $context))
+            ->respondTo($interaction);
     }
 }

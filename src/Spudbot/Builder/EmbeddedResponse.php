@@ -10,6 +10,8 @@ namespace Spudbot\Builder;
 use Discord\Builders\MessageBuilder;
 use Discord\Discord;
 use Discord\Parts\Embed\Embed;
+use Discord\Parts\Interactions\Interaction;
+use React\Promise\ExtendedPromiseInterface;
 
 class EmbeddedResponse
 {
@@ -20,6 +22,13 @@ class EmbeddedResponse
 
     public function __construct(public Discord $discord)
     {
+    }
+
+    public function error(string $description): self
+    {
+        $this->title = 'Error';
+        $this->description = $description;
+        return $this;
     }
 
     public function setTitle(string $title): self
@@ -40,7 +49,12 @@ class EmbeddedResponse
         return $this;
     }
 
-    public function getEmbeddedMessage(): MessageBuilder
+    public function respondTo(Interaction $interaction, bool $ephemeral = false): ExtendedPromiseInterface
+    {
+        return $interaction->respondWithMessage($this->build(), $ephemeral);
+    }
+
+    public function build(): MessageBuilder
     {
         $builder = MessageBuilder::new();
         $options = $this->options;

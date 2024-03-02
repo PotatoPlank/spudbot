@@ -8,13 +8,6 @@
 
 use GuzzleHttp\Client;
 use Psr\Container\ContainerInterface;
-use Spudbot\Repository\Api\ChannelRepository;
-use Spudbot\Repository\Api\DirectoryRepository;
-use Spudbot\Repository\Api\EventRepository;
-use Spudbot\Repository\Api\GuildRepository;
-use Spudbot\Repository\Api\MemberRepository;
-use Spudbot\Repository\Api\ReminderRepository;
-use Spudbot\Repository\Api\ThreadRepository;
 
 return [
     'api.endpoint' => $_ENV['API_ENDPOINT'],
@@ -29,12 +22,5 @@ return [
             ],
         ]);
     },
-    MemberRepository::class => DI\autowire(),
-    EventRepository::class => DI\autowire(),
-    GuildRepository::class => DI\autowire(),
-    ThreadRepository::class => DI\autowire(),
-    ChannelRepository::class => DI\autowire(),
-    ReminderRepository::class => DI\autowire(),
-    DirectoryRepository::class => DI\autowire(),
 ];
 

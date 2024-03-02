@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Spudbot\Repository\Api;
 
 use Carbon\Carbon;
+use GuzzleHttp\Exception\GuzzleException;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IMemberRepository;
@@ -49,12 +50,12 @@ class MemberRepository extends IMemberRepository
         ]);
         $json = $this->getResponseJson($response);
 
-        if (!$json) {
+        if (empty($json['data'])) {
             throw new OutOfBoundsException("Member with id {$discordId} does not exist.");
         }
 
 
-        return Member::hydrateWithArray($json['data']);
+        return Member::hydrateWithArray($json['data'][0]);
     }
 
     public function findByGuild(Guild $guild): Collection
@@ -67,7 +68,7 @@ class MemberRepository extends IMemberRepository
         ]);
         $json = $this->getResponseJson($response);
 
-        if (!empty($json)) {
+        if (!empty($json['data'])) {
             foreach ($json['data'] as $row) {
                 $member = Member::hydrateWithArray($row);
 
@@ -84,7 +85,7 @@ class MemberRepository extends IMemberRepository
         $response = $this->client->get('members');
         $json = $this->getResponseJson($response);
 
-        if (!empty($json)) {
+        if (!empty($json['data'])) {
             foreach ($json['data'] as $row) {
                 $member = Member::hydrateWithArray($row);
 
@@ -95,6 +96,27 @@ class MemberRepository extends IMemberRepository
         return $collection;
     }
 
+    public function getEventReputation(Collection $eventsAttended)
+    {
+        $totalEvents = count($eventsAttended);
+        $totalAttended = 0;
+        if ($totalEvents > 0) {
+            /**
+             * @var EventAttendance $event
+             */
+            foreach ($eventsAttended as $event) {
+                if ($event->getEvent()->getScheduledAt()->gt(Carbon::now())) {
+                    $totalEvents--;
+                } elseif (!$event->getNoShowStatus()) {
+                    $totalAttended++;
+                }
+            }
+
+            return round(($totalAttended / $totalEvents) * 100);
+        }
+        return 0;
+    }
+
     public function getEventAttendance(Member $member): Collection
     {
         $collection = new Collection();
@@ -102,7 +124,7 @@ class MemberRepository extends IMemberRepository
         $response = $this->client->get("members/{$member->getId()}/attendance");
         $json = $this->getResponseJson($response);
 
-        if (!empty($json)) {
+        if (!empty($json['data'])) {
             foreach ($json['data'] as $row) {
                 $attendance = EventAttendance::hydrateWithArray($row);
 
@@ -118,14 +140,16 @@ class MemberRepository extends IMemberRepository
         $collection = new Collection();
         $response = $this->client->get('members', [
             'query' => [
-                'sort' => 'comments',
+                'sort' => 'total_comments',
                 'direction' => 'desc',
+                'guild_discord_id' => $guild->getDiscordId(),
+                'limit' => $limit,
             ],
         ]);
 
         $json = $this->getResponseJson($response);
 
-        if (!empty($json)) {
+        if (!empty($json['data'])) {
             foreach ($json['data'] as $row) {
                 $member = Member::hydrateWithArray($row);
 
@@ -136,7 +160,11 @@ class MemberRepository extends IMemberRepository
         return $collection;
     }
 
-    public function save(Member $member): bool
+    /**
+     * @throws ApiException
+     * @throws GuzzleException
+     */
+    public function save(Member $member): Member
     {
         $member->setModifiedAt(Carbon::now());
 
@@ -163,9 +191,11 @@ class MemberRepository extends IMemberRepository
             ]);
         }
 
-        $json = $this->getResponseJson($response);
+        if (!$this->wasSuccessful($response)) {
+            throw new ApiException();
+        }
 
-        return (bool)$json['success'];
+        return $member;
     }
 
     public function remove(Member $member): bool
@@ -183,7 +213,11 @@ class MemberRepository extends IMemberRepository
         return true;
     }
 
-    public function saveMemberEventAttendance(EventAttendance $eventAttendance): bool
+    /**
+     * @throws ApiException
+     * @throws GuzzleException
+     */
+    public function saveMemberEventAttendance(EventAttendance $eventAttendance): EventAttendance
     {
         $eventAttendance->setModifiedAt(Carbon::now());
 
@@ -212,9 +246,11 @@ class MemberRepository extends IMemberRepository
             );
         }
 
-        $json = $this->getResponseJson($response);
+        if (!$this->wasSuccessful($response)) {
+            throw new ApiException();
+        }
 
-        return (bool)$json['success'];
+        return $eventAttendance;
     }
 
 }

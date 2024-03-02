@@ -8,13 +8,17 @@
 namespace Spudbot\Events\ScheduledEvent;
 
 
+use DI\Attribute\Inject;
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Services\GuildService;
 
 class AddedUserToNativeSeshEvent extends AbstractEventSubscriber
 {
     public const SESH_BOT_ID = '616754792965865495';
+    #[Inject]
+    protected GuildService $guildService;
 
     public function getEventName(): string
     {
@@ -23,10 +27,6 @@ class AddedUserToNativeSeshEvent extends AbstractEventSubscriber
 
     public function update($event = null): void
     {
-        $guildRepository = $this->spud->guildRepository;
-        $builder = $this->spud->getSimpleResponseBuilder();
-        $builder->setTitle('Native Event RSVP Notification');
-
         $guildPart = $this->spud->discord->guilds->get('id', $event->guild_id);
         if (!$guildPart) {
             return;
@@ -41,29 +41,24 @@ class AddedUserToNativeSeshEvent extends AbstractEventSubscriber
             "A user attempted to RSVP to a native event instead of the Sesh event."
         );
 
-        $guild = $guildRepository->findByPart($guildPart);
-        $output = $guildPart->channels->get('id', $guild->getOutputChannelId());
-        if ($guild->isOutputLocationThread()) {
-            $output = $output->threads->get('id', $guild->getOutputThreadId());
-        }
-
-        if (!$output) {
-            return;
-        }
+        $guild = $this->guildService->findWithPart($guildPart);
+        $output = $guild->getOutputPart($guildPart);
 
         $message = "<@{$event->user_id}> was sent a DM with the link to the sesh event for {$eventPart->name}.";
-        $builder->setDescription($message);
-        $output->sendMessage($builder->getEmbeddedMessage());
+        $builder = $this->spud->interact()
+            ->setTitle('Native Event RSVP Notification')
+            ->setDescription($message);
+        $output->sendMessage($builder->build());
 
-        $guildPart->members->fetch($event->user_id)->done(function (Member $member) use ($eventPart) {
-            $context = [
-                'username' => $member->user->username,
-                'eventName' => $eventPart->name,
-                'guildName' => $member->guild->name,
-                'eventUrl' => $eventPart->entity_metadata->location,
-            ];
-            $message = $this->spud->twig->render('dm/native_event.twig', $context);
-            $member->sendMessage($message);
-        });
+        $guildPart->members->fetch($event->user_id)
+            ->done(function (Member $member) use ($eventPart) {
+                $message = $this->spud->twig->render('dm/native_event.twig', [
+                    'username' => $member->user->username,
+                    'eventName' => $eventPart->name,
+                    'guildName' => $member->guild->name,
+                    'eventUrl' => $eventPart->entity_metadata->location,
+                ]);
+                $member->sendMessage($message);
+            });
     }
 }

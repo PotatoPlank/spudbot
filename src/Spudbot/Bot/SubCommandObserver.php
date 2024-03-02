@@ -21,10 +21,18 @@ class SubCommandObserver
         $this->subscribers = new Collection();
     }
 
+    public function subscribeAll(array $commands): void
+    {
+        foreach ($commands as $command) {
+            $this->subscribe($command);
+        }
+    }
+
     public function subscribe(string $command): void
     {
         $subscriber = new $command($this->spud);
-        $this->subscribers->set($subscriber->getCommandName(), $command);
+        $this->spud->container->injectOn($subscriber);
+        $this->subscribers->set($subscriber->getCommandName(), $subscriber);
     }
 
     public function notify(OptionRepository $options, mixed ...$arguments): void
@@ -35,8 +43,9 @@ class SubCommandObserver
          */
         foreach ($this->subscribers as $subCommand => $subscriber) {
             if ($options->isset($subCommand)) {
+                $this->spud->discord->getLogger()->info("$subCommand sub command called.");
                 $subscriber->setOptionRepository($options[$subCommand]->options);
-                $subscriber->hook(...$arguments);
+                $subscriber->update(...$arguments);
                 $notified = true;
             }
         }

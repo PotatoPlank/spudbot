@@ -10,9 +10,9 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Interface\IModel;
+use Spudbot\Interface\AbstractModel;
 
-class Reminder extends IModel
+class Reminder extends AbstractModel
 {
     private Guild $guild;
     private Channel $channel;

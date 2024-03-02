@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Spudbot\SubCommands\Coven;
 
 
+use BadMethodCallException;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractSubCommandSubscriber;
 
@@ -20,10 +21,10 @@ class Remove extends AbstractSubCommandSubscriber
     public function update(?Interaction $interaction = null): void
     {
         if (!$interaction) {
-            throw new \RuntimeException('Remove Coven requires an interaction.');
+            throw new BadMethodCallException('Remove Coven requires an interaction.');
         }
-        $builder = $this->spud->getSimpleResponseBuilder();
-        $builder->setTitle('Remove Coven');
+        $builder = $this->spud->interact()
+            ->setTitle('Remove Coven');
 
         $memberId = $this->options['user']->value;
         $sourceMemberId = $interaction->member->id;
@@ -42,7 +43,7 @@ class Remove extends AbstractSubCommandSubscriber
             $builder->setDescription('Discord member and/or channel is not yet cached, please try again later.');
         }
 
-        $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
+        $builder->respondTo($interaction, true);
     }
 
     public function getCommandName(): string

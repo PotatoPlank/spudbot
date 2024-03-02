@@ -8,14 +8,14 @@
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Interface\IModel;
+use Spudbot\Interface\AbstractModel;
 
-class EventAttendance extends IModel
+class EventAttendance extends AbstractModel
 {
     private Event $event;
     private Member $member;
     private string $status;
-    private bool $wasNoShow;
+    private bool $wasNoShow = false;
 
     public static function withDatabaseRow(array $row, ?Event $event = null, ?Member $member = null): self
     {

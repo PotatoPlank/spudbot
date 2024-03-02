@@ -18,4 +18,9 @@ abstract class AbstractSubscriber
     abstract public function hook(): void;
 
     abstract public function update(): void;
+
+    public function canRun(): bool
+    {
+        return true;
+    }
 }

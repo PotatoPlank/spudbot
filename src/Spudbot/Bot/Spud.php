@@ -9,6 +9,7 @@ namespace Spudbot\Bot;
 
 use Carbon\Carbon;
 use DI\Attribute\Inject;
+use DI\Container;
 use Discord\Discord;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Exception\BotTerminationException;
@@ -29,7 +30,7 @@ use Twig\Environment;
 class Spud
 {
     public readonly ?Guild $logGuild;
-    #[Inject]
+    #[Inject('spud.twig')]
     public readonly Environment $twig;
     public readonly Discord $discord;
     #[Inject]
@@ -50,11 +51,13 @@ class Spud
     public readonly CommandObserver $commandObserver;
     #[Inject]
     public readonly EventObserver $eventObserver;
+    public readonly Container $container;
 
-    public function __construct(SpudOptions $options)
+    public function __construct(SpudOptions $options, Container $container)
     {
         date_default_timezone_set('UTC');
         $this->discord = new Discord($options->getOptions());
+        $this->container = $container;
         $exceptionHandler = new ExceptionQueue();
         if (!empty($_ENV['SENTRY_DSN'])) {
             $sentryHandler = new SentryExceptions($_ENV['SENTRY_DSN'], $_ENV['SENTRY_ENV']);
@@ -89,6 +92,7 @@ class Spud
     {
         if ($name !== Boot::class) {
             $subscriber = new $name($this);
+            $this->container->injectOn($subscriber);
             $subscriber->hook();
         }
     }
@@ -126,14 +130,14 @@ class Spud
             if (!$output) {
                 return;
             }
-            $builder = $this->getSimpleResponseBuilder();
+            $builder = $this->interact();
             $builder->setTitle('Bot Started');
             $builder->setDescription('Bot started at ' . Carbon::now()->toIso8601String());
-            $output->sendMessage($builder->getEmbeddedMessage());
+            $output->sendMessage($builder->build());
         }
     }
 
-    public function getSimpleResponseBuilder(): EmbeddedResponse
+    public function interact(): EmbeddedResponse
     {
         return new EmbeddedResponse($this->discord);
     }

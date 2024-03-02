@@ -11,7 +11,11 @@ abstract class AbstractEventSubscriber extends AbstractSubscriber
 {
     public function hook(): void
     {
-        $this->spud->eventObserver->subscribe($this->getEventName(), [$this, 'update']);
+        $this->spud->eventObserver->subscribe($this->getEventName(), function (...$args) {
+            if ($this->canRun(...$args)) {
+                $this->update(...$args);
+            }
+        });
     }
 
     abstract public function getEventName(): string;

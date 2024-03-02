@@ -9,11 +9,13 @@ namespace Spudbot\Events\Message;
 
 
 use Carbon\Carbon;
+use DI\Attribute\Inject;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\Guild\Role;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
-use Spudbot\Model\Member;
+use Spudbot\Services\GuildService;
+use Spudbot\Services\MemberService;
 
 class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
 {
@@ -22,6 +24,10 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
     private const VERIFIED_ROLE = 1114365923730665482;
     private const MEMBER_TENURE_MINIMUM = 10;
     private const MEMBER_COMMENTS_MINIMUM = 10;
+    #[Inject]
+    protected GuildService $guildService;
+    #[Inject]
+    protected MemberService $memberService;
 
     public function getEventName(): string
     {
@@ -33,67 +39,53 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
         if (!$message) {
             return;
         }
-        if (!$message->member || $message->member->user->bot || $message->guild_id !== self::APPLIES_TO_GUILD) {
+        $isRegularMember = $message->member && !$message->member->user->bot;
+        $correctGuild = $message->guild_id === self::APPLIES_TO_GUILD;
+        $hasJoinDate = $message->member->joined_at instanceof Carbon;
+        if (!$isRegularMember || !$correctGuild || !$hasJoinDate) {
             return;
         }
-        if (!$message->member->joined_at instanceof Carbon) {
-            return;
-        }
-        $memberRepository = $this->spud->memberRepository;
-        $guildRepository = $this->spud->guildRepository;
 
         $this->spud->discord->getLogger()
             ->info("Checking to upgrade the membership of {$message->member->displayname}");
 
-        $guild = $guildRepository->findByPart($message->member->guild);
-        $output = $message->guild->channels->get('id', $guild->getOutputChannelId());
-        if ($guild->isOutputLocationThread()) {
-            $output = $output->threads->get('id', $guild->getOutputThreadId());
-        }
+        $guild = $this->guildService->findWithPart($message->member->guild);
 
-        if (!$output) {
+        try {
+            $output = $guild->getOutputPart($message->guild);
+        } catch (\Exception $exception) {
+            $this->spud->discord->getLogger()
+                ->error($exception->getMessage());
             return;
         }
 
-        $username = $message->member->nick ?? $message->member->displayname;
-
-        try {
-            $member = $memberRepository->findByPart($message->member);
-        } catch (\Exception $exception) {
-            $member = new Member();
-            $member->setGuild($guild);
-            $member->setDiscordId($message->member->id);
-            $member->setTotalComments(0);
-            $member->setUsername($username);
-            $memberRepository->save($member);
-        }
+        $member = $this->memberService->findOrCreateWithPart($message->member);
 
         $memberTenure = $message->member->joined_at->diffInDays(Carbon::now());
 
         $hasMetMembershipLength = $memberTenure >= self::MEMBER_TENURE_MINIMUM;
         $hasEnoughComments = $member->getTotalComments() >= self::MEMBER_COMMENTS_MINIMUM;
-        $isLevelOne = $message->member->roles->isset(self::LEVEL_ONE_ROLE);
-        $isVerified = $message->member->roles->isset(self::VERIFIED_ROLE);
+
+        $isAlreadyUpgraded = $message->member->roles->isset(self::LEVEL_ONE_ROLE);
+        $isAlreadyVerified = $message->member->roles->isset(self::VERIFIED_ROLE);
         $canModerateMembers = $message->member->getPermissions()->moderate_members;
 
-        if ((!$hasMetMembershipLength || !$hasEnoughComments) && !$canModerateMembers && !$isVerified) {
-            return;
-        }
-        if ($message->member->user->bot || $isLevelOne) {
+        $meetsRequirements = $hasMetMembershipLength && $hasEnoughComments && !$isAlreadyUpgraded;
+
+        if (!$meetsRequirements && !$canModerateMembers && !$isAlreadyVerified) {
             return;
         }
 
         $message->member->addRole(self::LEVEL_ONE_ROLE);
 
-        $message->guild->roles->fetch(self::LEVEL_ONE_ROLE)->done(
-            function (Role $role) use ($member, $output) {
-                $builder = $this->spud->getSimpleResponseBuilder();
-                $builder->setTitle("Member Given {$role->name}");
-                $builder->setDescription(
-                    "<@{$member->getDiscordId()}> met requirements to be given this role."
-                );
-                $output->sendMessage($builder->getEmbeddedMessage());
-            }
-        );
+        $message->guild->roles->fetch(self::LEVEL_ONE_ROLE)
+            ->done(function (Role $role) use ($member, $output) {
+                $builder = $this->spud->interact()
+                    ->setTitle("Member Given {$role->name}")
+                    ->setDescription(
+                        "<@{$member->getDiscordId()}> met requirements to be given this role."
+                    );
+                $output->sendMessage($builder->build());
+            });
     }
 }

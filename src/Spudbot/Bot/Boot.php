@@ -17,8 +17,11 @@ class Boot extends AbstractEventSubscriber
         $this->spud->commandObserver->all()->forEach(function (Collection $listeners, $commandName) {
             $listeners->forEach(function ($command) use ($commandName) {
                 $this->spud->discord->application->commands->save($command->getCommand());
-                $this->spud->discord->listenCommand($commandName, function (...$args) use ($command) {
-                    $command->update(...$args);
+                $this->spud->discord->listenCommand($commandName, function (...$args) use ($command, $commandName) {
+                    $this->spud->discord->getLogger()->info("$commandName command called.");
+                    if ($command->canRun(...$args)) {
+                        $command->update(...$args);
+                    }
                 });
             });
         });

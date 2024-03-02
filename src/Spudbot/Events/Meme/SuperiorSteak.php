@@ -11,10 +11,15 @@ namespace Spudbot\Events\Meme;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Util\Str;
 
 class SuperiorSteak extends AbstractEventSubscriber
 {
     private string $reaction = ':bonk:1114416108385095700';
+    private array $triggerKeywords = [
+        'pats',
+        'genos',
+    ];
 
     public function getEventName(): string
     {
@@ -26,27 +31,12 @@ class SuperiorSteak extends AbstractEventSubscriber
         if (!$message) {
             return;
         }
-        $keywords = [
-            'pats',
-            'genos',
-        ];
-
-        if (stripos('steak', $message->content) && $this->stringContains($message->content, $keywords)) {
-            $message->react($this->reaction);
+        $mentionedSteak = stripos('steak', $message->content) !== false;
+        $mentionedEateries = Str::hasSimilarWord($message->content, $this->triggerKeywords, 65);
+        if (!$mentionedSteak || !$mentionedEateries) {
+            return;
         }
-    }
 
-    private function stringContains($string, array $array): bool
-    {
-        $words = explode(' ', $string);
-        foreach ($words as $word) {
-            foreach ($array as $matchingWord) {
-                similar_text($word, $matchingWord, $percent);
-                if ($percent > 65) {
-                    return true;
-                }
-            }
-        }
-        return false;
+        $message->react($this->reaction);
     }
 }

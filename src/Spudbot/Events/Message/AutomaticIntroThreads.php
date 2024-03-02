@@ -8,9 +8,11 @@
 namespace Spudbot\Events\Message;
 
 
+use Carbon\Carbon;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Model\Member;
 
 class AutomaticIntroThreads extends AbstractEventSubscriber
 {
@@ -28,12 +30,16 @@ class AutomaticIntroThreads extends AbstractEventSubscriber
         if (!$message || $message->channel_id !== self::INTRO_CHANNEL_ID) {
             return;
         }
-        $memberName = $message->member->nick ?? $message->member->displayname;
-        $context = [
-            'memberName' => $memberName,
-        ];
+        $username = Member::getUsernameWithPart($message->member);
+        $tenure = $message->member->joined_at?->diffInDays(Carbon::now()) ?? -99;
+        if ($tenure < 0 || $tenure > 30) {
+            return;
+        }
+
         $message->react(self::DOGE_VIBE_REACT);
         $message->react(self::MOKKA_REACT);
-        $message->startThread($this->spud->twig->render('user/intro_title.twig', $context));
+        $message->startThread($this->spud->twig->render('user/intro_title.twig', [
+            'memberName' => $username,
+        ]));
     }
 }

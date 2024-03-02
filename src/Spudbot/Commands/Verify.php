@@ -21,8 +21,8 @@ class Verify extends AbstractCommandSubscriber
             return;
         }
 
-        $builder = $this->spud->getSimpleResponseBuilder();
-        $builder->setTitle('User Verification');
+        $builder = $this->spud->interact()
+            ->setTitle('User Verification');
         $targetMemberId = $interaction->data->options['user']->value;
         $verificationReason = $interaction->data->options['reason']->value;
         $sourceMemberName = $interaction->member->nick ?? $interaction->member->displayname;
@@ -31,14 +31,16 @@ class Verify extends AbstractCommandSubscriber
         $sourceMemberIsVerified = $interaction->member->roles->isset(1114365923730665482);
 
         if (!$memberToBeVerified) {
-            $builder->setDescription('An invalid user was submitted for verification.');
-            $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
+            $this->spud->interact()
+                ->error('An invalid user was submitted for verification.')
+                ->respondTo($interaction, true);
             return;
         }
 
         if ($interaction->member->id === $memberToBeVerified->id) {
-            $builder->setDescription('You cannot verify yourself.');
-            $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
+            $this->spud->interact()
+                ->error('You cannot verify yourself.')
+                ->respondTo($interaction, true);
             return;
         }
 
@@ -54,35 +56,34 @@ class Verify extends AbstractCommandSubscriber
             'reason' => $verificationReason,
         ];
 
-        if ($sourceMemberIsVerified) {
-            $memberToBeVerified->addRole(1114365923730665482, "Verified by {$sourceMemberName}");
+        if (!$sourceMemberIsVerified) {
+            $builder->error('You do not have the required permissions to verify.')
+                ->respondTo($interaction, true);
 
-            $builder->setDescription($this->spud->twig->render('user/verification.twig', $context));
-
-
-            $verifyingMember = $this->spud->memberRepository->findByPart($interaction->member);
-            try {
-                $verifiedMember = $this->spud->memberRepository->findByPart($memberToBeVerified);
-                $verifiedMember->setVerifiedBy($verifyingMember->getId());
-
-                $this->spud->memberRepository->save($verifiedMember);
-            } catch (\OutOfBoundsException $exception) {
-                $builder->setDescription(
-                    "Unable to verify <@{$memberToBeVerified->id}>, they haven't made any comments."
-                );
-            }
-
-            $interaction->respondWithMessage($builder->getEmbeddedMessage());
-            $output->sendMessage($builder->getEmbeddedMessage());
-
+            $builder->setDescription($this->spud->twig->render('user/verification_error.twig', $context));
+            $output->sendMessage($builder->build());
             return;
         }
 
-        $builder->setDescription('You do not have the required permissions to verify.');
-        $interaction->respondWithMessage($builder->getEmbeddedMessage(), true);
+        $memberToBeVerified->addRole(1114365923730665482, "Verified by {$sourceMemberName}");
 
-        $builder->setDescription($this->spud->twig->render('user/verification_error.twig', $context));
-        $output->sendMessage($builder->getEmbeddedMessage());
+        $builder->setDescription($this->spud->twig->render('user/verification.twig', $context));
+
+
+        $verifyingMember = $this->spud->memberRepository->findByPart($interaction->member);
+        try {
+            $verifiedMember = $this->spud->memberRepository->findByPart($memberToBeVerified);
+            $verifiedMember->setVerifiedBy($verifyingMember->getId());
+
+            $this->spud->memberRepository->save($verifiedMember);
+        } catch (\OutOfBoundsException $exception) {
+            $builder->setDescription(
+                "Unable to verify <@{$memberToBeVerified->id}>, they haven't made any comments."
+            );
+        }
+
+        $builder->respondTo($interaction);
+        $output->sendMessage($builder->build());
     }
 
     public function getCommand(): Command

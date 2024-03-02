@@ -12,31 +12,31 @@ use Spudbot\Interface\AbstractCommandSubscriber;
 
 class Hype extends AbstractCommandSubscriber
 {
+    private array $gifList = [
+        [
+            'url' => 'https://media.tenor.com/1RVeTBOtmi4AAAAC/lil-jon-yeah.gif',
+            'message' => 'YEAH!!',
+        ],
+        [
+            'url' => 'https://media.tenor.com/GQFMbuWapkcAAAAC/lil-jon-ok.gif',
+            'message' => 'OKAAY!!',
+        ],
+    ];
+
     public function update(?Interaction $interaction = null): void
     {
         if (!$interaction) {
             return;
         }
-        $builder = $this->spud->getSimpleResponseBuilder();
-        $hypeGifs = [
-            [
-                'url' => 'https://media.tenor.com/1RVeTBOtmi4AAAAC/lil-jon-yeah.gif',
-                'message' => 'YEAH!!',
-            ],
-            [
-                'url' => 'https://media.tenor.com/GQFMbuWapkcAAAAC/lil-jon-ok.gif',
-                'message' => 'OKAAY!!',
-            ],
-        ];
 
-        $selectedIndex = array_rand($hypeGifs);
-        $selectedGif = $hypeGifs[$selectedIndex];
+        $selectedIndex = array_rand($this->gifList);
+        $selectedGif = $this->gifList[$selectedIndex];
         $options['image']['url'] = $selectedGif['url'];
 
-        $builder->setTitle($selectedGif['message']);
-        $builder->setOptions($options);
-
-        $interaction->respondWithMessage($builder->getEmbeddedMessage());
+        $this->spud->interact()
+            ->setTitle($selectedGif['message'])
+            ->setOptions($options)
+            ->respondTo($interaction);
     }
 
     public function getCommandName(): string

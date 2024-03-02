@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Spudbot\Repository\Api;
 
 use Carbon\Carbon;
+use GuzzleHttp\Exception\GuzzleException;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\IDirectoryRepository;
@@ -58,7 +59,7 @@ class DirectoryRepository extends IDirectoryRepository
             throw new OutOfBoundsException("Directory with forum {$channel->getId()} does not exist.");
         }
 
-        return Directory::hydrateWithArray($json['data']);
+        return Directory::hydrateWithArray($json['data'][0]);
     }
 
     public function findByDirectoryChannel(Channel $channel): Collection
@@ -193,7 +194,11 @@ class DirectoryRepository extends IDirectoryRepository
         return !empty($embedContent) ? $embedContent : 'No threads found.';
     }
 
-    public function save(Directory $directory): bool
+    /**
+     * @throws ApiException
+     * @throws GuzzleException
+     */
+    public function save(Directory $directory): Directory
     {
         $directory->setModifiedAt(Carbon::now());
         $params = [
@@ -209,10 +214,13 @@ class DirectoryRepository extends IDirectoryRepository
                 'json' => $params,
             ]);
         } else {
-            return true;
+            return $directory;
         }
-        $json = $this->getResponseJson($response);
 
-        return (bool)$json['success'];
+        if (!$this->wasSuccessful($response)) {
+            throw new ApiException();
+        }
+
+        return $directory;
     }
 }

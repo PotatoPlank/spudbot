@@ -29,21 +29,18 @@ class MemberCount extends AbstractCommandSubscriber
             return;
         }
 
-        $builder = $this->spud->getSimpleResponseBuilder();
         if (!$interaction->member->permissions->manage_guild) {
-            $builder->setTitle('Invalid Permissions for Counter');
-            $builder->setDescription('You don\'t have the necessary permissions to run this command.');
-
-            $interaction->respondWithMessage($builder->getEmbeddedMessage());
+            $this->spud->interact()
+                ->error('You don\'t have the necessary permissions to run this command.')
+                ->respondTo($interaction);
             return;
         }
 
         Guild::updateMemberCount($interaction->guild, $this->spud->discord);
 
-
-        $builder->setTitle('Member Counter');
-        $builder->setDescription("The member counter was updated to: {$interaction->guild->member_count}");
-
-        $interaction->respondWithMessage($builder->getEmbeddedMessage());
+        $this->spud->interact()
+            ->setTitle('Member Counter')
+            ->setDescription("The member counter was updated to: {$interaction->guild->member_count}")
+            ->respondTo($interaction);
     }
 }

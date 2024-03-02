@@ -29,12 +29,11 @@ class Version extends AbstractCommandSubscriber
             return;
         }
 
-        $simpleResponse = $this->spud->getSimpleResponseBuilder();
         $date = Carbon::parse(trim(exec('git log -n1 --pretty=%ci HEAD')));
 
-        $simpleResponse->setTitle('Version');
-        $simpleResponse->setDescription("Latest code is from: " . $date->toIso8601String());
-
-        $interaction->respondWithMessage($simpleResponse->getEmbeddedMessage());
+        $this->spud->interact()
+            ->setTitle('Version')
+            ->setDescription("Latest code is from: " . $date->toIso8601String())
+            ->respondTo($interaction);
     }
 }
