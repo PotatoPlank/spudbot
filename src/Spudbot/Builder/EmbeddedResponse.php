@@ -9,8 +9,13 @@ namespace Spudbot\Builder;
 
 use Discord\Builders\MessageBuilder;
 use Discord\Discord;
+use Discord\Parts\Channel\Channel;
+use Discord\Parts\Channel\Message;
 use Discord\Parts\Embed\Embed;
 use Discord\Parts\Interactions\Interaction;
+use Discord\Parts\Thread\Thread;
+use Discord\Parts\User\Member;
+use Discord\Parts\User\User;
 use React\Promise\ExtendedPromiseInterface;
 
 class EmbeddedResponse
@@ -77,5 +82,15 @@ class EmbeddedResponse
     public function setAllowedMentions(array $allowedMentions): void
     {
         $this->allowedMentions = $allowedMentions;
+    }
+
+    public function sendTo(User|Member|Thread|Channel $target): ExtendedPromiseInterface
+    {
+        return $target->sendMessage($this->build());
+    }
+
+    public function replyTo(Message $message): ExtendedPromiseInterface
+    {
+        return $message->reply($this->build());
     }
 }
