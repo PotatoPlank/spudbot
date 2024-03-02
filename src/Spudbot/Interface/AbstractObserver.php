@@ -39,7 +39,7 @@ abstract class AbstractObserver
     public function emit(mixed $name, ...$args): void
     {
         $this->listeners->get($name)->forEach(function (callable $listener) use ($args) {
-            $listener($args);
+            $listener(...$args);
         });
     }
 }
