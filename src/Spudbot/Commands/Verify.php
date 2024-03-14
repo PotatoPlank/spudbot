@@ -12,6 +12,7 @@ use Discord\Builders\CommandBuilder;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
+use OutOfBoundsException;
 use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\Services\GuildService;
 use Spudbot\Services\MemberService;
@@ -81,7 +82,7 @@ class Verify extends AbstractCommandSubscriber
             $verifiedMember->setVerifiedBy($verifyingMember->getId());
 
             $this->memberService->save($verifiedMember);
-        } catch (\OutOfBoundsException $exception) {
+        } catch (OutOfBoundsException $exception) {
             $builder->setDescription(
                 "Unable to verify <@{$memberToBeVerified->id}>, they haven't made any comments."
             );

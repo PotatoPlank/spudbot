@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace Spudbot\SubCommands\Coven;
 
 
+use BadMethodCallException;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Interface\AbstractSubCommandSubscriber;
 
@@ -25,7 +26,7 @@ class Give extends AbstractSubCommandSubscriber
     public function update(?Interaction $interaction = null): void
     {
         if (!$interaction) {
-            throw new \BadMethodCallException('Give Coven requires an interaction.');
+            throw new BadMethodCallException('Give Coven requires an interaction.');
         }
         $builder = $this->spud->interact()
             ->setTitle('Give Coven');

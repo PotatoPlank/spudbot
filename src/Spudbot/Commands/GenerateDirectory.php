@@ -13,6 +13,7 @@ use Discord\Parts\Channel\Message;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
+use OutOfBoundsException;
 use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\Model\Directory;
 use Spudbot\Parsers\DirectoryParser;
@@ -54,7 +55,7 @@ class GenerateDirectory extends AbstractCommandSubscriber
         try {
             $directory = $this->directoryService->findWithForumChannel($forumChannel);
             if (!$directory) {
-                throw new \OutOfBoundsException('Directory does not exist.');
+                throw new OutOfBoundsException('Directory does not exist.');
             }
             $forumDirectoryPart = $interaction->guild
                 ->channels->get('id', $directory->getDirectoryChannel()->getDiscordId());
@@ -89,7 +90,7 @@ class GenerateDirectory extends AbstractCommandSubscriber
                 ->done($success, $rejected);
 
             $response->setDescription('Updated the directory.');
-        } catch (\OutOfBoundsException $exception) {
+        } catch (OutOfBoundsException $exception) {
             $this->spud->discord->getLogger()->info($exception->getMessage());
 
             $directory = new Directory();

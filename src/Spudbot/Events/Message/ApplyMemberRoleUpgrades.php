@@ -13,6 +13,7 @@ use DI\Attribute\Inject;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\Guild\Role;
 use Discord\WebSockets\Event;
+use Exception;
 use Spudbot\Interface\AbstractEventSubscriber;
 use Spudbot\Services\GuildService;
 use Spudbot\Services\MemberService;
@@ -47,7 +48,7 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
 
         try {
             $output = $guild->getOutputPart($message->guild);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->spud->discord->getLogger()
                 ->error($exception->getMessage());
             return;

@@ -10,7 +10,6 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Interface\AbstractModel;
 
 class Reminder extends AbstractModel
 {
@@ -20,77 +19,6 @@ class Reminder extends AbstractModel
     private Carbon $scheduledAt;
     private ?string $repeats = null;
     private string $description;
-
-
-    public static function hydrateWithArray(array $row): self
-    {
-        $reminder = new self();
-
-        $reminder->setId($row['external_id']);
-        $reminder->setDescription($row['description']);
-        $reminder->setMentionableRole($row['mention_role']);
-        $reminder->setScheduledAt(Carbon::parse($row['scheduled_at']));
-        $reminder->setRepeats($row['repeats']);
-        $reminder->setCreatedAt(Carbon::parse($row['created_at']));
-        $reminder->setModifiedAt(Carbon::parse($row['updated_at']));
-
-        if ($row['channel']) {
-            $reminder->setChannel(Channel::hydrateWithArray($row['channel']));
-        }
-        if ($row['guild']) {
-            $reminder->setGuild(Guild::hydrateWithArray($row['guild']));
-        }
-
-        return $reminder;
-    }
-
-    /**
-     * @return Channel
-     */
-    public function getChannel(): Channel
-    {
-        return $this->channel;
-    }
-
-    /**
-     * @param Channel $channel
-     */
-    public function setChannel(Channel $channel): void
-    {
-        $this->channel = $channel;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getMentionableRole(): ?string
-    {
-        return $this->mentionableRole;
-    }
-
-    /**
-     * @param string|null $mentionableRole
-     */
-    public function setMentionableRole(?string $mentionableRole): void
-    {
-        $this->mentionableRole = $mentionableRole;
-    }
-
-    /**
-     * @return Carbon
-     */
-    public function getScheduledAt(): Carbon
-    {
-        return $this->scheduledAt->copy();
-    }
-
-    /**
-     * @param Carbon $scheduledAt
-     */
-    public function setScheduledAt(Carbon $scheduledAt): void
-    {
-        $this->scheduledAt = $scheduledAt->copy()->setTimezone('UTC');
-    }
 
     public function getLocalScheduledAt(): Carbon
     {
@@ -113,20 +41,32 @@ class Reminder extends AbstractModel
         $this->guild = $guild;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getRepeats(): ?string
+    public function toCreateArray(): array
     {
-        return $this->repeats;
+        return [
+            'guild' => $this->getGuild()->getId(),
+            'channel' => $this->getChannel()->getId(),
+            'description' => $this->getDescription(),
+            'mention_role' => $this->getMentionableRole(),
+            'repeats' => $this->getRepeats(),
+            'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
+        ];
     }
 
     /**
-     * @param string|null $repeats
+     * @return Channel
      */
-    public function setRepeats(?string $repeats): void
+    public function getChannel(): Channel
     {
-        $this->repeats = $repeats;
+        return $this->channel;
+    }
+
+    /**
+     * @param Channel $channel
+     */
+    public function setChannel(Channel $channel): void
+    {
+        $this->channel = $channel;
     }
 
     /**
@@ -145,4 +85,59 @@ class Reminder extends AbstractModel
         $this->description = $description;
     }
 
+    /**
+     * @return string|null
+     */
+    public function getMentionableRole(): ?string
+    {
+        return $this->mentionableRole;
+    }
+
+    /**
+     * @param string|null $mentionableRole
+     */
+    public function setMentionableRole(?string $mentionableRole): void
+    {
+        $this->mentionableRole = $mentionableRole;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getRepeats(): ?string
+    {
+        return $this->repeats;
+    }
+
+    /**
+     * @param string|null $repeats
+     */
+    public function setRepeats(?string $repeats): void
+    {
+        $this->repeats = $repeats;
+    }
+
+    /**
+     * @return Carbon
+     */
+    public function getScheduledAt(): Carbon
+    {
+        return $this->scheduledAt->copy();
+    }
+
+    /**
+     * @param Carbon $scheduledAt
+     */
+    public function setScheduledAt(Carbon $scheduledAt): void
+    {
+        $this->scheduledAt = $scheduledAt->copy()->setTimezone('UTC');
+    }
+
+    public function toUpdateArray(): array
+    {
+        return [
+            'guild' => $this->getGuild()->getId(),
+            'channel' => $this->getChannel()->getId(),
+        ];
+    }
 }

@@ -8,10 +8,13 @@
 namespace Spudbot\Events\Thread;
 
 
+use BadMethodCallException;
 use DI\Attribute\Inject;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\Thread\Thread;
 use Discord\WebSockets\Event;
+use Exception;
+use OutOfBoundsException;
 use Spudbot\Interface\AbstractEventSubscriber;
 use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Services\ChannelService;
@@ -44,7 +47,7 @@ class DeletedThread extends AbstractEventSubscriber
         try {
             $thread = $this->threadService->findOrCreateWithPart($threadPart);
             $this->threadService->remove($thread);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             /**
              * Already deleted
              */
@@ -52,7 +55,7 @@ class DeletedThread extends AbstractEventSubscriber
 
         try {
             $forumChannel = $this->channelService->findOrCreateWithPart($threadPart->parent);
-        } catch (\OutOfBoundsException $exception) {
+        } catch (OutOfBoundsException $exception) {
             /**
              * There is no forum channel or directory
              */
@@ -64,14 +67,14 @@ class DeletedThread extends AbstractEventSubscriber
             $directory = $this->directoryService
                 ->findWithForumChannel($forumChannel);
             if (!$directory) {
-                throw new \OutOfBoundsException('Unable to find directory.');
+                throw new OutOfBoundsException('Unable to find directory.');
             }
 
             $forumDirectoryPart = $threadPart->guild->channels
                 ->get('id', $directory->getDirectoryChannel()->getDiscordId());
 
             if (!$forumDirectoryPart) {
-                throw new \BadMethodCallException('The specified directory channel does not exist.');
+                throw new BadMethodCallException('The specified directory channel does not exist.');
             }
 
             $directoryMessage = $this->directoryParser->fromPart($threadPart->parent)
@@ -97,7 +100,7 @@ class DeletedThread extends AbstractEventSubscriber
 
             $forumDirectoryPart->messages->fetch($directory->getEmbedId())
                 ->done($success, $rejected);
-        } catch (\OutOfBoundsException $exception) {
+        } catch (OutOfBoundsException $exception) {
             /**
              * There is no directory for this channel
              */

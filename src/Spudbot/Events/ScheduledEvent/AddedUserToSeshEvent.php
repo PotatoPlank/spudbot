@@ -13,6 +13,7 @@ use DI\Attribute\Inject;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
+use Exception;
 use Spudbot\Helpers\SeshEmbedParser;
 use Spudbot\Interface\AbstractEventSubscriber;
 use Spudbot\Model\EventAttendance;
@@ -87,9 +88,9 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
                     if ($shouldAdd) {
                         $member = $this->memberService->findOrCreateWithPart($attendee);
                         $eventAttendance = $this->attendanceService->findOrCreateByMemberAndEvent($member, $event);
-                        $eventAttendance->wasNoShow(false);
+                        $eventAttendance->setNoShowStatus(false);
                         if (str_contains($eventStatus, 'No')) {
-                            $eventAttendance->wasNoShow($noShowBoolean);
+                            $eventAttendance->setNoShowStatus($noShowBoolean);
                         }
                         $this->attendanceService->save($eventAttendance);
                         $statusContentText .= "<@{$eventAttendance->getMember()->getDiscordId()}>" . PHP_EOL;
@@ -104,7 +105,7 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
                 $statusContentText = '';
                 foreach ($originalAttendees as $originalAttendee) {
                     if ($originalAttendee->getStatus() !== 'No') {
-                        $originalAttendee->wasNoShow($noShowBoolean);
+                        $originalAttendee->setNoShowStatus($noShowBoolean);
                         $originalAttendee->setStatus('No');
                         $this->attendanceService->save($originalAttendee);
                         $statusContentText .= "<@{$originalAttendee->getMember()->getDiscordId()}>" . PHP_EOL;
@@ -122,7 +123,7 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
                     ->setAllowedMentions([])
                     ->sendTo($output);
             }
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             /**
              * Not a sesh embed
              */

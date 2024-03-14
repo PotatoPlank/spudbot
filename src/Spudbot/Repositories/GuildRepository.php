@@ -9,117 +9,36 @@ declare(strict_types=1);
 
 namespace Spudbot\Repositories;
 
-use Carbon\Carbon;
-use GuzzleHttp\Exception\GuzzleException;
-use OutOfBoundsException;
-use Spudbot\Helpers\Collection;
-use Spudbot\Interface\IGuildRepository;
+use Discord\Parts\Part;
 use Spudbot\Model\Guild;
-use Spudbot\Traits\UsesApi;
 
-class GuildRepository extends IGuildRepository
+/**
+ * @method Guild findById(string $id)
+ * @method Guild save(Guild $model)
+ * @method bool remove(Guild $model)
+ */
+class GuildRepository extends AbstractRepository
 {
-    use UsesApi;
+    protected array $endpoints = [
+        'default' => 'guilds',
+        'put' => 'put|guilds/:id',
+        'delete' => 'delete|guilds/:id',
+    ];
 
-    public function findById(string|int $id): Guild
+    public function findWithPart(Part $part): Guild
     {
-        $response = $this->client->get("guilds/{$id}");
-        $json = $this->getResponseJson($response);
-
-        if (!$json) {
-            throw new OutOfBoundsException("Guild with id {$id} does not exist.");
-        }
-
-        return Guild::hydrateWithArray($json);
+        return $this->findByDiscordId($part->id)->first();
     }
 
-    public function findByPart(\Discord\Parts\Guild\Guild $guild): Guild
+    public function hydrate(array $fields): Guild
     {
-        return $this->findByDiscordId($guild->id);
-    }
-
-    public function findByDiscordId(string $discordId): Guild
-    {
-        $response = $this->client->get("guilds", [
-            'query' => [
-                'discord_id' => $discordId,
-            ],
+        return Guild::create([
+            'id' => $fields['external_id'],
+            'discordId' => $fields['discord_id'],
+            'outputChannelId' => $fields['channel_announce_id'],
+            'outputThreadId' => $fields['channel_thread_announce_id'],
+            'createdAt' => $fields['created_at'],
+            'modifiedAt' => $fields['updated_at'],
         ]);
-        $json = $this->getResponseJson($response);
-
-        if (empty($json['data'])) {
-            throw new OutOfBoundsException("Guild with id {$discordId} does not exist.");
-        }
-
-        return Guild::hydrateWithArray($json['data'][0]);
-    }
-
-    public function getAll(): Collection
-    {
-        $collection = new Collection();
-
-        $response = $this->client->get('guilds');
-        $json = $this->getResponseJson($response);
-
-
-        if (!empty($json)) {
-            foreach ($json['data'] as $row) {
-                $guild = Guild::hydrateWithArray($row);
-
-                $collection->push($guild);
-            }
-        }
-
-        return $collection;
-    }
-
-    /**
-     * @throws ApiException
-     * @throws GuzzleException
-     */
-    public function save(Guild $guild): Guild
-    {
-        $guild->setModifiedAt(Carbon::now());
-
-        $params = [
-            'channel_announce_id' => $guild->getOutputChannelId(),
-            'channel_thread_announce_id' => $guild->getOutputThreadId(),
-        ];
-
-        if (!$guild->getId()) {
-            $guild->setCreatedAt(Carbon::now());
-
-            $params = [
-                'discord_id' => $guild->getDiscordId(),
-                ...$params,
-            ];
-            $response = $this->client->post("guilds", [
-                'json' => $params,
-            ]);
-        } else {
-            $response = $this->client->put("guilds/{$guild->getId()}", [
-                'json' => $params,
-            ]);
-        }
-        if (!$this->wasSuccessful($response)) {
-            throw new ApiException();
-        }
-
-        return $guild;
-    }
-
-    public function remove(Guild $guild): bool
-    {
-        if (!$guild->getId()) {
-            throw new OutOfBoundsException("Guild is unable to be removed without a proper id.");
-        }
-
-        $response = $this->client->delete("guilds/{$guild->getId()}");
-        $json = $this->getResponseJson($response);
-        if (!$json['success']) {
-            throw new \RuntimeException("Removing guild {$guild->getId()} was unsuccessful");
-        }
-
-        return true;
     }
 }

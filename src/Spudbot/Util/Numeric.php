@@ -7,6 +7,8 @@
 
 namespace Spudbot\Util;
 
+use SplStack;
+
 class Numeric
 {
     /**
@@ -79,7 +81,7 @@ class Numeric
         $powers = array_column($tokens, 'power', 'val');
 
         $mutate = function ($parts) use (&$mutate, $powers) {
-            $stack = new \SplStack;
+            $stack = new SplStack;
             $sum = 0;
             $last = null;
 

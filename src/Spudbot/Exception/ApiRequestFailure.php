@@ -5,11 +5,11 @@
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
-namespace Spudbot\Repositories;
+namespace Spudbot\Exception;
 
 use Exception;
 
-class ApiException extends Exception
+class ApiRequestFailure extends Exception
 {
 
 }

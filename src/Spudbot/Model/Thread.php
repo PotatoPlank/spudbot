@@ -9,9 +9,6 @@ declare(strict_types=1);
 
 namespace Spudbot\Model;
 
-use Carbon\Carbon;
-use Spudbot\Interface\AbstractModel;
-
 class Thread extends AbstractModel
 {
     private string $discordId;
@@ -19,24 +16,34 @@ class Thread extends AbstractModel
     private Channel $channel;
     private ?string $tag = '';
 
-    public static function hydrateWithArray(array $row): self
+    public function toCreateArray(): array
     {
-        $thread = new self();
+        return [
+            'discord_id' => $this->getDiscordId(),
+            'guild' => $this->getGuild()->getId(),
+            'channel' => $this->getChannel()->getId(),
+            'tag' => $this->getTag(),
+        ];
+    }
 
-        $thread->setId($row['external_id']);
-        $thread->setDiscordId($row['discord_id']);
-        $thread->setTag($row['tag']);
-        $thread->setCreatedAt(Carbon::parse($row['created_at']));
-        $thread->setModifiedAt(Carbon::parse($row['updated_at']));
+    public function getDiscordId(): string
+    {
+        return $this->discordId;
+    }
 
-        if ($row['guild']) {
-            $thread->setGuild(Guild::hydrateWithArray($row['guild']));
-        }
-        if ($row['channel']) {
-            $thread->setChannel(Channel::hydrateWithArray($row['channel']));
-        }
+    public function setDiscordId(string $discordId): void
+    {
+        $this->discordId = $discordId;
+    }
 
-        return $thread;
+    public function getGuild(): Guild
+    {
+        return $this->guild;
+    }
+
+    public function setGuild(Guild $guild): void
+    {
+        $this->guild = $guild;
     }
 
     /**
@@ -65,23 +72,10 @@ class Thread extends AbstractModel
         $this->tag = $tag;
     }
 
-    public function getDiscordId(): string
+    public function toUpdateArray(): array
     {
-        return $this->discordId;
-    }
-
-    public function setDiscordId(string $discordId): void
-    {
-        $this->discordId = $discordId;
-    }
-
-    public function getGuild(): Guild
-    {
-        return $this->guild;
-    }
-
-    public function setGuild(Guild $guild): void
-    {
-        $this->guild = $guild;
+        return [
+            'tag' => $this->getTag(),
+        ];
     }
 }

@@ -9,9 +9,6 @@ declare(strict_types=1);
 
 namespace Spudbot\Model;
 
-use Carbon\Carbon;
-use Spudbot\Interface\AbstractModel;
-
 class Member extends AbstractModel
 {
     private string $discordId;
@@ -20,44 +17,25 @@ class Member extends AbstractModel
     private ?string $username = null;
     private ?Member $verifiedBy = null;
 
-    public static function hydrateWithArray(array $row): self
-    {
-        $member = new self();
-
-        $member->setId($row['external_id']);
-        $member->setDiscordId($row['discord_id']);
-        $member->setTotalComments($row['total_comments']);
-        $member->setUsername($row['username']);
-        $member->setVerifiedBy($row['verified_by'] ? self::hydrateWithArray($row['verified_by']) : null);
-        $member->setCreatedAt(Carbon::parse($row['created_at']));
-        $member->setModifiedAt(Carbon::parse($row['updated_at']));
-
-        if (isset($row['guild'])) {
-            $member->setGuild(Guild::hydrateWithArray($row['guild']));
-        }
-
-        return $member;
-    }
-
     public static function getUsernameWithPart(\Discord\Parts\User\Member $member): string
     {
         return $member->nick ?? $member->displayname;
     }
 
-    /**
-     * @return string|null
-     */
-    public function getUsername(): ?string
+    public function hasMetCommentThreshold(): bool
     {
-        return $this->username;
+        return $this->totalComments >= $_ENV['MEMBER_COMMENT_THRESHOLD'];
     }
 
-    /**
-     * @param string|null $username
-     */
-    public function setUsername(?string $username): void
+    public function toCreateArray(): array
     {
-        $this->username = $username;
+        return [
+            'discord_id' => $this->getDiscordId(),
+            'guild' => $this->getGuild()->getId(),
+            'total_comments' => $this->getTotalComments(),
+            'username' => $this->getUsername(),
+            'verified_by_member' => $this->getVerifiedBy(),
+        ];
     }
 
     public function getDiscordId(): string
@@ -90,9 +68,20 @@ class Member extends AbstractModel
         $this->totalComments = $totalComments;
     }
 
-    public function hasMetCommentThreshold(): bool
+    /**
+     * @return string|null
+     */
+    public function getUsername(): ?string
     {
-        return $this->totalComments >= $_ENV['MEMBER_COMMENT_THRESHOLD'];
+        return $this->username;
+    }
+
+    /**
+     * @param string|null $username
+     */
+    public function setUsername(?string $username): void
+    {
+        $this->username = $username;
     }
 
     /**
@@ -109,5 +98,14 @@ class Member extends AbstractModel
     public function setVerifiedBy(?Member $verifiedBy): void
     {
         $this->verifiedBy = $verifiedBy;
+    }
+
+    public function toUpdateArray(): array
+    {
+        return [
+            'total_comments' => $this->getTotalComments(),
+            'username' => $this->getUsername(),
+            'verified_by_member' => $this->getVerifiedBy(),
+        ];
     }
 }

@@ -8,6 +8,7 @@
 namespace Spudbot\Parsers;
 
 use Discord\Parts\Channel\Channel;
+use InvalidArgumentException;
 use Spudbot\Model\Thread;
 use Spudbot\Services\ThreadService;
 use Spudbot\Util\DiscordFormatter;
@@ -40,7 +41,7 @@ class DirectoryParser
         $this->fresh();
         $this->threadCount = $forumChannel->threads->count();
         if ($forumChannel->threads->count() === 0) {
-            throw new \InvalidArgumentException('The provided forum channel does not have any threads.');
+            throw new InvalidArgumentException('The provided forum channel does not have any threads.');
         }
 
         /**

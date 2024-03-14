@@ -7,6 +7,7 @@
 
 namespace Spudbot\Bot;
 
+use Closure;
 use Discord\Repository\Interaction\OptionRepository;
 use Spudbot\Helpers\Collection;
 use Spudbot\Interface\AbstractSubCommandSubscriber;
@@ -14,7 +15,7 @@ use Spudbot\Interface\AbstractSubCommandSubscriber;
 class SubCommandObserver
 {
     private Collection $subscribers;
-    private \Closure $defaultListener;
+    private Closure $defaultListener;
 
     public function __construct(protected Spud $spud)
     {

@@ -9,28 +9,17 @@ declare(strict_types=1);
 
 namespace Spudbot\Model;
 
-use Carbon\Carbon;
-use Spudbot\Interface\AbstractModel;
-
 class Channel extends AbstractModel
 {
     private Guild $guild;
     private string $discordId;
 
-    public static function hydrateWithArray(array $row): self
+    public function toCreateArray(): array
     {
-        $channel = new self();
-
-        $channel->setId($row['external_id']);
-        $channel->setDiscordId($row['discord_id']);
-        $channel->setCreatedAt(Carbon::parse($row['created_at']));
-        $channel->setModifiedAt(Carbon::parse($row['updated_at']));
-
-        if (isset($row['guild'])) {
-            $channel->setGuild(Guild::hydrateWithArray($row['guild']));
-        }
-
-        return $channel;
+        return [
+            'discord_id' => $this->getDiscordId(),
+            'guild_id' => $this->getGuild()->getId(),
+        ];
     }
 
     /**
@@ -65,4 +54,11 @@ class Channel extends AbstractModel
         $this->guild = $guild;
     }
 
+    public function toUpdateArray(): array
+    {
+        return [
+            'discord_id' => $this->getDiscordId(),
+            'guild_id' => $this->getGuild()->getId(),
+        ];
+    }
 }

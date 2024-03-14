@@ -11,19 +11,23 @@ use Discord\Parts\Guild\ScheduledEvent;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Model\Event;
+use Spudbot\Repositories\EventAttendanceRepository;
 use Spudbot\Repositories\EventRepository;
 use Spudbot\Types\EventType;
 
 class EventService
 {
-    public function __construct(public EventRepository $eventRepository, public GuildService $guildService)
-    {
+    public function __construct(
+        public EventRepository $eventRepository,
+        public EventAttendanceRepository $attendanceRepository,
+        public GuildService $guildService
+    ) {
     }
 
     public function findOrCreateNativeWithPart(ScheduledEvent $event): Event
     {
         try {
-            return $this->eventRepository->findByPart($event);
+            return $this->eventRepository->findWithPart($event);
         } catch (OutOfBoundsException $exception) {
             return $this->eventRepository->save(Event::create([
                 'nativeId' => $event->guild_scheduled_event_id ?? $event->id,
@@ -46,7 +50,7 @@ class EventService
 
     public function getAttendance(Event $event): Collection
     {
-        return $this->eventRepository->getAttendanceByEvent($event);
+        return $this->attendanceRepository->getEventAttendance($event);
     }
 
     public function findOrCreateSesh(string $seshId, $defaults = []): Event

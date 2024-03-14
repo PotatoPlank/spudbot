@@ -7,9 +7,6 @@
 
 namespace Spudbot\Model;
 
-use Carbon\Carbon;
-use Spudbot\Interface\AbstractModel;
-
 class EventAttendance extends AbstractModel
 {
     private Event $event;
@@ -17,28 +14,7 @@ class EventAttendance extends AbstractModel
     private string $status;
     private bool $wasNoShow = false;
 
-    public static function hydrateWithArray(array $row): self
-    {
-        $eventAttendance = new self();
-
-        $eventAttendance->setId($row['external_id']);
-        $eventAttendance->setStatus($row['status']);
-        $eventAttendance->wasNoShow((bool)$row['no_show']);
-        $eventAttendance->setCreatedAt(Carbon::parse($row['created_at']));
-        $eventAttendance->setModifiedAt(Carbon::parse($row['updated_at']));
-
-
-        if (isset($row['event'])) {
-            $eventAttendance->setEvent(Event::hydrateWithArray($row['event']));
-        }
-        if (isset($row['member'])) {
-            $eventAttendance->setMember(Member::hydrateWithArray($row['member']));
-        }
-
-        return $eventAttendance;
-    }
-
-    public function wasNoShow(bool $status): void
+    public function setNoShowStatus(bool $status): void
     {
         $this->wasNoShow = $status;
     }
@@ -51,6 +27,15 @@ class EventAttendance extends AbstractModel
     public function setEvent(Event $event): void
     {
         $this->event = $event;
+    }
+
+    public function toCreateArray(): array
+    {
+        return [
+            'member' => $this->getMember()->getId(),
+            'status' => $this->getStatus(),
+            'no_show' => $this->getNoShowStatus(),
+        ];
     }
 
     public function getMember(): Member
@@ -76,5 +61,13 @@ class EventAttendance extends AbstractModel
     public function getNoShowStatus(): bool
     {
         return $this->wasNoShow;
+    }
+
+    public function toUpdateArray(): array
+    {
+        return [
+            'status' => $this->getStatus(),
+            'no_show' => $this->getNoShowStatus(),
+        ];
     }
 }

@@ -10,11 +10,9 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
-use Spudbot\Interface\AbstractModel;
 use Spudbot\Types\EventType;
 
-class
-Event extends AbstractModel
+class Event extends AbstractModel
 {
     private Guild $guild;
     private ?string $channelId;
@@ -24,22 +22,17 @@ Event extends AbstractModel
     private ?string $nativeId;
     private Carbon $scheduledAt;
 
-    public static function hydrateWithArray(array $row): self
+    public function toCreateArray(): array
     {
-        $event = new self();
-
-        $event->setId($row['external_id']);
-        $event->setGuild(Guild::hydrateWithArray($row['guild']));
-        $event->setChannelId($row['discord_channel_id']);
-        $event->setName($row['name']);
-        $event->setType(EventType::from($row['type']));
-        $event->setSeshId($row['sesh_message_id']);
-        $event->setNativeId($row['native_event_id']);
-        $event->setScheduledAt(Carbon::parse($row['scheduled_at']));
-        $event->setCreatedAt(Carbon::parse($row['created_at']));
-        $event->setModifiedAt(Carbon::parse($row['updated_at']));
-
-        return $event;
+        return [
+            'guild' => $this->getGuild()->getId(),
+            'type' => $this->getType(),
+            'sesh_id' => $this->getSeshId(),
+            'native_id' => $this->getNativeId(),
+            'discord_channel_id' => $this->getChannelId(),
+            'name' => $this->getName(),
+            'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
+        ];
     }
 
     public function getGuild(): Guild
@@ -50,26 +43,6 @@ Event extends AbstractModel
     public function setGuild(Guild $guild): void
     {
         $this->guild = $guild;
-    }
-
-    public function getChannelId(): string
-    {
-        return $this->channelId;
-    }
-
-    public function setChannelId(?string $channelId): void
-    {
-        $this->channelId = $channelId;
-    }
-
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    public function setName(string $name): void
-    {
-        $this->name = $name;
     }
 
     public function getType(): EventType
@@ -102,6 +75,26 @@ Event extends AbstractModel
         $this->nativeId = $id;
     }
 
+    public function getChannelId(): string
+    {
+        return $this->channelId;
+    }
+
+    public function setChannelId(?string $channelId): void
+    {
+        $this->channelId = $channelId;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): void
+    {
+        $this->name = $name;
+    }
+
     public function getScheduledAt(): Carbon
     {
         return $this->scheduledAt;
@@ -110,5 +103,14 @@ Event extends AbstractModel
     public function setScheduledAt(Carbon $scheduledAt): void
     {
         $this->scheduledAt = $scheduledAt;
+    }
+
+    public function toUpdateArray(): array
+    {
+        return [
+            'discord_channel_id' => $this->getChannelId(),
+            'name' => $this->getName(),
+            'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
+        ];
     }
 }

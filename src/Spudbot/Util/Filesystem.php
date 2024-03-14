@@ -7,6 +7,7 @@
 
 namespace Spudbot\Util;
 
+use InvalidArgumentException;
 use Spudbot\Helpers\Collection;
 
 class Filesystem
@@ -14,7 +15,7 @@ class Filesystem
     public static function fetchFilesByDirectoryRecursively(string $directoryPath): Collection
     {
         if (!is_dir($directoryPath)) {
-            throw new \InvalidArgumentException('$directoryPath must be a valid directory.');
+            throw new InvalidArgumentException('$directoryPath must be a valid directory.');
         }
 
         $result = new Collection();
@@ -41,7 +42,7 @@ class Filesystem
     {
         $namespace = strstr($filePath, 'Spudbot');
         if (!$namespace) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 'Unable to locate the expected namespace, please provide a valid path.'
             );
         }

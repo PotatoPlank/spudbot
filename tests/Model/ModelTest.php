@@ -23,7 +23,7 @@ class ModelTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Interface\AbstractModel
+     * @covers \Spudbot\Model\AbstractModel
      */
     public function successfullySetsAndGetsCreatedAt(): void
     {
@@ -36,7 +36,7 @@ class ModelTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Interface\AbstractModel
+     * @covers \Spudbot\Model\AbstractModel
      */
     public function successfullySetsAndGetsModifiedAt(): void
     {
@@ -49,7 +49,7 @@ class ModelTest extends TestCase
 
     /**
      * @test
-     * @covers \Spudbot\Interface\AbstractModel
+     * @covers \Spudbot\Model\AbstractModel
      */
     public function successfullySetsAndGetsId(): void
     {

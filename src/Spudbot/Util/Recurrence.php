@@ -8,6 +8,7 @@
 namespace Spudbot\Util;
 
 use Carbon\Carbon;
+use InvalidArgumentException;
 
 class Recurrence
 {
@@ -129,7 +130,7 @@ class Recurrence
         }
 
         if (!$hasNumber || !$hasUnit) {
-            throw new \InvalidArgumentException("{$intervalString} is not a recognized interval.");
+            throw new InvalidArgumentException("{$intervalString} is not a recognized interval.");
         }
         return implode(' ', $parsedPieces);
     }

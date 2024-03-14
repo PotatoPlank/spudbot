@@ -2,7 +2,9 @@
 
 namespace Spudbot\Exception;
 
-class InvalidSeshEmbed extends \InvalidArgumentException
+use InvalidArgumentException;
+
+class InvalidSeshEmbed extends InvalidArgumentException
 {
 
 }

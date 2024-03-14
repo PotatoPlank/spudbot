@@ -9,11 +9,10 @@ declare(strict_types=1);
 
 namespace Spudbot\Model;
 
-use Carbon\Carbon;
+use BadMethodCallException;
 use Carbon\CarbonTimeZone;
 use Discord\Discord;
 use Discord\Parts\Channel\Channel;
-use Spudbot\Interface\AbstractModel;
 
 class Guild extends AbstractModel
 {
@@ -25,20 +24,6 @@ class Guild extends AbstractModel
     public function __construct()
     {
         $this->timeZone = new CarbonTimeZone('America/New_York');
-    }
-
-    public static function hydrateWithArray(array $row): self
-    {
-        $guild = new self();
-
-        $guild->setId($row['external_id']);
-        $guild->setDiscordId($row['discord_id']);
-        $guild->setOutputChannelId($row['channel_announce_id']);
-        $guild->setOutputThreadId($row['channel_thread_announce_id']);
-        $guild->setCreatedAt(Carbon::parse($row['created_at']));
-        $guild->setModifiedAt(Carbon::parse($row['updated_at']));
-
-        return $guild;
     }
 
     public static function updateMemberCount(\Discord\Parts\Guild\Guild $guild, Discord $discord): void
@@ -72,16 +57,6 @@ class Guild extends AbstractModel
         }
 
         $guild->channels->save($channel);
-    }
-
-    public function getDiscordId(): string
-    {
-        return $this->discordId;
-    }
-
-    public function setDiscordId(string $discordId): void
-    {
-        $this->discordId = $discordId;
     }
 
     public function getOutputLocationId(): ?string
@@ -119,14 +94,14 @@ class Guild extends AbstractModel
 
         $outputPart = $guild->channels->get('id', $channelId);
         if (!$outputPart) {
-            throw new \BadMethodCallException(
+            throw new BadMethodCallException(
                 "Failed locating channel {$channelId} for {$guild->id}."
             );
         }
         if ($this->isOutputLocationThread()) {
             $outputPart = $outputPart->threads->get('id', $threadId);
             if (!$outputPart) {
-                throw new \BadMethodCallException(
+                throw new BadMethodCallException(
                     "Failed locating thread {$threadId} in channel {$channelId} for {$guild->id}"
                 );
             }
@@ -153,5 +128,32 @@ class Guild extends AbstractModel
     public function setTimeZone(CarbonTimeZone $timeZone): void
     {
         $this->timeZone = $timeZone;
+    }
+
+    public function toCreateArray(): array
+    {
+        return [
+            'discord_id' => $this->getDiscordId(),
+            'channel_announce_id' => $this->getOutputChannelId(),
+            'channel_thread_announce_id' => $this->getOutputThreadId(),
+        ];
+    }
+
+    public function getDiscordId(): string
+    {
+        return $this->discordId;
+    }
+
+    public function setDiscordId(string $discordId): void
+    {
+        $this->discordId = $discordId;
+    }
+
+    public function toUpdateArray(): array
+    {
+        return [
+            'channel_announce_id' => $this->getOutputChannelId(),
+            'channel_thread_announce_id' => $this->getOutputThreadId(),
+        ];
     }
 }

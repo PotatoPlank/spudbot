@@ -7,7 +7,7 @@
 
 declare(strict_types=1);
 
-namespace Spudbot\Interface;
+namespace Spudbot\Model;
 
 use Carbon\Carbon;
 
@@ -86,4 +86,8 @@ abstract class AbstractModel
     {
         $this->id = $id;
     }
+
+    abstract public function toCreateArray(): array;
+
+    abstract public function toUpdateArray(): array;
 }

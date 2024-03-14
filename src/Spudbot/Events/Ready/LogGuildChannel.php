@@ -7,6 +7,8 @@
 
 namespace Spudbot\Events\Ready;
 
+use BadMethodCallException;
+use Exception;
 use Spudbot\Bot\ApplicationVersion;
 use Spudbot\Bot\Events;
 use Spudbot\Interface\AbstractEventSubscriber;
@@ -24,10 +26,10 @@ class LogGuildChannel extends AbstractEventSubscriber
         try {
             $part = $this->spud->discord->guilds->get('id', $this->spud->logGuild->getDiscordId());
             if (!$part) {
-                throw new \BadMethodCallException("Invalid guild {$this->spud->logGuild->getDiscordId()}");
+                throw new BadMethodCallException("Invalid guild {$this->spud->logGuild->getDiscordId()}");
             }
             $output = $this->spud->logGuild->getOutputPart($part);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->spud->discord->getLogger()
                 ->error($exception->getMessage());
             return;

@@ -9,153 +9,49 @@ declare(strict_types=1);
 
 namespace Spudbot\Repositories;
 
-use Carbon\Carbon;
-use GuzzleHttp\Exception\GuzzleException;
-use OutOfBoundsException;
-use Spudbot\Helpers\Collection;
-use Spudbot\Interface\IDirectoryRepository;
+use BadMethodCallException;
+use Discord\Parts\Part;
 use Spudbot\Model\Channel;
 use Spudbot\Model\Directory;
-use Spudbot\Model\Guild;
-use Spudbot\Traits\UsesApi;
 
-class DirectoryRepository extends IDirectoryRepository
+/**
+ * @method Directory findById(string $id)
+ * @method Directory save(Directory $model)
+ * @method bool remove(Directory $model)
+ */
+class DirectoryRepository extends AbstractRepository
 {
-    use UsesApi;
-
-    public function findByGuild(Guild $guild): Collection
-    {
-        $collection = new Collection();
-
-        $response = $this->client->get('directories', [
-            'query' => [
-                'guild' => $guild->getId(),
-            ],
-        ]);
-        $json = $this->getResponseJson($response);
-
-        if (!empty($json)) {
-            foreach ($json['data'] as $row) {
-                $directory = Directory::hydrateWithArray($row);
-
-                $collection->push($directory);
-            }
-        }
-
-        return $collection;
-    }
+    protected array $endpoints = [
+        'default' => 'directories',
+        'put' => 'put|directories/:id',
+        'delete' => 'delete|directories/:id',
+    ];
 
     public function findByForumChannel(Channel $channel): Directory
     {
-        $response = $this->client->get('directories', [
+        $response = $this->find([
             'query' => [
                 'forum_channel' => $channel->getId(),
             ],
         ]);
-        $json = $this->getResponseJson($response);
 
-        if (!$json) {
-            throw new OutOfBoundsException("Directory with forum {$channel->getId()} does not exist.");
-        }
-
-        return Directory::hydrateWithArray($json['data'][0]);
+        return $response->first();
     }
 
-    public function findByDirectoryChannel(Channel $channel): Collection
+    public function findWithPart(Part $part): void
     {
-        $collection = new Collection();
+        throw new BadMethodCallException('Directories cannot be located by part.');
+    }
 
-        $response = $this->client->get('directories', [
-            'query' => [
-                'directory_channel' => $channel->getId(),
-            ],
+    public function hydrate(array $fields): Directory
+    {
+        return Directory::create([
+            'id' => $fields['external_id'],
+            'embedId' => $fields['embed_id'],
+            'createdAt' => $fields['created_at'],
+            'modifiedAt' => $fields['updated_at'],
+            'directoryChannel' => $fields['directory_channel'],
+            'forumChannel' => $fields['forum_channel'],
         ]);
-        $json = $this->getResponseJson($response);
-
-
-        if (!empty($json)) {
-            foreach ($json['data'] as $row) {
-                $directory = Directory::hydrateWithArray($row);
-
-                $collection->push($directory);
-            }
-        }
-
-        return $collection;
-    }
-
-    public function getAll(): Collection
-    {
-        $collection = new Collection();
-
-        $response = $this->client->get('directories');
-        $json = $this->getResponseJson($response);
-
-        if (!empty($json)) {
-            foreach ($json['data'] as $row) {
-                $directory = Directory::hydrateWithArray($row);
-
-                $collection->push($directory);
-            }
-        }
-
-        return $collection;
-    }
-
-    public function findById(int|string $id): Directory
-    {
-        $response = $this->client->get("directories/{$id}");
-        $json = $this->getResponseJson($response);
-
-        if (!$json) {
-            throw new OutOfBoundsException("Directory with id {$id} does not exist.");
-        }
-
-        return Directory::hydrateWithArray($json);
-    }
-
-    public function remove(Directory $directory): bool
-    {
-        if (!$directory->getId()) {
-            throw new OutOfBoundsException("Directory is unable to be removed without a proper id.");
-        }
-        $response = $this->client->delete("directories/{$directory->getId()}");
-        $json = $this->getResponseJson($response);
-
-        if (!$json['success']) {
-            throw new \RuntimeException("Removing directory #{$directory->getId()} was unsuccessful");
-        }
-
-        return true;
-    }
-
-    /**
-     * @throws ApiException
-     * @throws GuzzleException
-     */
-    public function save(Directory $directory): Directory
-    {
-        $directory->setModifiedAt(Carbon::now());
-        $params = [
-            'embed_id' => $directory->getEmbedId(),
-            'directory_channel' => $directory->getDirectoryChannel()->getId(),
-            'forum_channel' => $directory->getForumChannel()->getId(),
-        ];
-
-        if (!$directory->getId()) {
-            $directory->setCreatedAt(Carbon::now());
-
-            $response = $this->client->post("directories", [
-                'json' => $params,
-            ]);
-        } else {
-            return $directory;
-        }
-
-        if (!$this->wasSuccessful($response)) {
-            throw new ApiException();
-        }
-
-        return $directory;
     }
 }

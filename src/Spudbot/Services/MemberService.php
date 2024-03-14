@@ -12,18 +12,22 @@ use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Model\Member;
+use Spudbot\Repositories\EventAttendanceRepository;
 use Spudbot\Repositories\MemberRepository;
 
 class MemberService
 {
-    public function __construct(public MemberRepository $memberRepository, public GuildService $guildService)
-    {
+    public function __construct(
+        public MemberRepository $memberRepository,
+        public GuildService $guildService,
+        public EventAttendanceRepository $attendanceRepository
+    ) {
     }
 
     public function findOrCreateWithPart(\Discord\Parts\User\Member $member): Member
     {
         try {
-            return $this->memberRepository->findByPart($member);
+            return $this->memberRepository->findWithPart($member);
         } catch (OutOfBoundsException $exception) {
             return $this->save(Member::create([
                 'discordId' => $member->id,
@@ -32,6 +36,15 @@ class MemberService
                 'verifiedBy' => null,
                 'guild' => $this->guildService->findOrCreateWithPart($member->guild),
             ]));
+        }
+    }
+
+    public function findWithPart(\Discord\Parts\User\Member $member): ?Member
+    {
+        try {
+            return $this->memberRepository->findWithPart($member);
+        } catch (OutOfBoundsException $exception) {
+            return null;
         }
     }
 
@@ -70,16 +83,7 @@ class MemberService
 
     public function getEventAttendance(Member $member): Collection
     {
-        return $this->memberRepository->getEventAttendance($member);
-    }
-
-    public function findWithPart(\Discord\Parts\User\Member $member): ?Member
-    {
-        try {
-            return $this->memberRepository->findByPart($member);
-        } catch (OutOfBoundsException $exception) {
-            return null;
-        }
+        return $this->attendanceRepository->getMemberAttendance($member);
     }
 
     public function remove(Member $member): bool

@@ -1,9 +1,13 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Model;
 
 
-use Carbon\Carbon;
 use PHPUnit\Framework\TestCase;
 use Spudbot\Model\Event;
 use Spudbot\Model\EventAttendance;
@@ -63,7 +67,7 @@ class EventAttendanceTest extends TestCase
      */
     public function successfullySetsAndGetsNoShowStatus(): void
     {
-        $this->model->wasNoShow(true);
+        $this->model->setNoShowStatus(true);
 
         $this->assertTrue($this->model->getNoShowStatus());
     }

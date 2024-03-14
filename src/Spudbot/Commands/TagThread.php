@@ -14,6 +14,8 @@ use Discord\Parts\Channel\Message;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
+use OutOfBoundsException;
+use RuntimeException;
 use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Services\ChannelService;
@@ -81,14 +83,14 @@ class TagThread extends AbstractCommandSubscriber
         try {
             $directory = $this->directoryService->findWithForumChannel($channel);
             if (!$directory) {
-                throw new \OutOfBoundsException('Directory does not exist.');
+                throw new OutOfBoundsException('Directory does not exist.');
             }
 
             $forumDirectoryPart = $channelPart->guild->channels
                 ->get('id', $directory->getDirectoryChannel()->getDiscordId());
 
             if (!$forumDirectoryPart) {
-                throw new \RuntimeException('The specified directory channel does not exist.');
+                throw new RuntimeException('The specified directory channel does not exist.');
             }
 
             $directoryMessage = $this->directoryParser->fromPart($channelPart)
@@ -114,7 +116,7 @@ class TagThread extends AbstractCommandSubscriber
 
             $forumDirectoryPart->messages
                 ->fetch($directory->getEmbedId())->done($success, $rejected);
-        } catch (\OutOfBoundsException $exception) {
+        } catch (OutOfBoundsException $exception) {
             /**
              * There is no directory for this channel
              */

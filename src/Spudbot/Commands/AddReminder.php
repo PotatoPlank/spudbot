@@ -14,6 +14,7 @@ use Discord\Parts\Channel\Channel;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
+use InvalidArgumentException;
 use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\Model\Reminder;
 use Spudbot\Services\ChannelService;
@@ -54,7 +55,7 @@ class AddReminder extends AbstractCommandSubscriber
         if ($repeats) {
             try {
                 $repeats = Recurrence::getIntervalFromString($repeats);
-            } catch (\InvalidArgumentException $exception) {
+            } catch (InvalidArgumentException $exception) {
                 $builder->setDescription($exception->getMessage());
                 $builder->respondTo($interaction, true);
                 return;

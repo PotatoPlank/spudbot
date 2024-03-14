@@ -9,135 +9,41 @@ declare(strict_types=1);
 
 namespace Spudbot\Repositories;
 
-use Carbon\Carbon;
-use GuzzleHttp\Exception\GuzzleException;
-use OutOfBoundsException;
-use Spudbot\Helpers\Collection;
-use Spudbot\Interface\IChannelRepository;
+use Discord\Parts\Part;
+use Spudbot\Exception\ApiException;
+use Spudbot\Exception\ApiRequestFailure;
 use Spudbot\Model\Channel;
-use Spudbot\Model\Guild;
-use Spudbot\Traits\UsesApi;
 
-class ChannelRepository extends IChannelRepository
+/**
+ * @method Channel save(Channel $model)
+ * @method bool remove(Channel $model)
+ */
+class ChannelRepository extends AbstractRepository
 {
-    use UsesApi;
 
-    public function findById(string|int $id): Channel
-    {
-        $response = $this->client->get("channels/{$id}");
-        $json = $this->getResponseJson($response);
-
-        if (!$json) {
-            throw new OutOfBoundsException("Channel with id {$id} does not exist.");
-        }
-
-        return Channel::hydrateWithArray($json);
-    }
-
-    public function findByGuild(Guild $guild): Collection
-    {
-        $collection = new Collection();
-
-        $response = $this->client->get('channels', [
-            'query' => [
-                'guild' => $guild->getId(),
-            ],
-        ]);
-        $json = $this->getResponseJson($response);
-
-        if (!empty($json)) {
-            foreach ($json['data'] as $row) {
-                $channel = Channel::hydrateWithArray($row);
-
-                $collection->push($channel);
-            }
-        }
-
-        return $collection;
-    }
-
-    public function getAll(): Collection
-    {
-        $collection = new Collection();
-
-        $response = $this->client->get('channels');
-        $json = $this->getResponseJson($response);
-
-        if (!empty($json)) {
-            foreach ($json['data'] as $row) {
-                $channel = Channel::hydrateWithArray($row);
-
-                $collection->push($channel);
-            }
-        }
-
-        return $collection;
-    }
+    protected array $endpoints = [
+        'default' => 'channels',
+        'put' => 'put|channels/:id',
+        'delete' => 'delete|channels/:id',
+    ];
 
     /**
+     * @throws ApiRequestFailure
      * @throws ApiException
-     * @throws GuzzleException
      */
-    public function save(Channel $channel): Channel
+    public function findWithPart(Part $part): Channel
     {
-        $channel->setModifiedAt(Carbon::now());
-
-        $params = [
-            'discord_id' => $channel->getDiscordId(),
-            'guild_id' => $channel->getGuild()->getId(),
-        ];
-
-        if (!$channel->getId()) {
-            $channel->setCreatedAt(Carbon::now());
-            $response = $this->client->post("channels", [
-                'json' => $params,
-            ]);
-        } else {
-            $response = $this->client->put("channels/{$channel->getId()}", [
-                'json' => $params,
-            ]);
-        }
-
-        if (!$this->wasSuccessful($response)) {
-            throw new ApiException();
-        }
-
-        return $channel;
+        return $this->findByDiscordId($part->id)->first();
     }
 
-    public function remove(Channel $channel): bool
+    public function hydrate(array $fields): Channel
     {
-        if (!$channel->getId()) {
-            throw new OutOfBoundsException("Channel is unable to be removed without a proper id.");
-        }
-
-        $response = $this->client->delete("channels/{$channel->getId()}");
-        $json = $this->getResponseJson($response);
-        if (!$json['success']) {
-            throw new \RuntimeException("Removing channel {$channel->getId()} was unsuccessful");
-        }
-
-        return true;
-    }
-
-    public function findByPart(\Discord\Parts\Channel\Channel $channel): Channel
-    {
-        return $this->findByDiscordId($channel->id, $channel->guild->id);
-    }
-
-    public function findByDiscordId(string $discordId, string $discordGuildId): Channel
-    {
-        $response = $this->client->get('channels', [
-            'query' => [
-                'discord_id' => $discordId,
-            ],
+        return Channel::create([
+            'id' => $fields['external_id'],
+            'discordId' => $fields['discord_id'],
+            'guild' => $fields['guild'],
+            'createdAt' => $fields['created_at'],
+            'modifiedAt' => $fields['updated_at'],
         ]);
-        $json = $this->getResponseJson($response);
-
-        if (!$json) {
-            throw new OutOfBoundsException("Channel with discord id {$discordId} does not exist.");
-        }
-
-        return Channel::hydrateWithArray($json['data'][0]);
     }
 }

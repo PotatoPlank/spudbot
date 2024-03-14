@@ -12,6 +12,7 @@ namespace Spudbot\SubCommands;
 
 use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
+use OutOfBoundsException;
 use Spudbot\Interface\AbstractSubCommandSubscriber;
 use Spudbot\Services\EventAttendanceService;
 use Spudbot\Services\EventService;
@@ -48,16 +49,16 @@ class UserNoShowStatus extends AbstractSubCommandSubscriber
         try {
             $event = $this->eventService->findWhereId($eventId);
             if (!$event) {
-                throw new \OutOfBoundsException();
+                throw new OutOfBoundsException();
             }
             $eventAttendance = $this->eventAttendanceService->findOrCreateByMemberAndEvent($member, $event);
 
-            $eventAttendance->wasNoShow($noShowStatus);
+            $eventAttendance->setNoShowStatus($noShowStatus);
 
             $this->eventAttendanceService->save($eventAttendance);
 
             $message = DiscordFormatter::mentionUser($member->getDiscordId()) . "'s status was updated.";
-        } catch (\OutOfBoundsException $exception) {
+        } catch (OutOfBoundsException $exception) {
             $message = 'An event with that id and user could not be found.';
         }
 

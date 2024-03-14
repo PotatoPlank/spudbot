@@ -7,6 +7,7 @@
 
 namespace Spudbot\Interface;
 
+use BadMethodCallException;
 use Discord\Builders\CommandBuilder;
 use Discord\Parts\Interactions\Command\Command;
 use Spudbot\Bot\Spud;
@@ -32,7 +33,7 @@ abstract class AbstractCommandSubscriber extends AbstractSubscriber
     public function getCommand(): Command
     {
         if (empty($this->getCommandName()) || empty($this->getCommandDescription())) {
-            throw new \BadMethodCallException('Encountered an empty command name or description.');
+            throw new BadMethodCallException('Encountered an empty command name or description.');
         }
         $command = CommandBuilder::new();
         $command->setName($this->getCommandName());
@@ -47,6 +48,6 @@ abstract class AbstractCommandSubscriber extends AbstractSubscriber
     {
         $list = !empty($missingArgs) ? implode(', ', $missingArgs) : '';
         $message = !empty($missingArgs) ? "Missing arguments {$list} for command " : 'Missing arguments for command ';
-        throw new \BadMethodCallException($message . static::class);
+        throw new BadMethodCallException($message . static::class);
     }
 }

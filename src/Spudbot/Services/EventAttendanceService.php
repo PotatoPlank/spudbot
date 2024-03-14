@@ -11,6 +11,7 @@ use OutOfBoundsException;
 use Spudbot\Model\Event;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Model\Member;
+use Spudbot\Repositories\EventAttendanceRepository;
 use Spudbot\Repositories\EventRepository;
 use Spudbot\Repositories\MemberRepository;
 
@@ -18,6 +19,7 @@ class EventAttendanceService
 {
     public function __construct(
         public EventRepository $eventRepository,
+        public EventAttendanceRepository $attendanceRepository,
         public GuildService $guildService,
         public MemberRepository $memberRepository
     ) {
@@ -26,9 +28,9 @@ class EventAttendanceService
     public function findOrCreateByMemberAndEvent(Member $member, Event $event): EventAttendance
     {
         try {
-            return $this->eventRepository->getAttendanceByMemberAndEvent($member, $event);
+            return $this->attendanceRepository->getMembersEventAttendance($member, $event);
         } catch (OutOfBoundsException $exception) {
-            return $this->memberRepository->saveMemberEventAttendance(EventAttendance::create([
+            return $this->attendanceRepository->save(EventAttendance::create([
                 'status' => 'Attendees',
                 'event' => $event,
                 'member' => $member,
@@ -38,6 +40,6 @@ class EventAttendanceService
 
     public function save(EventAttendance $attendance): EventAttendance
     {
-        return $this->memberRepository->saveMemberEventAttendance($attendance);
+        return $this->attendanceRepository->save($attendance);
     }
 }

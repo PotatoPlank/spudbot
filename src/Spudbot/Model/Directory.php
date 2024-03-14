@@ -9,32 +9,40 @@ declare(strict_types=1);
 
 namespace Spudbot\Model;
 
-use Carbon\Carbon;
-use Spudbot\Interface\AbstractModel;
-
 class Directory extends AbstractModel
 {
     private Channel $directoryChannel;
     private Channel $forumChannel;
     private string $embedId;
 
-    public static function hydrateWithArray(array $row): self
+    public function getTitle(\Discord\Parts\Channel\Channel $channel): string
     {
-        $directory = new self();
+        return $channel->name . ' thread directory';
+    }
 
-        $directory->setId($row['external_id']);
-        $directory->setEmbedId($row['embed_id']);
-        $directory->setCreatedAt(Carbon::parse($row['created_at']));
-        $directory->setModifiedAt(Carbon::parse($row['updated_at']));
+    public function toCreateArray(): array
+    {
+        return [
+            'embed_id' => $this->getEmbedId(),
+            'directory_channel' => $this->getDirectoryChannel()->getId(),
+            'forum_channel' => $this->getForumChannel()->getId(),
+        ];
+    }
 
-        if ($row['directory_channel']) {
-            $directory->setDirectoryChannel($row['directory_channel']);
-        }
-        if ($row['forum_channel']) {
-            $directory->setForumChannel($row['forum_channel']);
-        }
+    /**
+     * @return string
+     */
+    public function getEmbedId(): string
+    {
+        return $this->embedId;
+    }
 
-        return $directory;
+    /**
+     * @param string $embedId
+     */
+    public function setEmbedId(string $embedId): void
+    {
+        $this->embedId = $embedId;
     }
 
     /**
@@ -69,25 +77,12 @@ class Directory extends AbstractModel
         $this->forumChannel = $forumChannel;
     }
 
-    /**
-     * @return string
-     */
-    public function getEmbedId(): string
+    public function toUpdateArray(): array
     {
-        return $this->embedId;
+        return [
+            'embed_id' => $this->getEmbedId(),
+            'directory_channel' => $this->getDirectoryChannel()->getId(),
+            'forum_channel' => $this->getForumChannel()->getId(),
+        ];
     }
-
-    /**
-     * @param string $embedId
-     */
-    public function setEmbedId(string $embedId): void
-    {
-        $this->embedId = $embedId;
-    }
-
-    public function getTitle(\Discord\Parts\Channel\Channel $channel): string
-    {
-        return $channel->name . ' thread directory';
-    }
-
 }

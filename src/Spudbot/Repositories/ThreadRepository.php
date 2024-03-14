@@ -9,142 +9,40 @@ declare(strict_types=1);
 
 namespace Spudbot\Repositories;
 
-use Carbon\Carbon;
-use GuzzleHttp\Exception\GuzzleException;
-use OutOfBoundsException;
-use Spudbot\Helpers\Collection;
-use Spudbot\Interface\IThreadRepository;
+use Discord\Parts\Part;
+use Spudbot\Model\Channel;
 use Spudbot\Model\Guild;
 use Spudbot\Model\Thread;
-use Spudbot\Traits\UsesApi;
 
-class ThreadRepository extends IThreadRepository
+/**
+ * @method Thread findById(string $id)
+ * @method Thread save(Thread $model)
+ * @method bool remove(Thread $model)
+ */
+class ThreadRepository extends AbstractRepository
 {
-    use UsesApi;
 
-    public function findById(string|int $id): Thread
+    protected array $endpoints = [
+        'default' => 'threads',
+        'put' => 'put|threads/:id',
+        'delete' => 'delete|threads/:id',
+    ];
+
+    public function findWithPart(Part $part): Thread
     {
-        $response = $this->client->get("threads/{$id}");
-        $json = $this->getResponseJson($response);
-
-        if (!$json) {
-            throw new OutOfBoundsException("Thread with id {$id} does not exist.");
-        }
-
-        return Thread::hydrateWithArray($json);
+        return $this->findByDiscordId($part->id)->first();
     }
 
-    public function findByPart(\Discord\Parts\Thread\Thread $thread): Thread
+    public function hydrate(array $fields): Thread
     {
-        return $this->findByDiscordId($thread->id, $thread->guild->id, $thread->parent->id);
-    }
-
-    public function findByDiscordId(string $discordId, string $discordGuildId, ?string $discordChannelId = null): Thread
-    {
-        $response = $this->client->get("threads", [
-            'query' => [
-                'discord_id' => $discordId,
-            ],
+        return Thread::create([
+            'id' => $fields['external_id'],
+            'discordId' => $fields['discord_id'],
+            'guild' => Guild::create($fields['guild']),
+            'channel' => Channel::create($fields['channel']),
+            'tag' => $fields['tag'],
+            'createdAt' => $fields['created_at'],
+            'modifiedAt' => $fields['updated_at'],
         ]);
-        $json = $this->getResponseJson($response);
-
-        if (!$json) {
-            throw new OutOfBoundsException("Thread with id {$discordId} does not exist.");
-        }
-
-        return Thread::hydrateWithArray($json['data'][0]);
-    }
-
-    /**
-     * @throws ApiException
-     * @throws GuzzleException
-     */
-    public function save(Thread $thread): Thread
-    {
-        $thread->setModifiedAt(Carbon::now());
-
-        $params = [
-            'tag' => $thread->getTag(),
-        ];
-
-        if (!$thread->getId()) {
-            $thread->setCreatedAt(Carbon::now());
-
-            $params = [
-                'discord_id' => $thread->getDiscordId(),
-                'guild' => $thread->getGuild()->getId(),
-                'channel' => $thread->getChannel()->getId(),
-                ...$params,
-            ];
-            $response = $this->client->post("threads", [
-                'json' => $params,
-            ]);
-        } else {
-            $response = $this->client->put("threads/{$thread->getId()}", [
-                'json' => $params,
-            ]);
-        }
-
-        if (!$this->wasSuccessful($response)) {
-            throw new ApiException();
-        }
-
-
-        return $thread;
-    }
-
-    public function findByGuild(Guild $guild): Collection
-    {
-        $collection = new Collection();
-
-        $response = $this->client->get('threads', [
-            'query' => [
-                'guild' => $guild->getId(),
-            ],
-        ]);
-        $json = $this->getResponseJson($response);
-
-        if (!empty($json)) {
-            foreach ($json['data'] as $row) {
-                $thread = Thread::hydrateWithArray($row);
-
-                $collection->push($thread);
-            }
-        }
-
-        return $collection;
-    }
-
-    public function getAll(): Collection
-    {
-        $collection = new Collection();
-
-        $response = $this->client->get('threads');
-        $json = $this->getResponseJson($response);
-
-        if (!empty($json)) {
-            foreach ($json['data'] as $row) {
-                $thread = Thread::hydrateWithArray($row);
-
-                $collection->push($thread);
-            }
-        }
-
-        return $collection;
-    }
-
-    public function remove(Thread $thread): bool
-    {
-        if (!$thread->getId()) {
-            throw new OutOfBoundsException("Thread is unable to be removed without a proper id.");
-        }
-
-        $response = $this->client->delete("threads/{$thread->getId()}");
-        $json = $this->getResponseJson($response);
-        if (!$json['success']) {
-            throw new \RuntimeException("Removing thread {$thread->getId()} was unsuccessful");
-        }
-
-        return true;
     }
 }

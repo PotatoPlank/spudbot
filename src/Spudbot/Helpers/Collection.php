@@ -7,11 +7,25 @@
 
 namespace Spudbot\Helpers;
 
+use ArrayAccess;
+use ArrayIterator;
+use Countable;
+use IteratorAggregate;
 use Traversable;
 
-class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
+class Collection implements ArrayAccess, Countable, IteratorAggregate
 {
-    private array $collection = [];
+    private array $collection;
+
+    public function __construct(array $list = [])
+    {
+        $this->collection = $list;
+    }
+
+    public static function collect(array $list): Collection
+    {
+        return new self($list);
+    }
 
     public function set(string|int $key, mixed $value): void
     {
@@ -79,7 +93,7 @@ class Collection implements \ArrayAccess, \Countable, \IteratorAggregate
 
     public function getIterator(): Traversable
     {
-        return new \ArrayIterator($this->collection);
+        return new ArrayIterator($this->collection);
     }
 
     public function filter(callable $callback): void
