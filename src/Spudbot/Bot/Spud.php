@@ -9,8 +9,8 @@ namespace Spudbot\Bot;
 
 use Carbon\Carbon;
 use DI\Attribute\Inject;
-use DI\Container;
 use Discord\Discord;
+use Psr\Container\ContainerInterface;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Exception\BotTerminationException;
 use Spudbot\Handler\ExceptionQueue;
@@ -25,18 +25,17 @@ class Spud
     public readonly ?Guild $logGuild;
     #[Inject('spud.twig')]
     public readonly Environment $twig;
+    #[Inject]
     public readonly Discord $discord;
     #[Inject]
     public readonly CommandObserver $commandObserver;
     #[Inject]
     public readonly EventObserver $eventObserver;
-    public readonly Container $container;
 
-    public function __construct(SpudOptions $options, Container $container)
+    public function __construct(public readonly ?ContainerInterface $container)
     {
         date_default_timezone_set('UTC');
-        $this->discord = new Discord($options->getOptions());
-        $this->container = $container;
+
         $exceptionHandler = new ExceptionQueue();
         if (!empty($_ENV['SENTRY_DSN'])) {
             $sentryHandler = new SentryExceptions($_ENV['SENTRY_DSN'], $_ENV['SENTRY_ENV']);

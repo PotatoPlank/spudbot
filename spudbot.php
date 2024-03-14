@@ -6,6 +6,7 @@
  */
 
 use DI\ContainerBuilder;
+use Spudbot\Bot\ConfigurationException;
 use Spudbot\Bot\Spud;
 use Spudbot\Commands\About;
 use Spudbot\Commands\User;
@@ -23,17 +24,18 @@ if (!isset($_ENV['DOCKER'])) {
     $dotenv->load();
 }
 if (!isset($_ENV['DATABASE_NAME'])) {
-    exit('Invalid config, database not detected');
+    throw new ConfigurationException('Invalid config, database not detected.');
+}
+$configFiles = glob(__DIR__ . '/src/config/*.php');
+if (empty($configFiles)) {
+    throw new ConfigurationException('No configuration files found.');
 }
 
 $builder = new ContainerBuilder();
 $builder->useAttributes(true);
-$builder->addDefinitions(
-    __DIR__ . '/config/api.php',
-    __DIR__ . '/config/bot.php',
-    __DIR__ . '/config/repositories.php',
-    __DIR__ . '/config/services.php',
-);
+foreach ($configFiles as $configFile) {
+    $builder->addDefinitions(realpath($configFile));
+}
 $container = $builder->build();
 
 $spud = $container->get(Spud::class);
