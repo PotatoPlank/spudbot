@@ -15,7 +15,7 @@ class About extends AbstractCommandSubscriber
 {
     public function getCommandName(): string
     {
-        return 'about_test';
+        return 'about';
     }
 
     public function getCommandDescription(): string

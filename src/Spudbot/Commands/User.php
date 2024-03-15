@@ -123,7 +123,7 @@ class User extends AbstractCommandSubscriber
 
     public function getCommandName(): string
     {
-        return 'user_test';
+        return 'user';
     }
 
     public function getCommandDescription(): string

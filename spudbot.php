@@ -8,12 +8,8 @@
 use DI\ContainerBuilder;
 use Spudbot\Bot\ConfigurationException;
 use Spudbot\Bot\Spud;
-use Spudbot\Commands\About;
-use Spudbot\Commands\User;
 use Spudbot\Events\Member\MemberBanned;
-use Spudbot\Events\Meme\SprayUser;
 use Spudbot\Events\Reactions\MessageHasManyReactions;
-use Spudbot\Events\Ready\ReadyMessage;
 use Spudbot\Events\Thread\DeletedThread;
 
 
@@ -49,13 +45,13 @@ $excludedEvents = [
     MemberBanned::class,
     DeletedThread::class,
 ];
-//$spud->attachAll($container->get('spud.commands'), $excludedCommands);
-//$spud->attachAll($container->get('spud.events'), $excludedEvents);
+$spud->attachAll($container->get('spud.commands'), $excludedCommands);
+$spud->attachAll($container->get('spud.events'), $excludedEvents);
 
-$spud->attachSubscriber(ReadyMessage::class);
-$spud->attachSubscriber(About::class);
-$spud->attachSubscriber(User::class);
-$spud->attachSubscriber(SprayUser::class);
+//$spud->attachSubscriber(ReadyMessage::class);
+//$spud->attachSubscriber(About::class);
+//$spud->attachSubscriber(User::class);
+//$spud->attachSubscriber(SprayUser::class);
 
 
 $spud->run();
