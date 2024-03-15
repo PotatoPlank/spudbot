@@ -24,19 +24,18 @@ abstract class AbstractModel
     public static function create(array $fields = []): static
     {
         $self = new static();
-        if (!isset($fields['createdAt'])) {
+        if (!isset($fields['createdAt']) && !isset($fields['created_at'])) {
             $fields['createdAt'] = Carbon::now();
-        } else {
-            $fields['createdAt'] = Carbon::parse($fields['createdAt']);
         }
-        if (!isset($fields['updatedAt'])) {
+        if (!isset($fields['updatedAt']) && !isset($fields['updated_at'])) {
             $fields['updatedAt'] = Carbon::now();
-        } else {
-            $fields['updatedAt'] = Carbon::parse($fields['updatedAt']);
         }
 
         foreach ($fields as $field => $value) {
             $mutator = $self->getFieldMutator($field);
+            if (strrpos($mutator, 'At') === strlen($mutator) - 1) {
+                $value = Carbon::parse($value);
+            }
             $self->$mutator($value);
         }
 
