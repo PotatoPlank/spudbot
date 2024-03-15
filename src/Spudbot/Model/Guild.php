@@ -17,8 +17,8 @@ use Discord\Parts\Channel\Channel;
 class Guild extends AbstractModel
 {
     private string $discordId;
-    private ?string $outputChannelId = null;
-    private ?string $outputThreadId = null;
+    private ?string $channelAnnounceId = null;
+    private ?string $channelThreadAnnounceId = null;
     private CarbonTimeZone $timeZone;
 
     public function __construct()
@@ -61,36 +61,36 @@ class Guild extends AbstractModel
 
     public function getOutputLocationId(): ?string
     {
-        if (!empty($this->getOutputThreadId())) {
-            return $this->getOutputThreadId();
+        if (!empty($this->getChannelThreadAnnounceId())) {
+            return $this->getChannelThreadAnnounceId();
         }
-        return $this->getOutputChannelId();
+        return $this->getChannelAnnounceId();
     }
 
-    public function getOutputThreadId(): ?string
+    public function getChannelThreadAnnounceId(): ?string
     {
-        return $this->outputThreadId;
+        return $this->channelThreadAnnounceId;
     }
 
-    public function setOutputThreadId(?string $threadId): void
+    public function setChannelThreadAnnounceId(?string $threadId): void
     {
-        $this->outputThreadId = $threadId;
+        $this->channelThreadAnnounceId = $threadId;
     }
 
-    public function getOutputChannelId(): ?string
+    public function getChannelAnnounceId(): ?string
     {
-        return $this->outputChannelId;
+        return $this->channelAnnounceId;
     }
 
-    public function setOutputChannelId(?string $channelId): void
+    public function setChannelAnnounceId(?string $channelId): void
     {
-        $this->outputChannelId = $channelId;
+        $this->channelAnnounceId = $channelId;
     }
 
     public function getOutputPart(\Discord\Parts\Guild\Guild $guild): Channel
     {
-        $channelId = $this->getOutputChannelId();
-        $threadId = $this->getOutputThreadId();
+        $channelId = $this->getChannelAnnounceId();
+        $threadId = $this->getChannelThreadAnnounceId();
 
         $outputPart = $guild->channels->get('id', $channelId);
         if (!$outputPart) {
@@ -111,7 +111,7 @@ class Guild extends AbstractModel
 
     public function isOutputLocationThread(): bool
     {
-        return !empty($this->getOutputThreadId());
+        return !empty($this->getChannelThreadAnnounceId());
     }
 
     /**
@@ -134,8 +134,8 @@ class Guild extends AbstractModel
     {
         return [
             'discord_id' => $this->getDiscordId(),
-            'channel_announce_id' => $this->getOutputChannelId(),
-            'channel_thread_announce_id' => $this->getOutputThreadId(),
+            'channel_announce_id' => $this->getChannelAnnounceId(),
+            'channel_thread_announce_id' => $this->getChannelThreadAnnounceId(),
         ];
     }
 
@@ -152,8 +152,8 @@ class Guild extends AbstractModel
     public function toUpdateArray(): array
     {
         return [
-            'channel_announce_id' => $this->getOutputChannelId(),
-            'channel_thread_announce_id' => $this->getOutputThreadId(),
+            'channel_announce_id' => $this->getChannelAnnounceId(),
+            'channel_thread_announce_id' => $this->getChannelThreadAnnounceId(),
         ];
     }
 }

@@ -15,7 +15,7 @@ class Reminder extends AbstractModel
 {
     private Guild $guild;
     private Channel $channel;
-    private ?string $mentionableRole = null;
+    private ?string $mentionRole = null;
     private Carbon $scheduledAt;
     private ?string $repeats = null;
     private string $description;
@@ -47,7 +47,7 @@ class Reminder extends AbstractModel
             'guild' => $this->getGuild()->getExternalId(),
             'channel' => $this->getChannel()->getExternalId(),
             'description' => $this->getDescription(),
-            'mention_role' => $this->getMentionableRole(),
+            'mention_role' => $this->getMentionRole(),
             'repeats' => $this->getRepeats(),
             'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
         ];
@@ -88,17 +88,17 @@ class Reminder extends AbstractModel
     /**
      * @return string|null
      */
-    public function getMentionableRole(): ?string
+    public function getMentionRole(): ?string
     {
-        return $this->mentionableRole;
+        return $this->mentionRole;
     }
 
     /**
-     * @param string|null $mentionableRole
+     * @param string|null $mentionRole
      */
-    public function setMentionableRole(?string $mentionableRole): void
+    public function setMentionRole(?string $mentionRole): void
     {
-        $this->mentionableRole = $mentionableRole;
+        $this->mentionRole = $mentionRole;
     }
 
     /**

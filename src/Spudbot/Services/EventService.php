@@ -30,7 +30,7 @@ class EventService
             return $this->eventRepository->findWithPart($event);
         } catch (OutOfBoundsException $exception) {
             return $this->eventRepository->save(Event::create([
-                'nativeId' => $event->guild_scheduled_event_id ?? $event->id,
+                'nativeEventId' => $event->guild_scheduled_event_id ?? $event->id,
                 'type' => EventType::Native,
                 'guild' => $this->guildService->findOrCreateWithPart($event->guild),
                 'name' => $event->name ?? '',

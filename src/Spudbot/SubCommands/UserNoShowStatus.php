@@ -53,7 +53,7 @@ class UserNoShowStatus extends AbstractSubCommandSubscriber
             }
             $eventAttendance = $this->eventAttendanceService->findOrCreateByMemberAndEvent($member, $event);
 
-            $eventAttendance->setNoShowStatus($noShowStatus);
+            $eventAttendance->setNoShow($noShowStatus);
 
             $this->eventAttendanceService->save($eventAttendance);
 

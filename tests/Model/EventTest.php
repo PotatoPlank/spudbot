@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Model;
 
@@ -77,9 +82,9 @@ class EventTest extends TestCase
     {
         $seshId = 'sesh';
 
-        $this->model->setSeshId($seshId);
+        $this->model->setSeshMessageId($seshId);
 
-        $this->assertEquals($seshId, $this->model->getSeshId());
+        $this->assertEquals($seshId, $this->model->getSeshMessageId());
     }
 
     /**
@@ -90,9 +95,9 @@ class EventTest extends TestCase
     {
         $nativeId = 'native';
 
-        $this->model->setNativeId($nativeId);
+        $this->model->setNativeEventId($nativeId);
 
-        $this->assertEquals($nativeId, $this->model->getNativeId());
+        $this->assertEquals($nativeId, $this->model->getNativeEventId());
     }
 
     /**

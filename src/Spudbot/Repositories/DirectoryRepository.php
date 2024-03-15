@@ -46,7 +46,7 @@ class DirectoryRepository extends AbstractRepository
     public function hydrate(array $fields): Directory
     {
         return Directory::create([
-            'external_id' => $fields['external_id'],
+            'externalId' => $fields['external_id'],
             'embedId' => $fields['embed_id'],
             'createdAt' => $fields['created_at'],
             'updatedAt' => $fields['updated_at'],

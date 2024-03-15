@@ -1,4 +1,9 @@
 <?php
+/*
+ * This file is a part of the SpudBot Framework.
+ * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
+ */
 
 namespace Model;
 
@@ -36,9 +41,9 @@ class GuildTest extends TestCase
     {
         $channelId = 'channel id';
 
-        $this->model->setOutputChannelId($channelId);
+        $this->model->setChannelAnnounceId($channelId);
 
-        $this->assertEquals($channelId, $this->model->getOutputChannelId());
+        $this->assertEquals($channelId, $this->model->getChannelAnnounceId());
     }
 
     /**
@@ -49,8 +54,8 @@ class GuildTest extends TestCase
     {
         $name = 'thread id';
 
-        $this->model->setOutputThreadId($name);
+        $this->model->setChannelThreadAnnounceId($name);
 
-        $this->assertEquals($name, $this->model->getOutputThreadId());
+        $this->assertEquals($name, $this->model->getChannelThreadAnnounceId());
     }
 }

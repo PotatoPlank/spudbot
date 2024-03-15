@@ -12,12 +12,7 @@ class EventAttendance extends AbstractModel
     private Event $event;
     private Member $member;
     private string $status;
-    private bool $wasNoShow = false;
-
-    public function setNoShowStatus(bool $status): void
-    {
-        $this->wasNoShow = $status;
-    }
+    private bool $noShow = false;
 
     public function getEvent(): Event
     {
@@ -34,7 +29,7 @@ class EventAttendance extends AbstractModel
         return [
             'member' => $this->getMember()->getExternalId(),
             'status' => $this->getStatus(),
-            'no_show' => $this->getNoShowStatus(),
+            'no_show' => $this->getNoShow(),
         ];
     }
 
@@ -58,16 +53,21 @@ class EventAttendance extends AbstractModel
         $this->status = $status;
     }
 
-    public function getNoShowStatus(): bool
+    public function getNoShow(): bool
     {
-        return $this->wasNoShow;
+        return $this->noShow;
+    }
+
+    public function setNoShow(bool $status): void
+    {
+        $this->noShow = $status;
     }
 
     public function toUpdateArray(): array
     {
         return [
             'status' => $this->getStatus(),
-            'no_show' => $this->getNoShowStatus(),
+            'no_show' => $this->getNoShow(),
         ];
     }
 }

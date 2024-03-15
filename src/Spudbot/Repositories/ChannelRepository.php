@@ -13,6 +13,7 @@ use Discord\Parts\Part;
 use Spudbot\Exception\ApiException;
 use Spudbot\Exception\ApiRequestFailure;
 use Spudbot\Model\Channel;
+use Spudbot\Model\Guild;
 
 /**
  * @method Channel save(Channel $model)
@@ -39,9 +40,9 @@ class ChannelRepository extends AbstractRepository
     public function hydrate(array $fields): Channel
     {
         return Channel::create([
-            'external_id' => $fields['external_id'],
+            'externalId' => $fields['external_id'],
             'discordId' => $fields['discord_id'],
-            'guild' => $fields['guild'],
+            'guild' => Guild::create($fields['guild']),
             'createdAt' => $fields['created_at'],
             'updatedAt' => $fields['updated_at'],
         ]);

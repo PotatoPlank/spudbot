@@ -59,7 +59,7 @@ class MemberRepository extends AbstractRepository
     public function hydrate(array $fields): Member
     {
         return Member::create([
-            'external_id' => $fields['external_id'],
+            'externalId' => $fields['external_id'],
             'discordId' => $fields['discord_id'],
             'totalComments' => $fields['total_comments'],
             'username' => $fields['username'],

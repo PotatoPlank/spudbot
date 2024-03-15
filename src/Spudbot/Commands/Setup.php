@@ -57,9 +57,9 @@ class Setup extends AbstractCommandSubscriber
 
                 $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
 
-                $guild->setOutputChannelId($channelId);
+                $guild->setChannelAnnounceId($channelId);
                 if ($isThread) {
-                    $guild->setOutputThreadId($threadId);
+                    $guild->setChannelThreadAnnounceId($threadId);
                 }
                 $this->guildService->save($guild);
 

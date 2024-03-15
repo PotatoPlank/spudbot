@@ -18,8 +18,8 @@ class Event extends AbstractModel
     private ?string $channelId;
     private string $name;
     private EventType $type;
-    private ?string $seshId;
-    private ?string $nativeId;
+    private ?string $seshMessageId;
+    private ?string $nativeEventId;
     private Carbon $scheduledAt;
 
     public function toCreateArray(): array
@@ -27,8 +27,8 @@ class Event extends AbstractModel
         return [
             'guild' => $this->getGuild()->getExternalId(),
             'type' => $this->getType(),
-            'sesh_id' => $this->getSeshId(),
-            'native_id' => $this->getNativeId(),
+            'sesh_id' => $this->getSeshMessageId(),
+            'native_id' => $this->getNativeEventId(),
             'discord_channel_id' => $this->getChannelId(),
             'name' => $this->getName(),
             'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
@@ -55,24 +55,24 @@ class Event extends AbstractModel
         $this->type = $type;
     }
 
-    public function getSeshId(): ?string
+    public function getSeshMessageId(): ?string
     {
-        return $this->seshId ?? null;
+        return $this->seshMessageId ?? null;
     }
 
-    public function setSeshId(?string $id): void
+    public function setSeshMessageId(?string $id): void
     {
-        $this->seshId = $id;
+        $this->seshMessageId = $id;
     }
 
-    public function getNativeId(): ?string
+    public function getNativeEventId(): ?string
     {
-        return $this->nativeId ?? null;
+        return $this->nativeEventId ?? null;
     }
 
-    public function setNativeId(?string $id): void
+    public function setNativeEventId(?string $id): void
     {
-        $this->nativeId = $id;
+        $this->nativeEventId = $id;
     }
 
     public function getChannelId(): string

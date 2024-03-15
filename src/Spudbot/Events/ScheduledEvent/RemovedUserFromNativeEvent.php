@@ -57,7 +57,7 @@ class RemovedUserFromNativeEvent extends AbstractEventSubscriber
 
         $noShowDateTime = $eventPart->scheduled_start_time->modify($_ENV['EVENT_NO_SHOW_WINDOW']);
         if ($noShowDateTime->lte(Carbon::now())) {
-            $eventAttendance->setNoShowStatus(true);
+            $eventAttendance->setNoShow(true);
         }
 
         $this->attendanceService->save($eventAttendance);

@@ -95,8 +95,8 @@ class Spud
 
 
         if (!empty($this->logGuild)) {
-            $channelId = $this->logGuild->getOutputChannelId();
-            $threadId = $this->logGuild->getOutputThreadId();
+            $channelId = $this->logGuild->getChannelAnnounceId();
+            $threadId = $this->logGuild->getChannelThreadAnnounceId();
             $guild = $this->discord->guilds->get('id', $this->logGuild->getDiscordId());
             if (!$guild) {
                 return;

@@ -36,7 +36,7 @@ class ThreadRepository extends AbstractRepository
     public function hydrate(array $fields): Thread
     {
         return Thread::create([
-            'external_id' => $fields['external_id'],
+            'externalId' => $fields['external_id'],
             'discordId' => $fields['discord_id'],
             'guild' => Guild::create($fields['guild']),
             'channel' => Channel::create($fields['channel']),

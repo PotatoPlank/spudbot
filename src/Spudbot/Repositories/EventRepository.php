@@ -54,13 +54,13 @@ class EventRepository extends AbstractRepository
     public function hydrate(array $fields): Event
     {
         return Event::create([
-            'external_id' => $fields['external_id'],
+            'externalId' => $fields['external_id'],
             'guild' => $fields['guild'],
             'channelId' => $fields['discord_channel_id'],
             'name' => $fields['name'],
             'type' => $fields['type'],
-            'seshId' => $fields['sesh_message_id'],
-            'nativeId' => $fields['native_event_id'],
+            'seshMessageId' => $fields['sesh_message_id'],
+            'nativeEventId' => $fields['native_event_id'],
             'scheduledAt' => $fields['scheduled_at'],
             'createdAt' => $fields['created_at'],
             'updatedAt' => $fields['updated_at'],

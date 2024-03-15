@@ -54,7 +54,7 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
             $output = $guild->getOutputPart($message->guild);
 
             $event = $this->eventService->findOrCreateSesh($eventInformation->getId(), [
-                'seshId' => $message->id,
+                'seshMessageId' => $message->id,
                 'channelId' => $message->channel_id,
                 'type' => EventType::Sesh,
                 'guild' => $guild,
@@ -88,9 +88,9 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
                     if ($shouldAdd) {
                         $member = $this->memberService->findOrCreateWithPart($attendee);
                         $eventAttendance = $this->attendanceService->findOrCreateByMemberAndEvent($member, $event);
-                        $eventAttendance->setNoShowStatus(false);
+                        $eventAttendance->setNoShow(false);
                         if (str_contains($eventStatus, 'No')) {
-                            $eventAttendance->setNoShowStatus($noShowBoolean);
+                            $eventAttendance->setNoShow($noShowBoolean);
                         }
                         $this->attendanceService->save($eventAttendance);
                         $statusContentText .= "<@{$eventAttendance->getMember()->getDiscordId()}>" . PHP_EOL;
@@ -105,7 +105,7 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
                 $statusContentText = '';
                 foreach ($originalAttendees as $originalAttendee) {
                     if ($originalAttendee->getStatus() !== 'No') {
-                        $originalAttendee->setNoShowStatus($noShowBoolean);
+                        $originalAttendee->setNoShow($noShowBoolean);
                         $originalAttendee->setStatus('No');
                         $this->attendanceService->save($originalAttendee);
                         $statusContentText .= "<@{$originalAttendee->getMember()->getDiscordId()}>" . PHP_EOL;

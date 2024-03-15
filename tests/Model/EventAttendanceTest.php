@@ -67,8 +67,8 @@ class EventAttendanceTest extends TestCase
      */
     public function successfullySetsAndGetsNoShowStatus(): void
     {
-        $this->model->setNoShowStatus(true);
+        $this->model->setNoShow(true);
 
-        $this->assertTrue($this->model->getNoShowStatus());
+        $this->assertTrue($this->model->getNoShow());
     }
 }
