@@ -63,7 +63,8 @@ class MemberRepository extends AbstractRepository
             'discordId' => $fields['discord_id'],
             'totalComments' => $fields['total_comments'],
             'username' => $fields['username'],
-            'verifiedBy' => $fields['verified_by'],
+            'guild' => Guild::create($fields['guild']),
+            'verifiedBy' => !empty($fields['verified_by']) ? Member::create($fields['verified_by']) : null,
             'createdAt' => $fields['created_at'],
             'modifiedAt' => $fields['updated_at'],
         ]);

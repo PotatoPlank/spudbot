@@ -33,7 +33,7 @@ abstract class AbstractModel
 
         foreach ($fields as $field => $value) {
             $mutator = $self->getFieldMutator($field);
-            $self->$mutator = $value;
+            $self->$mutator($value);
         }
 
         return $self;
