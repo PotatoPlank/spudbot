@@ -27,12 +27,12 @@ abstract class AbstractModel
         if (!isset($fields['createdAt'])) {
             $self->createdAt = Carbon::now();
         } else {
-            $self->createdAt = Carbon::parse($fields['createdAt']);
+            $fields['createdAt'] = Carbon::parse($fields['createdAt']);
         }
         if (!isset($fields['updatedAt'])) {
             $self->updatedAt = Carbon::now();
         } else {
-            $self->updatedAt = Carbon::parse($fields['updatedAt']);
+            $fields['updatedAt'] = Carbon::parse($fields['updatedAt']);
         }
 
         foreach ($fields as $field => $value) {
