@@ -19,9 +19,6 @@ if (!isset($_ENV['DOCKER'])) {
     $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
     $dotenv->load();
 }
-if (!isset($_ENV['DATABASE_NAME'])) {
-    throw new ConfigurationException('Invalid config, database not detected.');
-}
 $configFiles = glob(__DIR__ . '/src/config/*.php');
 if (empty($configFiles)) {
     throw new ConfigurationException('No configuration files found.');
