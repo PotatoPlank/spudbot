@@ -105,7 +105,7 @@ abstract class AbstractRepository
     {
         return $this->find([
             'query' => [
-                'guild' => $guild->getId(),
+                'guild' => $guild->getExternalId(),
             ],
         ]);
     }
@@ -130,12 +130,12 @@ abstract class AbstractRepository
 
     public function remove(AbstractModel $model): bool
     {
-        if (!$model->getId()) {
+        if (!$model->getExternalId()) {
             throw new InvalidArgumentException("Model cannot be removed without an id set.");
         }
         $endpoint = $this->router->getEndpoint('delete')
             ->setDefaultMethod('delete')
-            ->setVariable('id', $model->getId());
+            ->setVariable('id', $model->getExternalId());
         return $this->call($endpoint, []);
     }
 
@@ -146,8 +146,8 @@ abstract class AbstractRepository
     public function save(AbstractModel $model): AbstractModel
     {
         $now = Carbon::now();
-        $model->setModifiedAt($now);
-        if (!$model->getId()) {
+        $model->setUpdatedAt($now);
+        if (!$model->getExternalId()) {
             $model->setCreatedAt($now);
             $options = [
                 'json' => $model->toCreateArray(),
@@ -160,7 +160,7 @@ abstract class AbstractRepository
             ];
             $endpoint = $this->router->getEndpoint('put')
                 ->setDefaultMethod('put')
-                ->setVariable('id', $model->getId());
+                ->setVariable('id', $model->getExternalId());
         }
 
         $this->call($endpoint, $options);

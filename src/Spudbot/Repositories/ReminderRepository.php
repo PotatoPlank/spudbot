@@ -48,7 +48,7 @@ class ReminderRepository extends AbstractRepository
     public function hydrate(array $fields): Reminder
     {
         return Reminder::create([
-            'id' => $fields['external_id'],
+            'external_id' => $fields['external_id'],
             'description' => $fields['description'],
             'mentionableRole' => $fields['mention_role'],
             'scheduledAt' => $fields['scheduled_at'],
@@ -56,7 +56,7 @@ class ReminderRepository extends AbstractRepository
             'guild' => Guild::create($fields['guild']),
             'channel' => Channel::create($fields['channel']),
             'createdAt' => $fields['created_at'],
-            'modifiedAt' => $fields['updated_at'],
+            'updatedAt' => $fields['updated_at'],
         ]);
     }
 }

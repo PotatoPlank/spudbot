@@ -32,7 +32,7 @@ class EventAttendance extends AbstractModel
     public function toCreateArray(): array
     {
         return [
-            'member' => $this->getMember()->getId(),
+            'member' => $this->getMember()->getExternalId(),
             'status' => $this->getStatus(),
             'no_show' => $this->getNoShowStatus(),
         ];

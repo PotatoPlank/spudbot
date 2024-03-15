@@ -31,7 +31,7 @@ class DirectoryRepository extends AbstractRepository
     {
         $response = $this->find([
             'query' => [
-                'forum_channel' => $channel->getId(),
+                'forum_channel' => $channel->getExternalId(),
             ],
         ]);
 
@@ -46,10 +46,10 @@ class DirectoryRepository extends AbstractRepository
     public function hydrate(array $fields): Directory
     {
         return Directory::create([
-            'id' => $fields['external_id'],
+            'external_id' => $fields['external_id'],
             'embedId' => $fields['embed_id'],
             'createdAt' => $fields['created_at'],
-            'modifiedAt' => $fields['updated_at'],
+            'updatedAt' => $fields['updated_at'],
             'directoryChannel' => $fields['directory_channel'],
             'forumChannel' => $fields['forum_channel'],
         ]);

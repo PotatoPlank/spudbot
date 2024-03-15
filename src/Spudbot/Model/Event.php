@@ -25,7 +25,7 @@ class Event extends AbstractModel
     public function toCreateArray(): array
     {
         return [
-            'guild' => $this->getGuild()->getId(),
+            'guild' => $this->getGuild()->getExternalId(),
             'type' => $this->getType(),
             'sesh_id' => $this->getSeshId(),
             'native_id' => $this->getNativeId(),

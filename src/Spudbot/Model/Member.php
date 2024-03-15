@@ -31,7 +31,7 @@ class Member extends AbstractModel
     {
         return [
             'discord_id' => $this->getDiscordId(),
-            'guild' => $this->getGuild()->getId(),
+            'guild' => $this->getGuild()->getExternalId(),
             'total_comments' => $this->getTotalComments(),
             'username' => $this->getUsername(),
             'verified_by_member' => $this->getVerifiedBy(),

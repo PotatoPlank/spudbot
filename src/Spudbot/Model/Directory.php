@@ -24,8 +24,8 @@ class Directory extends AbstractModel
     {
         return [
             'embed_id' => $this->getEmbedId(),
-            'directory_channel' => $this->getDirectoryChannel()->getId(),
-            'forum_channel' => $this->getForumChannel()->getId(),
+            'directory_channel' => $this->getDirectoryChannel()->getExternalId(),
+            'forum_channel' => $this->getForumChannel()->getExternalId(),
         ];
     }
 
@@ -81,8 +81,8 @@ class Directory extends AbstractModel
     {
         return [
             'embed_id' => $this->getEmbedId(),
-            'directory_channel' => $this->getDirectoryChannel()->getId(),
-            'forum_channel' => $this->getForumChannel()->getId(),
+            'directory_channel' => $this->getDirectoryChannel()->getExternalId(),
+            'forum_channel' => $this->getForumChannel()->getExternalId(),
         ];
     }
 }

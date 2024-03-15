@@ -44,8 +44,8 @@ class Reminder extends AbstractModel
     public function toCreateArray(): array
     {
         return [
-            'guild' => $this->getGuild()->getId(),
-            'channel' => $this->getChannel()->getId(),
+            'guild' => $this->getGuild()->getExternalId(),
+            'channel' => $this->getChannel()->getExternalId(),
             'description' => $this->getDescription(),
             'mention_role' => $this->getMentionableRole(),
             'repeats' => $this->getRepeats(),
@@ -136,8 +136,8 @@ class Reminder extends AbstractModel
     public function toUpdateArray(): array
     {
         return [
-            'guild' => $this->getGuild()->getId(),
-            'channel' => $this->getChannel()->getId(),
+            'guild' => $this->getGuild()->getExternalId(),
+            'channel' => $this->getChannel()->getExternalId(),
         ];
     }
 }

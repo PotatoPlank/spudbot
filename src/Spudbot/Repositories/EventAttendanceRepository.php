@@ -74,8 +74,8 @@ class EventAttendanceRepository extends AbstractRepository
     public function save(EventAttendance|AbstractModel $model): AbstractModel
     {
         $this->endpointVars = [
-            'attendanceId' => $model->getId(),
-            'eventId' => $model->getEvent()->getId(),
+            'attendanceId' => $model->getExternalId(),
+            'eventId' => $model->getEvent()->getExternalId(),
         ];
         return parent::save($model);
     }
@@ -83,8 +83,8 @@ class EventAttendanceRepository extends AbstractRepository
     public function remove(EventAttendance|AbstractModel $model): bool
     {
         $this->endpointVars = [
-            'attendanceId' => $model->getId(),
-            'eventId' => $model->getEvent()->getId(),
+            'attendanceId' => $model->getExternalId(),
+            'eventId' => $model->getEvent()->getExternalId(),
         ];
         return parent::remove($model);
     }
@@ -97,7 +97,7 @@ class EventAttendanceRepository extends AbstractRepository
     {
         $endpoint = $this->router
             ->getEndpoint('getByMember')
-            ->setVariable('memberId', $member->getId());
+            ->setVariable('memberId', $member->getExternalId());
         $json = $this->call($endpoint);
         $results = Collection::collect($json);
         $results->transform(function ($item) {
@@ -109,13 +109,13 @@ class EventAttendanceRepository extends AbstractRepository
     public function hydrate(array $fields): EventAttendance
     {
         return EventAttendance::create([
-            'id' => $fields['external_id'],
+            'external_id' => $fields['external_id'],
             'status' => $fields['status'],
             'noShowStatus' => $fields['no_show'],
             'member' => Member::create($fields['member']),
             'event' => Event::create($fields['event']),
             'createdAt' => $fields['created_at'],
-            'modifiedAt' => $fields['updated_at'],
+            'updatedAt' => $fields['updated_at'],
         ]);
     }
 
@@ -127,7 +127,7 @@ class EventAttendanceRepository extends AbstractRepository
     {
         $attendees = $this->getEventAttendance($event);
         $attendees->filter(function (EventAttendance $attendance) use ($member) {
-            return $attendance->getMember()->getId() === $member->getId();
+            return $attendance->getMember()->getExternalId() === $member->getExternalId();
         });
 
         if ($attendees->empty()) {
@@ -145,7 +145,7 @@ class EventAttendanceRepository extends AbstractRepository
     {
         $endpoint = $this->router
             ->getEndpoint('getByEvent')
-            ->setVariable('eventId', $event->getId());
+            ->setVariable('eventId', $event->getExternalId());
 
         $json = $this->call($endpoint);
         $results = Collection::collect($json);

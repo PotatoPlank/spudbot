@@ -20,8 +20,8 @@ class Thread extends AbstractModel
     {
         return [
             'discord_id' => $this->getDiscordId(),
-            'guild' => $this->getGuild()->getId(),
-            'channel' => $this->getChannel()->getId(),
+            'guild' => $this->getGuild()->getExternalId(),
+            'channel' => $this->getChannel()->getExternalId(),
             'tag' => $this->getTag(),
         ];
     }

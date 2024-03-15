@@ -42,9 +42,9 @@ class ModelTest extends TestCase
     {
         $modifiedAt = Carbon::now();
 
-        $this->model->setModifiedAt($modifiedAt);
+        $this->model->setUpdatedAt($modifiedAt);
 
-        $this->assertEquals($modifiedAt, $this->model->getModifiedAt());
+        $this->assertEquals($modifiedAt, $this->model->getUpdatedAt());
     }
 
     /**
@@ -55,8 +55,8 @@ class ModelTest extends TestCase
     {
         $id = 1;
 
-        $this->model->setId($id);
+        $this->model->setExternalId($id);
 
-        $this->assertEquals($id, $this->model->getId());
+        $this->assertEquals($id, $this->model->getExternalId());
     }
 }

@@ -15,7 +15,7 @@ abstract class AbstractModel
 {
     private null|int|string $id;
     private Carbon $createdAt;
-    private Carbon $modifiedAt;
+    private Carbon $updatedAt;
 
     /**
      * @param array $fields
@@ -27,8 +27,8 @@ abstract class AbstractModel
         if (!isset($fields['createdAt'])) {
             $self->createdAt = Carbon::now();
         }
-        if (!isset($fields['modifiedAt'])) {
-            $self->modifiedAt = Carbon::now();
+        if (!isset($fields['updatedAt'])) {
+            $self->updatedAt = Carbon::now();
         }
 
         foreach ($fields as $field => $value) {
@@ -67,22 +67,22 @@ abstract class AbstractModel
         $this->createdAt = $createdAt;
     }
 
-    public function getModifiedAt(): Carbon
+    public function getUpdatedAt(): Carbon
     {
-        return $this->modifiedAt;
+        return $this->updatedAt;
     }
 
-    public function setModifiedAt(Carbon $modifiedAt): void
+    public function setUpdatedAt(Carbon $updatedAt): void
     {
-        $this->modifiedAt = $modifiedAt;
+        $this->updatedAt = $updatedAt;
     }
 
-    public function getId(): null|int|string
+    public function getExternalId(): null|int|string
     {
         return $this->id ?? null;
     }
 
-    public function setId(null|string|int $id): void
+    public function setExternalId(null|string|int $id): void
     {
         $this->id = $id;
     }
