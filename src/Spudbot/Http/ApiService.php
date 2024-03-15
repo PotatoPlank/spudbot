@@ -48,7 +48,7 @@ class ApiService
         try {
             $parsedResponse = json_decode($response->getBody()->__toString(), true, 512, JSON_THROW_ON_ERROR);
             if (!$parsedResponse) {
-                throw new InvalidApiResponseException();
+                throw new InvalidApiResponseException($response->getBody()->__toString());
             }
             return $parsedResponse;
         } catch (JsonException $exception) {
@@ -59,7 +59,7 @@ class ApiService
     protected function wasSuccessful(array $parsedResponse): bool
     {
         if (!isset($parsedResponse['success'])) {
-            throw new InvalidApiResponseException();
+            throw new InvalidApiResponseException("Error: $parsedResponse");
         }
         return (bool)$parsedResponse['success'];
     }
