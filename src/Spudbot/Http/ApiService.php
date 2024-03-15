@@ -59,7 +59,7 @@ class ApiService
     protected function wasSuccessful(array $parsedResponse): bool
     {
         if (!isset($parsedResponse['success'])) {
-            throw new InvalidApiResponseException("Error: $parsedResponse");
+            throw new InvalidApiResponseException("Error: " . json_encode($parsedResponse));
         }
         return (bool)$parsedResponse['success'];
     }
