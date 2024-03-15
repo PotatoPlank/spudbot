@@ -45,6 +45,9 @@ class Endpoint
         preg_match_all('~:\w+~', $this->endpoint, $matches);
         if (!empty($matches)) {
             foreach ($matches as $match) {
+                if (empty($match)) {
+                    continue;
+                }
                 $varName = str_ireplace(':', '', $match);
                 if (!isset($this->variables[$varName])) {
                     continue;
