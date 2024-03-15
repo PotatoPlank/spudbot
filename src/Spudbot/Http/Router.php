@@ -12,7 +12,7 @@ use BadMethodCallException;
 class Router
 {
     private array $defaultRoutes = [
-        'default' => '',
+        'default',
     ];
 
     public function __construct(private array $definitions = [])
