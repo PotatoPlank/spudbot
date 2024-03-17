@@ -59,14 +59,14 @@ class MemberRepository extends AbstractRepository
     public function hydrate(array $fields): Member
     {
         return Member::create([
-            'externalId' => $fields['external_id'],
-            'discordId' => $fields['discord_id'],
-            'totalComments' => $fields['total_comments'],
+            'external_id' => $fields['external_id'],
+            'discord_id' => $fields['discord_id'],
+            'total_comments' => $fields['total_comments'],
             'username' => $fields['username'],
             'guild' => Guild::create($fields['guild']),
-            'verifiedBy' => !empty($fields['verified_by']) ? Member::create($fields['verified_by']) : null,
-            'createdAt' => $fields['created_at'],
-            'updatedAt' => $fields['updated_at'],
+            'verified_by' => !empty($fields['verified_by']) ? Member::create($fields['verified_by']) : null,
+            'created_at' => $fields['created_at'],
+            'updated_at' => $fields['updated_at'],
         ]);
     }
 }

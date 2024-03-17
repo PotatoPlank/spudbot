@@ -26,7 +26,7 @@ class ThreadService
             return $this->threadRepository->findWithPart($thread);
         } catch (OutOfBoundsException $exception) {
             return $this->threadRepository->save(Thread::create([
-                'discordId' => $thread->id,
+                'discord_id' => $thread->id,
                 'guild' => $this->guildService->findOrCreateWithPart($thread->guild),
                 'channel' => $this->channelService->findOrCreateWithPart($thread->parent),
                 'tag' => '',
@@ -50,7 +50,7 @@ class ThreadService
             return $this->threadRepository->findByDiscordId($discordId, $discordGuildId);
         } catch (OutOfBoundsException $exception) {
             return Thread::create([
-                'discordId' => $discordId,
+                'discord_id' => $discordId,
                 'tag' => '',
             ]);
         }

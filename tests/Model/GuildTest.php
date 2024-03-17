@@ -8,6 +8,7 @@
 namespace Model;
 
 
+use Faker\Factory;
 use PHPUnit\Framework\TestCase;
 use Spudbot\Model\Guild;
 
@@ -18,6 +19,7 @@ class GuildTest extends TestCase
     public function setUp(): void
     {
         $this->model = new Guild();
+        $this->faker = Factory::create();
     }
 
     /**
@@ -57,5 +59,30 @@ class GuildTest extends TestCase
         $this->model->setChannelThreadAnnounceId($name);
 
         $this->assertEquals($name, $this->model->getChannelThreadAnnounceId());
+    }
+
+    /**
+     * @test
+     * @covers \Spudbot\Model\Guild
+     */
+    public function successfullyCreates(): void
+    {
+        $fields = [
+            'external_id' => $this->faker->uuid,
+            'discord_id' => $this->faker->randomNumber(9, true),
+            'channel_announce_id' => $this->faker->randomNumber(9, true),
+            'channel_thread_announce_id' => $this->faker->randomNumber(9, true),
+            'created_at' => $this->faker->dateTime->format('Y-m-d H:i:s'),
+            'updated_at' => $this->faker->dateTime->format('Y-m-d H:i:s'),
+        ];
+
+        $model = Guild::create($fields);
+
+        $this->assertEquals($fields['external_id'], $model->getExternalId());
+        $this->assertEquals($fields['discord_id'], $model->getDiscordId());
+        $this->assertEquals($fields['channel_announce_id'], $model->getChannelAnnounceId());
+        $this->assertEquals($fields['channel_thread_announce_id'], $model->getChannelThreadAnnounceId());
+        $this->assertEquals($fields['created_at'], $model->getCreatedAt()->format('Y-m-d H:i:s'));
+        $this->assertEquals($fields['updated_at'], $model->getUpdatedAt()->format('Y-m-d H:i:s'));
     }
 }

@@ -40,11 +40,11 @@ class ChannelRepository extends AbstractRepository
     public function hydrate(array $fields): Channel
     {
         return Channel::create([
-            'externalId' => $fields['external_id'],
-            'discordId' => $fields['discord_id'],
+            'external_id' => $fields['external_id'],
+            'discord_id' => $fields['discord_id'],
             'guild' => Guild::create($fields['guild']),
-            'createdAt' => $fields['created_at'],
-            'updatedAt' => $fields['updated_at'],
+            'created_at' => $fields['created_at'],
+            'updated_at' => $fields['updated_at'],
         ]);
     }
 }

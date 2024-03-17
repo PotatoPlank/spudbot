@@ -9,6 +9,7 @@ namespace Model;
 
 
 use Carbon\Carbon;
+use Faker\Factory;
 use PHPUnit\Framework\TestCase;
 use Spudbot\Model\Event;
 use Spudbot\Model\Guild;
@@ -21,6 +22,7 @@ class EventTest extends TestCase
     public function setUp(): void
     {
         $this->model = new Event();
+        $this->faker = Factory::create();
     }
 
     /**
@@ -44,9 +46,9 @@ class EventTest extends TestCase
     {
         $channelId = 'channel id';
 
-        $this->model->setChannelId($channelId);
+        $this->model->setDiscordChannelId($channelId);
 
-        $this->assertEquals($channelId, $this->model->getChannelId());
+        $this->assertEquals($channelId, $this->model->getDiscordChannelId());
     }
 
     /**
@@ -111,5 +113,40 @@ class EventTest extends TestCase
         $this->model->setScheduledAt($scheduledAt);
 
         $this->assertEquals($scheduledAt, $this->model->getScheduledAt());
+    }
+
+    /**
+     * @test
+     * @covers \Spudbot\Model\Directory
+     */
+    public function successfullyCreates(): void
+    {
+        $fields = [
+            'external_id' => $this->faker->uuid,
+            'guild' => [
+                'external_id' => $this->faker->uuid,
+            ],
+            'discord_channel_id' => $this->faker->randomNumber(9, true),
+            'name' => $this->faker->word,
+            'type' => $this->faker->randomElement([EventType::Sesh->value, EventType::Native->value]),
+            'sesh_message_id' => $this->faker->randomNumber(9, true),
+            'native_event_id' => $this->faker->randomNumber(9, true),
+            'scheduled_at' => $this->faker->dateTime->format('Y-m-d H:i:s'),
+            'created_at' => $this->faker->dateTime->format('Y-m-d H:i:s'),
+            'updated_at' => $this->faker->dateTime->format('Y-m-d H:i:s'),
+        ];
+
+        $model = Event::create($fields);
+
+        $this->assertEquals($fields['external_id'], $model->getExternalId());
+        $this->assertEquals($fields['discord_channel_id'], $model->getDiscordChannelId());
+        $this->assertEquals($fields['guild']['external_id'], $model->getGuild()->getExternalId());
+        $this->assertEquals($fields['name'], $model->getName());
+        $this->assertEquals($fields['type'], $model->getType()->value);
+        $this->assertEquals($fields['sesh_message_id'], $model->getSeshMessageId());
+        $this->assertEquals($fields['native_event_id'], $model->getNativeEventId());
+        $this->assertEquals($fields['scheduled_at'], $model->getScheduledAt()->format('Y-m-d H:i:s'));
+        $this->assertEquals($fields['created_at'], $model->getCreatedAt()->format('Y-m-d H:i:s'));
+        $this->assertEquals($fields['updated_at'], $model->getUpdatedAt()->format('Y-m-d H:i:s'));
     }
 }

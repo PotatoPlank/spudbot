@@ -14,8 +14,11 @@ use Spudbot\Types\EventType;
 
 class Event extends AbstractModel
 {
+    protected array $dates = [
+        'scheduled_at'
+    ];
     private Guild $guild;
-    private ?string $channelId;
+    private ?string $discordChannelId;
     private string $name;
     private EventType $type;
     private ?string $seshMessageId;
@@ -26,10 +29,10 @@ class Event extends AbstractModel
     {
         return [
             'guild' => $this->getGuild()->getExternalId(),
-            'type' => $this->getType(),
+            'type' => $this->getType()->value,
             'sesh_id' => $this->getSeshMessageId(),
             'native_id' => $this->getNativeEventId(),
-            'discord_channel_id' => $this->getChannelId(),
+            'discord_channel_id' => $this->getDiscordChannelId(),
             'name' => $this->getName(),
             'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
         ];
@@ -50,9 +53,9 @@ class Event extends AbstractModel
         return $this->type;
     }
 
-    public function setType(EventType $type): void
+    public function setType(string|EventType $type): void
     {
-        $this->type = $type;
+        $this->type = $type instanceof EventType ? $type : EventType::from($type);
     }
 
     public function getSeshMessageId(): ?string
@@ -75,14 +78,14 @@ class Event extends AbstractModel
         $this->nativeEventId = $id;
     }
 
-    public function getChannelId(): string
+    public function getDiscordChannelId(): string
     {
-        return $this->channelId;
+        return $this->discordChannelId;
     }
 
-    public function setChannelId(?string $channelId): void
+    public function setDiscordChannelId(?string $discordChannelId): void
     {
-        $this->channelId = $channelId;
+        $this->discordChannelId = $discordChannelId;
     }
 
     public function getName(): string
@@ -108,7 +111,7 @@ class Event extends AbstractModel
     public function toUpdateArray(): array
     {
         return [
-            'discord_channel_id' => $this->getChannelId(),
+            'discord_channel_id' => $this->getDiscordChannelId(),
             'name' => $this->getName(),
             'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
         ];

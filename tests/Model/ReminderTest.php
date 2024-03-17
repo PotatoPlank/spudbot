@@ -9,74 +9,50 @@ namespace Model;
 
 
 use Faker\Factory;
+use Faker\Generator;
 use PHPUnit\Framework\TestCase;
-use Spudbot\Model\Guild;
-use Spudbot\Model\Thread;
+use Spudbot\Model\Reminder;
 
-class ThreadTest extends TestCase
+class ReminderTest extends TestCase
 {
-    public Thread $model;
+    public Generator $faker;
 
     public function setUp(): void
     {
-        $this->model = new Thread();
         $this->faker = Factory::create();
     }
 
     /**
      * @test
-     * @covers \Spudbot\Model\Thread
-     */
-    public function successfullySetsAndGetsDiscordId(): void
-    {
-        $discordId = 'discord id';
-
-        $this->model->setDiscordId($discordId);
-
-        $this->assertEquals($discordId, $this->model->getDiscordId());
-    }
-
-    /**
-     * @test
-     * @covers \Spudbot\Model\Thread
-     * @uses   \Spudbot\Model\Guild
-     */
-    public function successfullySetsAndGetsGuild(): void
-    {
-        $guild = new Guild();
-
-        $this->model->setGuild($guild);
-
-        $this->assertEquals($guild, $this->model->getGuild());
-    }
-
-    /**
-     * @test
-     * @covers \Spudbot\Model\Thread
+     * @covers \Spudbot\Model\Reminder
      */
     public function successfullyCreates(): void
     {
         $fields = [
             'external_id' => $this->faker->uuid,
-            'discord_id' => $this->faker->randomNumber(9, true),
+            'description' => $this->faker->sentence,
+            'mention_role' => null,
+            'scheduled_at' => $this->faker->dateTime->format('Y-m-d H:i:s'),
+            'repeats' => $this->faker->word,
             'guild' => [
                 'external_id' => $this->faker->uuid,
             ],
             'channel' => [
                 'external_id' => $this->faker->uuid,
             ],
-            'tag' => $this->faker->word,
             'created_at' => $this->faker->dateTime->format('Y-m-d H:i:s'),
             'updated_at' => $this->faker->dateTime->format('Y-m-d H:i:s'),
         ];
 
-        $model = Thread::create($fields);
+        $model = Reminder::create($fields);
 
         $this->assertEquals($fields['external_id'], $model->getExternalId());
-        $this->assertEquals($fields['discord_id'], $model->getDiscordId());
+        $this->assertEquals($fields['description'], $model->getDescription());
+        $this->assertEquals($fields['mention_role'], $model->getMentionRole());
+        $this->assertEquals($fields['repeats'], $model->getRepeats());
         $this->assertEquals($fields['guild']['external_id'], $model->getGuild()->getExternalId());
         $this->assertEquals($fields['channel']['external_id'], $model->getChannel()->getExternalId());
-        $this->assertEquals($fields['tag'], $model->getTag());
+        $this->assertEquals($fields['scheduled_at'], $model->getScheduledAt()->format('Y-m-d H:i:s'));
         $this->assertEquals($fields['created_at'], $model->getCreatedAt()->format('Y-m-d H:i:s'));
         $this->assertEquals($fields['updated_at'], $model->getUpdatedAt()->format('Y-m-d H:i:s'));
     }

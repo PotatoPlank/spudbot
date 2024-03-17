@@ -9,50 +9,22 @@ namespace Model;
 
 
 use Faker\Factory;
+use Faker\Generator;
 use PHPUnit\Framework\TestCase;
-use Spudbot\Model\Guild;
-use Spudbot\Model\Thread;
+use Spudbot\Model\Channel;
 
-class ThreadTest extends TestCase
+class ChannelTest extends TestCase
 {
-    public Thread $model;
+    public Generator $faker;
 
     public function setUp(): void
     {
-        $this->model = new Thread();
         $this->faker = Factory::create();
     }
 
     /**
      * @test
-     * @covers \Spudbot\Model\Thread
-     */
-    public function successfullySetsAndGetsDiscordId(): void
-    {
-        $discordId = 'discord id';
-
-        $this->model->setDiscordId($discordId);
-
-        $this->assertEquals($discordId, $this->model->getDiscordId());
-    }
-
-    /**
-     * @test
-     * @covers \Spudbot\Model\Thread
-     * @uses   \Spudbot\Model\Guild
-     */
-    public function successfullySetsAndGetsGuild(): void
-    {
-        $guild = new Guild();
-
-        $this->model->setGuild($guild);
-
-        $this->assertEquals($guild, $this->model->getGuild());
-    }
-
-    /**
-     * @test
-     * @covers \Spudbot\Model\Thread
+     * @covers \Spudbot\Model\Channel
      */
     public function successfullyCreates(): void
     {
@@ -62,21 +34,15 @@ class ThreadTest extends TestCase
             'guild' => [
                 'external_id' => $this->faker->uuid,
             ],
-            'channel' => [
-                'external_id' => $this->faker->uuid,
-            ],
-            'tag' => $this->faker->word,
             'created_at' => $this->faker->dateTime->format('Y-m-d H:i:s'),
             'updated_at' => $this->faker->dateTime->format('Y-m-d H:i:s'),
         ];
 
-        $model = Thread::create($fields);
+        $model = Channel::create($fields);
 
         $this->assertEquals($fields['external_id'], $model->getExternalId());
         $this->assertEquals($fields['discord_id'], $model->getDiscordId());
         $this->assertEquals($fields['guild']['external_id'], $model->getGuild()->getExternalId());
-        $this->assertEquals($fields['channel']['external_id'], $model->getChannel()->getExternalId());
-        $this->assertEquals($fields['tag'], $model->getTag());
         $this->assertEquals($fields['created_at'], $model->getCreatedAt()->format('Y-m-d H:i:s'));
         $this->assertEquals($fields['updated_at'], $model->getUpdatedAt()->format('Y-m-d H:i:s'));
     }

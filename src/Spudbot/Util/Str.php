@@ -32,4 +32,21 @@ class Str
         }
         return false;
     }
+
+    public static function isSnakeCase(string $field): bool
+    {
+        return !str_starts_with($field, '_');
+    }
+
+    public static function snakeToCamelCase(string $field): string
+    {
+        return lcfirst(str_replace(' ', '', ucwords(str_replace('_', ' ', $field))));
+    }
+
+    public static function camelToSnakeCase(string $field): string
+    {
+        $pattern = '/(?<=\\w)(?=[A-Z])|(?<=[a-z])(?=[0-9])/';
+        $snakeCase = preg_replace($pattern, '_', $field);
+        return strtolower($snakeCase);
+    }
 }

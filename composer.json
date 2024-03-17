@@ -17,7 +17,8 @@
         "ext-pcntl": "*",
         "doctrine/migrations": "^3.6",
         "guzzlehttp/guzzle": "^7.0",
-        "php-di/php-di": "^7.0"
+        "php-di/php-di": "^7.0",
+        "fakerphp/faker": "^1.23"
     },
     "autoload": {
         "psr-4": {

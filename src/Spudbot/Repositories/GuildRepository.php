@@ -33,12 +33,12 @@ class GuildRepository extends AbstractRepository
     public function hydrate(array $fields): Guild
     {
         return Guild::create([
-            'externalId' => $fields['external_id'],
-            'discordId' => $fields['discord_id'],
-            'channelAnnounceId' => $fields['channel_announce_id'],
-            'channelThreadAnnounceId' => $fields['channel_thread_announce_id'],
-            'createdAt' => $fields['created_at'],
-            'updatedAt' => $fields['updated_at'],
+            'external_id' => $fields['external_id'],
+            'discord_id' => $fields['discord_id'],
+            'channel_announce_id' => $fields['channel_announce_id'],
+            'channel_thread_announce_id' => $fields['channel_thread_announce_id'],
+            'created_at' => $fields['created_at'],
+            'updated_at' => $fields['updated_at'],
         ]);
     }
 }

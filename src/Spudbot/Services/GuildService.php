@@ -27,9 +27,9 @@ class GuildService
             return $this->guildRepository->findWithPart($guild);
         } catch (OutOfBoundsException $exception) {
             return $this->save(Guild::create([
-                'discordId' => $guild->id,
-                'channelAnnounceId' => null,
-                'channelThreadAnnounceId' => null,
+                'discord_id' => $guild->id,
+                'channel_announce_id' => null,
+                'channel_thread_announce_id' => null,
             ]));
         }
     }

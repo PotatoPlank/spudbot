@@ -109,13 +109,13 @@ class EventAttendanceRepository extends AbstractRepository
     public function hydrate(array $fields): EventAttendance
     {
         return EventAttendance::create([
-            'externalId' => $fields['external_id'],
+            'external_id' => $fields['external_id'],
             'status' => $fields['status'],
-            'noShow' => $fields['no_show'],
+            'no_show' => $fields['no_show'],
             'member' => Member::create($fields['member']),
             'event' => Event::create($fields['event']),
-            'createdAt' => $fields['created_at'],
-            'updatedAt' => $fields['updated_at'],
+            'created_at' => $fields['created_at'],
+            'updated_at' => $fields['updated_at'],
         ]);
     }
 
