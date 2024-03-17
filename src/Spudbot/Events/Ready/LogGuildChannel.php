@@ -11,7 +11,7 @@ use BadMethodCallException;
 use Exception;
 use Spudbot\Bot\ApplicationVersion;
 use Spudbot\Bot\Events;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 
 class LogGuildChannel extends AbstractEventSubscriber
 {

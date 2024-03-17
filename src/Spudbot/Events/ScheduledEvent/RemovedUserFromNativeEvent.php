@@ -11,7 +11,7 @@ namespace Spudbot\Events\ScheduledEvent;
 use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\WebSockets\Event;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Services\EventAttendanceService;
 use Spudbot\Services\EventService;
 use Spudbot\Services\GuildService;

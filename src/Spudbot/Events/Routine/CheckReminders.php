@@ -10,7 +10,7 @@ namespace Spudbot\Events\Routine;
 
 use DI\Attribute\Inject;
 use Spudbot\Bot\Events;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Model\Reminder;
 use Spudbot\Services\ReminderService;
 use Spudbot\Util\Recurrence;

@@ -12,7 +12,6 @@ use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use Discord\Parts\Permissions\Permission;
-use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\SubCommands\Coven\Give;
 use Spudbot\SubCommands\Coven\Remove;
 

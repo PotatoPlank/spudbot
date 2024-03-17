@@ -10,7 +10,7 @@ namespace Spudbot\Events\Ready;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Repository\Interaction\GlobalCommandRepository;
 use Spudbot\Bot\Events;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 
 class FreshenCommands extends AbstractEventSubscriber
 {

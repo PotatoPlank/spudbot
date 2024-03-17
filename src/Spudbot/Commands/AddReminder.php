@@ -15,7 +15,6 @@ use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use InvalidArgumentException;
-use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\Model\Reminder;
 use Spudbot\Services\ChannelService;
 use Spudbot\Services\ReminderService;

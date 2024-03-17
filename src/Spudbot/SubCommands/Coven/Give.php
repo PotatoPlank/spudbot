@@ -12,7 +12,7 @@ namespace Spudbot\SubCommands\Coven;
 
 use BadMethodCallException;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Interface\AbstractSubCommandSubscriber;
+use Spudbot\SubCommands\AbstractSubCommandSubscriber;
 
 class Give extends AbstractSubCommandSubscriber
 {

@@ -9,7 +9,6 @@ namespace Spudbot\Commands;
 
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Bot\ApplicationVersion;
-use Spudbot\Interface\AbstractCommandSubscriber;
 
 class About extends AbstractCommandSubscriber
 {

@@ -7,8 +7,7 @@
 
 namespace Spudbot\Bot;
 
-use Spudbot\Interface\AbstractCommandSubscriber;
-use Spudbot\Interface\AbstractObserver;
+use Spudbot\Commands\AbstractCommandSubscriber;
 
 class CommandObserver extends AbstractObserver
 {

@@ -11,7 +11,6 @@ use Discord\Builders\CommandBuilder;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\SubCommands\TotalUserComments;
 use Spudbot\SubCommands\UserEventReputation;
 use Spudbot\SubCommands\UserInformation;

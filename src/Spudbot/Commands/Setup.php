@@ -10,7 +10,6 @@ namespace Spudbot\Commands;
 use DI\Attribute\Inject;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\Services\GuildService;
 
 class Setup extends AbstractCommandSubscriber

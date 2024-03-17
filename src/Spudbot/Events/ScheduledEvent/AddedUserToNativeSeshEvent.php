@@ -11,7 +11,7 @@ namespace Spudbot\Events\ScheduledEvent;
 use DI\Attribute\Inject;
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Services\GuildService;
 
 class AddedUserToNativeSeshEvent extends AbstractEventSubscriber

@@ -14,7 +14,7 @@ use Discord\Parts\Channel\Message;
 use Discord\Parts\Guild\Role;
 use Discord\WebSockets\Event;
 use Exception;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Services\GuildService;
 use Spudbot\Services\MemberService;
 

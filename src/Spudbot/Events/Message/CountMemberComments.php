@@ -11,7 +11,7 @@ namespace Spudbot\Events\Message;
 use DI\Attribute\Inject;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Model\Member;
 use Spudbot\Services\MemberService;
 

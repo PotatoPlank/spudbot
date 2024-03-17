@@ -8,7 +8,7 @@
 namespace Spudbot\Events\Ready;
 
 use Spudbot\Bot\Events;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 
 class ReadyMessage extends AbstractEventSubscriber
 {

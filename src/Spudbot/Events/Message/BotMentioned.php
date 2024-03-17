@@ -10,7 +10,7 @@ namespace Spudbot\Events\Message;
 
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 
 class BotMentioned extends AbstractEventSubscriber
 {

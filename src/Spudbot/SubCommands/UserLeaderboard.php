@@ -12,7 +12,6 @@ namespace Spudbot\SubCommands;
 
 use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Interface\AbstractSubCommandSubscriber;
 use Spudbot\Model\Member;
 use Spudbot\Services\GuildService;
 

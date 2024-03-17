@@ -10,7 +10,7 @@ namespace Spudbot\Bot;
 use Closure;
 use Discord\Repository\Interaction\OptionRepository;
 use Spudbot\Helpers\Collection;
-use Spudbot\Interface\AbstractSubCommandSubscriber;
+use Spudbot\SubCommands\AbstractSubCommandSubscriber;
 
 class SubCommandObserver
 {

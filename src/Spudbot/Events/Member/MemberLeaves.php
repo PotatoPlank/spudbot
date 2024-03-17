@@ -10,7 +10,7 @@ namespace Spudbot\Events\Member;
 
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Model\Guild;
 
 class MemberLeaves extends AbstractEventSubscriber

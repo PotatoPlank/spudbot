@@ -7,8 +7,6 @@
 
 namespace Spudbot\Bot;
 
-use Spudbot\Interface\AbstractObserver;
-
 class EventObserver extends AbstractObserver
 {
 }

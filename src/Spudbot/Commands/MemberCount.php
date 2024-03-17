@@ -8,7 +8,6 @@
 namespace Spudbot\Commands;
 
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\Model\Guild;
 
 class MemberCount extends AbstractCommandSubscriber

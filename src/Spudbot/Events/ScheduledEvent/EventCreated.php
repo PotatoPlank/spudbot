@@ -10,7 +10,7 @@ namespace Spudbot\Events\ScheduledEvent;
 
 use DI\Attribute\Inject;
 use Discord\WebSockets\Event;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Services\EventService;
 use Spudbot\Services\GuildService;
 

@@ -12,7 +12,6 @@ use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use RuntimeException;
-use Spudbot\Interface\AbstractCommandSubscriber;
 
 class FAQ extends AbstractCommandSubscriber
 {

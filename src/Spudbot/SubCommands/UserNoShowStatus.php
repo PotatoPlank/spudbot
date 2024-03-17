@@ -13,7 +13,6 @@ namespace Spudbot\SubCommands;
 use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
 use OutOfBoundsException;
-use Spudbot\Interface\AbstractSubCommandSubscriber;
 use Spudbot\Services\EventAttendanceService;
 use Spudbot\Services\EventService;
 use Spudbot\Services\MemberService;

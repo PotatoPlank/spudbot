@@ -11,7 +11,7 @@ namespace Spudbot\Events\Reactions;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\WebSockets\MessageReaction;
 use Discord\WebSockets\Event;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 
 class MessageHasManyReactions extends AbstractEventSubscriber
 {

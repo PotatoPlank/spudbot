@@ -7,8 +7,8 @@
 
 namespace Spudbot\Bot;
 
+use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Helpers\Collection;
-use Spudbot\Interface\AbstractEventSubscriber;
 
 class Boot extends AbstractEventSubscriber
 {

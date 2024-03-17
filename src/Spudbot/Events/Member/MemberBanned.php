@@ -11,7 +11,7 @@ namespace Spudbot\Events\Member;
 use Carbon\Carbon;
 use Discord\Parts\Guild\Ban;
 use Discord\WebSockets\Event;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 
 class MemberBanned extends AbstractEventSubscriber
 {

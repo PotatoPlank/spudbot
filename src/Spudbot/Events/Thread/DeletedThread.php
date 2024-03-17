@@ -15,7 +15,7 @@ use Discord\Parts\Thread\Thread;
 use Discord\WebSockets\Event;
 use Exception;
 use OutOfBoundsException;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Services\ChannelService;
 use Spudbot\Services\DirectoryService;

@@ -14,7 +14,6 @@ use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use OutOfBoundsException;
-use Spudbot\Interface\AbstractCommandSubscriber;
 use Spudbot\Model\Directory;
 use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Services\ChannelService;

@@ -5,7 +5,9 @@
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
-namespace Spudbot\Interface;
+namespace Spudbot\Events;
+
+use Spudbot\Bot\AbstractSubscriber;
 
 abstract class AbstractEventSubscriber extends AbstractSubscriber
 {

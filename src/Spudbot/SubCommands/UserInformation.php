@@ -11,7 +11,6 @@ namespace Spudbot\SubCommands;
 use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Interface\AbstractSubCommandSubscriber;
 use Spudbot\Services\MemberService;
 
 class UserInformation extends AbstractSubCommandSubscriber

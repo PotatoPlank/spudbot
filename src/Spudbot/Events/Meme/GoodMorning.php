@@ -11,7 +11,7 @@ namespace Spudbot\Events\Meme;
 use Carbon\Carbon;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
-use Spudbot\Interface\AbstractEventSubscriber;
+use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Util\Str;
 
 class GoodMorning extends AbstractEventSubscriber
