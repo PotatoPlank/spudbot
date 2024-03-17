@@ -95,19 +95,11 @@ class Spud
 
 
         if (!empty($this->logGuild)) {
-            $channelId = $this->logGuild->getChannelAnnounceId();
-            $threadId = $this->logGuild->getChannelThreadAnnounceId();
             $guild = $this->discord->guilds->get('id', $this->logGuild->getDiscordId());
             if (!$guild) {
                 return;
             }
-            $output = $guild->channels->get('id', $channelId);
-            if (!empty($threadId)) {
-                $output = $output->threads->get('id', $threadId);
-            }
-            if (!$output) {
-                return;
-            }
+            $output = $this->logGuild->getOutputPart($guild);
             $this->interact()
                 ->setTitle('Bot Started')
                 ->setDescription('Bot started at ' . Carbon::now()->toIso8601String())
