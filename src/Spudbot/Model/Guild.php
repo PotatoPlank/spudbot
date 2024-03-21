@@ -87,7 +87,7 @@ class Guild extends AbstractModel
         $this->channelAnnounceId = $channelId;
     }
 
-    public function getOutputPart(\Discord\Parts\Guild\Guild $guild): Channel
+    public function getOutputPart(\Discord\Parts\Guild\Guild $guild): Channel|\Discord\Parts\Thread\Thread
     {
         $channelId = $this->getChannelAnnounceId();
         $threadId = $this->getChannelThreadAnnounceId();

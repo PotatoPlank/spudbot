@@ -26,9 +26,10 @@ class LogThreadActivity extends AbstractEventSubscriber
 
     public function update(?Message $message = null): void
     {
-        if (!$message || $message->thread) {
+        if (!$message || !$message->thread) {
             return;
         }
+        $this->spud->discord->getLogger()->info('Called thread activity.');
 
         $thread = $this->threadService->findOrCreateWithPart($message->thread);
 

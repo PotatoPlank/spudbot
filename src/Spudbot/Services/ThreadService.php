@@ -23,7 +23,11 @@ class ThreadService
     public function findOrCreateWithPart(\Discord\Parts\Thread\Thread $thread): Thread
     {
         try {
-            return $this->threadRepository->findWithPart($thread);
+            $model = $this->threadRepository->findWithPart($thread);
+            if ($model) {
+                return $model;
+            }
+            throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
             return $this->threadRepository->save(Thread::create([
                 'discord_id' => $thread->id,

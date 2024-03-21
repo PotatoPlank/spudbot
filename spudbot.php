@@ -45,6 +45,9 @@ $excludedEvents = [
 $spud->attachAll($container->get('spud.commands'), $excludedCommands);
 $spud->attachAll($container->get('spud.events'), $excludedEvents);
 
+//$spud->attachSubscriber(Spudbot\Events\Message\CountMemberComments::class);
+//$spud->attachSubscriber(\Spudbot\Events\Message\LogThreadActivity::class);
+
 //$spud->attachSubscriber(ReadyMessage::class);
 //$spud->attachSubscriber(About::class);
 //$spud->attachSubscriber(User::class);

@@ -54,12 +54,13 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
             $output = $guild->getOutputPart($message->guild);
 
             $event = $this->eventService->findOrCreateSesh($eventInformation->getId(), [
-                'seshMessageId' => $message->id,
-                'channelId' => $message->channel_id,
+                'sesh_message_id' => $message->id,
+                'discord_channel_id' => $message->channel_id,
                 'type' => EventType::Sesh,
                 'guild' => $guild,
                 'name' => $eventInformation->getTitle(),
-                'scheduledAt' => $eventInformation->getScheduledAt(),
+                'scheduled_at' => $eventInformation->getScheduledAt(),
+                'native_event_id' => null,
             ]);
 
             $noShowDateTime = Carbon::parse($event->getScheduledAt())

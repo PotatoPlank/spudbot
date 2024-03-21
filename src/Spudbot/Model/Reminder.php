@@ -136,8 +136,10 @@ class Reminder extends AbstractModel
     public function toUpdateArray(): array
     {
         return [
-            'guild' => $this->getGuild()->getExternalId(),
-            'channel' => $this->getChannel()->getExternalId(),
+            'repeats' => $this->getRepeats(),
+            'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
+            'mention_role' => $this->getMentionRole(),
+            'description' => $this->getDescription(),
         ];
     }
 }

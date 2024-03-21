@@ -40,7 +40,7 @@ class Router
 
     public function getRoute(string $name): array
     {
-        $options = [...$this->defaultRoutes, $name,];
+        $options = [$name, ...$this->defaultRoutes,];
 
         foreach ($options as $option) {
             if (isset($this->definitions[$option])) {

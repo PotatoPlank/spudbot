@@ -38,8 +38,11 @@ abstract class AbstractRepository
     abstract public function findWithPart(Part $part);
 
     /**
-     * @throws ApiRequestFailure
+     * @param string $id
+     * @return AbstractModel
      * @throws ApiException
+     * @throws ApiRequestFailure
+     * @throws InvalidApiResponseException
      */
     public function findById(string $id): AbstractModel
     {
@@ -52,13 +55,18 @@ abstract class AbstractRepository
     }
 
     /**
-     * @throws ApiRequestFailure
+     * @param Endpoint $endpoint
+     * @param array $options
+     * @return mixed
      * @throws ApiException
+     * @throws ApiRequestFailure
+     * @throws InvalidApiResponseException
      */
     public function call(Endpoint $endpoint, array $options = []): mixed
     {
         $endpoint->addVariables($this->endpointVars);
-        return ApiService::new($this->client)->handle($endpoint->getMethod(), $endpoint, $options);
+        return ApiService::new($this->client)
+            ->handle($endpoint->getMethod(), $endpoint, $options);
     }
 
     abstract public function hydrate(array $fields);

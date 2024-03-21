@@ -29,7 +29,7 @@ class EventRepository extends AbstractRepository
         'delete' => 'delete|events/:id',
     ];
 
-    public function findBySeshId(string $seshId): Event
+    public function findBySeshId(string $seshId): ?Event
     {
         $response = $this->find([
             'query' => [
@@ -40,7 +40,7 @@ class EventRepository extends AbstractRepository
         return $response->first();
     }
 
-    public function findWithPart(stdClass|ScheduledEvent|Part $part): Event
+    public function findWithPart(stdClass|ScheduledEvent|Part $part): ?Event
     {
         if (!($part instanceof ScheduledEvent) && !isset($part->guild_scheduled_event_id)) {
             throw new InvalidArgumentException("Part is not an instance with an Event Id.");

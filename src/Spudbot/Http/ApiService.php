@@ -9,6 +9,7 @@ namespace Spudbot\Http;
 
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Spudbot\Exception\ApiException;
@@ -26,16 +27,32 @@ class ApiService
         return new self($client);
     }
 
+    /**
+     * @throws ApiRequestFailure
+     * @throws InvalidApiResponseException
+     * @throws ApiException
+     */
     public function handle(string $method, string $endpoint, array $options): mixed
     {
-        $response = $this->client->request($method, $endpoint, $options);
+        try {
+            $response = $this->client->request($method, $endpoint, $options);
+        } catch (GuzzleException $exception) {
+            throw new ApiException(
+                "Unable to process $method request to $endpoint options: " . json_encode(
+                    $options
+                ) . " error: " . $exception->getMessage(), 0, $exception
+            );
+        }
         $content = $this->getParsedBody($response);
         $success = $this->wasSuccessful($content);
         if ($method === 'delete') {
             return $success;
         }
         if (!$success) {
-            throw new ApiRequestFailure("$method to $endpoint was unsuccessful.");
+            if (isset($content['message'])) {
+                throw new ApiRequestFailure($content['message']);
+            }
+            throw new ApiException("$method to $endpoint was unsuccessful.");
         }
         if (!isset($content['data'])) {
             throw new ApiException("Unable to retrieve data from $method request to $endpoint.");
@@ -43,6 +60,9 @@ class ApiService
         return $content['data'];
     }
 
+    /**
+     * @throws InvalidApiResponseException
+     */
     protected function getParsedBody(ResponseInterface $response): mixed
     {
         try {

@@ -27,9 +27,9 @@ class EventAttendanceRepository extends AbstractRepository
 {
     protected array $endpoints = [
         'default' => 'events/:eventId/attendance',
-        'post' => 'post|events/:eventId',
-        'put' => 'put|events/:eventId/:attendanceId',
-        'delete' => 'delete|events/:eventId/:attendanceId',
+        'post' => 'post|events/:eventId/attendance',
+        'put' => 'put|events/:eventId/attendance/:attendanceId',
+        'delete' => 'delete|events/:eventId/attendance/:attendanceId',
         'getByEvent' => 'events/:eventId/attendance',
         'getByMember' => 'members/:memberId/attendance',
     ];
@@ -42,7 +42,7 @@ class EventAttendanceRepository extends AbstractRepository
     /**
      * @throws MethodNotImplementedException
      */
-    public function findWithPart(Part $part): EventAttendance
+    public function findWithPart(Part $part): void
     {
         throw new MethodNotImplementedException();
     }
@@ -143,9 +143,12 @@ class EventAttendanceRepository extends AbstractRepository
      */
     public function getEventAttendance(Event $event): Collection
     {
+        $this->endpointVars = [
+            'eventId' => $event->getExternalId(),
+        ];
         $endpoint = $this->router
             ->getEndpoint('getByEvent')
-            ->setVariable('eventId', $event->getExternalId());
+            ->setDefaultMethod('get');
 
         $json = $this->call($endpoint);
         $results = Collection::collect($json);

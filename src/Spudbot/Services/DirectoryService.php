@@ -27,7 +27,7 @@ class DirectoryService
         }
     }
 
-    public function findOrCreateWithForumChannel(Channel $channel, $defaults = []): Directory
+    public function findOrCreateWithForumChannel(Channel $channel, $defaults = []): ?Directory
     {
         try {
             return $this->directoryRepository->findByForumChannel($channel);

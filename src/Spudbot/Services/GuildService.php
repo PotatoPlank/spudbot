@@ -24,7 +24,11 @@ class GuildService
     public function findOrCreateWithPart(\Discord\Parts\Guild\Guild $guild): Guild
     {
         try {
-            return $this->guildRepository->findWithPart($guild);
+            $model = $this->guildRepository->findWithPart($guild);
+            if ($model) {
+                return $model;
+            }
+            throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
             return $this->save(Guild::create([
                 'discord_id' => $guild->id,

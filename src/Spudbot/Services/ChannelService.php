@@ -20,7 +20,11 @@ class ChannelService
     public function findOrCreateWithPart(\Discord\Parts\Channel\Channel $channel): Channel
     {
         try {
-            return $this->channelRepository->findWithPart($channel);
+            $model = $this->channelRepository->findWithPart($channel);
+            if ($model) {
+                return $model;
+            }
+            throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
             return $this->save(Channel::create([
                 'discordId' => $channel->id,

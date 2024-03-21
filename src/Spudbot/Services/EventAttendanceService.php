@@ -8,6 +8,8 @@
 namespace Spudbot\Services;
 
 use OutOfBoundsException;
+use Spudbot\Exception\ApiException;
+use Spudbot\Exception\ApiRequestFailure;
 use Spudbot\Model\Event;
 use Spudbot\Model\EventAttendance;
 use Spudbot\Model\Member;
@@ -25,6 +27,10 @@ class EventAttendanceService
     ) {
     }
 
+    /**
+     * @throws ApiRequestFailure
+     * @throws ApiException
+     */
     public function findOrCreateByMemberAndEvent(Member $member, Event $event): EventAttendance
     {
         try {

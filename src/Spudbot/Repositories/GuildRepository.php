@@ -25,7 +25,7 @@ class GuildRepository extends AbstractRepository
         'delete' => 'delete|guilds/:id',
     ];
 
-    public function findWithPart(Part $part): Guild
+    public function findWithPart(Part $part): ?Guild
     {
         return $this->findByDiscordId($part->id)->first();
     }

@@ -24,10 +24,14 @@ class MemberService
     ) {
     }
 
-    public function findOrCreateWithPart(\Discord\Parts\User\Member $member): Member
+    public function findOrCreateWithPart(\Discord\Parts\User\Member $member): ?Member
     {
         try {
-            return $this->memberRepository->findWithPart($member);
+            $model = $this->memberRepository->findWithPart($member);
+            if ($model) {
+                return $model;
+            }
+            throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
             return $this->save(Member::create([
                 'discordId' => $member->id,
@@ -42,7 +46,11 @@ class MemberService
     public function findWithPart(\Discord\Parts\User\Member $member): ?Member
     {
         try {
-            return $this->memberRepository->findWithPart($member);
+            $model = $this->memberRepository->findWithPart($member);
+            if ($model) {
+                return $model;
+            }
+            throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
             return null;
         }

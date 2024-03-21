@@ -27,14 +27,20 @@ class EventService
     public function findOrCreateNativeWithPart(ScheduledEvent $event): Event
     {
         try {
-            return $this->eventRepository->findWithPart($event);
+            $model = $this->eventRepository->findWithPart($event);
+            if ($model) {
+                return $model;
+            }
+            throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
             return $this->eventRepository->save(Event::create([
-                'nativeEventId' => $event->guild_scheduled_event_id ?? $event->id,
+                'native_event_id' => $event->guild_scheduled_event_id ?? $event->id,
                 'type' => EventType::Native,
                 'guild' => $this->guildService->findOrCreateWithPart($event->guild),
                 'name' => $event->name ?? '',
-                'scheduledAt' => $event->scheduled_start_time,
+                'scheduled_at' => $event->scheduled_start_time,
+                'discord_channel_id' => null,
+                'sesh_message_id' => null,
             ]));
         }
     }
@@ -53,10 +59,14 @@ class EventService
         return $this->attendanceRepository->getEventAttendance($event);
     }
 
-    public function findOrCreateSesh(string $seshId, $defaults = []): Event
+    public function findOrCreateSesh(string $seshId, $defaults = []): ?Event
     {
         try {
-            return $this->eventRepository->findBySeshId($seshId);
+            $model = $this->eventRepository->findBySeshId($seshId);
+            if ($model) {
+                return $model;
+            }
+            throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
             return $this->eventRepository->save(Event::create($defaults));
         }

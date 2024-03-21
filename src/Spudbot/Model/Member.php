@@ -34,7 +34,7 @@ class Member extends AbstractModel
             'guild' => $this->getGuild()->getExternalId(),
             'total_comments' => $this->getTotalComments(),
             'username' => $this->getUsername(),
-            'verified_by_member' => $this->getVerifiedBy(),
+            'verified_by_member' => $this->getVerifiedBy()?->getExternalId(),
         ];
     }
 
@@ -105,7 +105,7 @@ class Member extends AbstractModel
         return [
             'total_comments' => $this->getTotalComments(),
             'username' => $this->getUsername(),
-            'verified_by_member' => $this->getVerifiedBy(),
+            'verified_by_member' => $this->getVerifiedBy()?->getExternalId(),
         ];
     }
 }

@@ -43,16 +43,16 @@ class Endpoint
     {
         $endpoint = $this->endpoint;
         preg_match_all('~:\w+~', $this->endpoint, $matches);
-        if (!empty($matches)) {
-            foreach ($matches as $match) {
-                if (empty($match) || !isset($match[0])) {
+        if (!empty($matches) && isset($matches[0])) {
+            foreach ($matches[0] as $match) {
+                if (empty($match)) {
                     continue;
                 }
-                $varName = str_ireplace(':', '', $match[0]);
+                $varName = str_ireplace(':', '', $match);
                 if (!isset($this->variables[$varName])) {
                     continue;
                 }
-                $endpoint = str_replace($match[0], $this->variables[$varName], $endpoint);
+                $endpoint = str_replace($match, $this->variables[$varName], $endpoint);
             }
         }
 

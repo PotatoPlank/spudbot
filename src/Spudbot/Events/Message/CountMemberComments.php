@@ -40,10 +40,16 @@ class CountMemberComments extends AbstractEventSubscriber
             return;
         }
         $username = Member::getUsernameWithPart($message->member);
+        if ($username === 'Spudicus#8409') {
+            var_dump($message->member->user->bot, $isBot);
+        }
 
         $member = $this->memberService->findOrCreateWithPart($message->member);
+        $old = $member->getTotalComments();
         $member->setTotalComments($member->getTotalComments() + 1);
+        $new = $member->getTotalComments();
         $member->setUsername($username);
+        $this->spud->discord->getLogger()->info("Updated $username comment count from $old to $new.");
 
         $this->memberService->save($member);
     }

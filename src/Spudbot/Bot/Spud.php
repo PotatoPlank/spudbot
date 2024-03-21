@@ -54,6 +54,10 @@ class Spud
                 return Filesystem::getNamespaceFromPath($directory . '\\' . $event);
             });
 
+            $files->filter(function ($event) {
+                return !str_contains($event, '\Abstract');
+            });
+
             if (!empty($excluded)) {
                 $files->filter(function ($event) use ($excluded) {
                     return !in_array($event, $excluded, true);

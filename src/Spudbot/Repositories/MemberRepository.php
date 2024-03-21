@@ -51,9 +51,10 @@ class MemberRepository extends AbstractRepository
         ]);
     }
 
-    public function findWithPart(Part|\Discord\Parts\User\Member $part): Member
+    public function findWithPart(Part|\Discord\Parts\User\Member $part): ?Member
     {
-        return $this->findByDiscordId($part->id, $part->guild->id)->first();
+        return $this->findByDiscordId($part->id, $part->guild->id)
+            ->first();
     }
 
     public function hydrate(array $fields): Member

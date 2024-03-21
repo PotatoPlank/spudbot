@@ -10,6 +10,8 @@ declare(strict_types=1);
 namespace Spudbot\Repositories;
 
 use Discord\Parts\Part;
+use Spudbot\Exception\ApiException;
+use Spudbot\Exception\ApiRequestFailure;
 use Spudbot\Model\Channel;
 use Spudbot\Model\Guild;
 use Spudbot\Model\Thread;
@@ -28,7 +30,11 @@ class ThreadRepository extends AbstractRepository
         'delete' => 'delete|threads/:id',
     ];
 
-    public function findWithPart(Part $part): Thread
+    /**
+     * @throws ApiRequestFailure
+     * @throws ApiException
+     */
+    public function findWithPart(Part $part): ?Thread
     {
         return $this->findByDiscordId($part->id)->first();
     }

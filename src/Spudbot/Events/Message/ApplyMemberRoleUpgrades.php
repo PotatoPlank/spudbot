@@ -21,8 +21,8 @@ use Spudbot\Services\MemberService;
 class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
 {
     private const APPLIES_TO_GUILD = '1114365923625816155';
-    private const LEVEL_ONE_ROLE = 1114365923730665481;
-    private const VERIFIED_ROLE = 1114365923730665482;
+    private const LEVEL_ONE_ROLE = '1114365923730665481';
+    private const VERIFIED_ROLE = '1114365923730665482';
     private const MEMBER_TENURE_MINIMUM = 10;
     private const MEMBER_COMMENTS_MINIMUM = 10;
     #[Inject]
@@ -37,7 +37,7 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
 
     public function update(?Message $message = null): void
     {
-        if (!$message) {
+        if (!$message || !$message->member) {
             return;
         }
 
@@ -62,10 +62,13 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
         $hasEnoughComments = $member->getTotalComments() >= self::MEMBER_COMMENTS_MINIMUM;
 
         $isAlreadyUpgraded = $message->member->roles->isset(self::LEVEL_ONE_ROLE);
+        if ($isAlreadyUpgraded) {
+            return;
+        }
         $isAlreadyVerified = $message->member->roles->isset(self::VERIFIED_ROLE);
         $canModerateMembers = $message->member->getPermissions()->moderate_members;
 
-        $meetsRequirements = $hasMetMembershipLength && $hasEnoughComments && !$isAlreadyUpgraded;
+        $meetsRequirements = $hasMetMembershipLength && $hasEnoughComments;
 
         if (!$meetsRequirements && !$canModerateMembers && !$isAlreadyVerified) {
             return;
@@ -90,7 +93,7 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
         }
         $isRegularMember = $message->member && !$message->member->user->bot;
         $correctGuild = $message->guild_id === self::APPLIES_TO_GUILD;
-        $hasJoinDate = $message->member->joined_at instanceof Carbon;
+        $hasJoinDate = $message->member?->joined_at instanceof Carbon;
         if (!$isRegularMember || !$correctGuild || !$hasJoinDate) {
             return false;
         }

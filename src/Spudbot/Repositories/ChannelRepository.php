@@ -32,7 +32,7 @@ class ChannelRepository extends AbstractRepository
      * @throws ApiRequestFailure
      * @throws ApiException
      */
-    public function findWithPart(Part $part): Channel
+    public function findWithPart(Part $part): ?Channel
     {
         return $this->findByDiscordId($part->id)->first();
     }
