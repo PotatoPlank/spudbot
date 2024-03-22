@@ -14,14 +14,14 @@ use Discord\WebSockets\Event;
 use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Util\Str;
 
-class GoodMorning extends AbstractEventSubscriber
+class GoodAfternoon extends AbstractEventSubscriber
 {
-    private string $reaction = '🌞';
+    private string $reaction = '☀';
     private string $guildTimezone = 'America/New_York';
-    private string $start = '03:00';
-    private string $end = '12:00';
+    private string $start = '12:00';
+    private string $end = '17:00';
     private array $triggerPhrases = [
-        'good morning',
+        'good afternoon',
     ];
 
     public function getEventName(): string
@@ -45,10 +45,10 @@ class GoodMorning extends AbstractEventSubscriber
         }
         $hasGreeted = Str::containsOnePhrase(strtolower($message->content), $this->triggerPhrases);
         $messageSentAt = $message->timestamp->clone()->setTimezone($this->guildTimezone);
-        $morningStart = Carbon::now($this->guildTimezone)->setTimeFromTimeString($this->start);
-        $morningEnd = Carbon::now($this->guildTimezone)->setTimeFromTimeString($this->end);
-        $isMorning = $messageSentAt->between($morningStart, $morningEnd);
+        $afternoonStart = Carbon::now($this->guildTimezone)->setTimeFromTimeString($this->start);
+        $afternoonEnd = Carbon::now($this->guildTimezone)->setTimeFromTimeString($this->end);
+        $isAfternoon = $messageSentAt->isBetween($afternoonStart, $afternoonEnd);
 
-        return $hasGreeted && $isMorning;
+        return $hasGreeted && $isAfternoon;
     }
 }
