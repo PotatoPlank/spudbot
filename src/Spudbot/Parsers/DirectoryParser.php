@@ -99,6 +99,8 @@ class DirectoryParser
             return self::MESSAGE_NO_THREADS_FOUND;
         }
 
+        ksort($this->categories);
+
         $body = '';
         foreach ($this->categories as $category => $threads) {
             if (empty($threads)) {
