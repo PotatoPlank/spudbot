@@ -51,7 +51,7 @@ class ThreadService
     public function findWithDiscordId(string $discordId, string $discordGuildId): Thread
     {
         try {
-            return $this->threadRepository->findByDiscordId($discordId, $discordGuildId);
+            return $this->threadRepository->findByDiscordId($discordId, $discordGuildId)->first();
         } catch (OutOfBoundsException $exception) {
             return Thread::create([
                 'discord_id' => $discordId,

@@ -24,6 +24,7 @@ class EmbeddedResponse
     private string $description;
     private array $allowedMentions = [];
     private array $options = [];
+    private bool $acknowledged = false;
 
     public function __construct(public Discord $discord)
     {
@@ -54,9 +55,18 @@ class EmbeddedResponse
         return $this;
     }
 
+    public function acknowledge(Interaction $interaction, bool $ephemeral = false): ExtendedPromiseInterface
+    {
+        $this->acknowledged = true;
+
+        return $interaction->acknowledgeWithResponse($ephemeral);
+    }
+
     public function respondTo(Interaction $interaction, bool $ephemeral = false): ExtendedPromiseInterface
     {
-        return $interaction->respondWithMessage($this->build(), $ephemeral);
+        return $this->acknowledged ?
+            $interaction->updateOriginalResponse($this->build()) :
+            $interaction->respondWithMessage($this->build(), $ephemeral);
     }
 
     public function build(): MessageBuilder

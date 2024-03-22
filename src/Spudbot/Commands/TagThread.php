@@ -42,86 +42,87 @@ class TagThread extends AbstractCommandSubscriber
         }
         $builder = $this->spud->interact()
             ->setTitle('Applied Tag');
-        $tag = $interaction->data->options['tag']->value;
-        $threadId = $interaction->data->options['thread']->value;
 
-        $channelPart = $interaction->guild->channels->find(function (Channel $channel) use ($threadId) {
-            return !empty($channel->threads->get('id', $threadId));
+        $builder->acknowledge($interaction, true)->done(function () use ($interaction, $builder) {
+            $tag = $interaction->data->options['tag']->value;
+            $threadId = $interaction->data->options['thread']->value;
+
+            $channelPart = $interaction->guild->channels->find(function (Channel $channel) use ($threadId) {
+                return !empty($channel->threads->get('id', $threadId));
+            });
+            $threadPart = $channelPart?->threads->get('id', $threadId);
+
+            if (!$channelPart || !$threadPart) {
+                $this->spud->interact()
+                    ->error("Unable to locate the relevant parent channel.")
+                    ->respondTo($interaction, true);
+                return;
+            }
+
+            $threadOwner = $interaction->channel->owner_id ?? null;
+            $isOwner = $threadOwner === $interaction->member->id;
+            $isMod = $interaction->member->getPermissions()->manage_messages;
+
+            if (!$isOwner && !$isMod) {
+                $this->spud->interact()
+                    ->error("You do not have correct permissions to apply the tag.")
+                    ->respondTo($interaction, true);
+                return;
+            }
+            $builder->acknowledge($interaction, true);
+
+            $thread = $this->threadService->findOrCreateWithPart($threadPart);
+            $thread->setTag($tag);
+            $this->threadService
+                ->save($thread);
+
+            $builder->setDescription("Your tag {$tag} was applied.");
+
+            try {
+                $directory = $this->directoryService->findWithForumChannel($thread->getChannel());
+                if (!$directory) {
+                    throw new OutOfBoundsException('Directory does not exist.');
+                }
+
+                $forumDirectoryPart = $channelPart->guild->channels
+                    ->get('id', $directory->getDirectoryChannel()->getDiscordId());
+
+                if (!$forumDirectoryPart) {
+                    throw new RuntimeException('The specified directory channel does not exist.');
+                }
+
+                $directoryMessage = $this->directoryParser->fromPart($channelPart)
+                    ->getBody();
+
+                $embed = $this->spud->interact()
+                    ->setTitle($forumDirectoryPart->name . ' thread directory')
+                    ->setDescription($directoryMessage);
+
+                $success = function (Message $message) use ($embed) {
+                    $message->edit($embed->build());
+                };
+
+                $rejected = function () use ($forumDirectoryPart, $embed, $directory) {
+                    $embed->sendTo($forumDirectoryPart)
+                        ->done(function (Message $message) use ($directory) {
+                            $directory->setEmbedId($message->id);
+
+                            $this->directoryService
+                                ->save($directory);
+                        });
+                };
+
+                $forumDirectoryPart->messages
+                    ->fetch($directory->getEmbedId())->done($success, $rejected);
+            } catch (OutOfBoundsException $exception) {
+                /**
+                 * There is no directory for this channel
+                 */
+                $builder->setDescription($exception->getMessage());
+            }
+
+            $builder->respondTo($interaction, true);
         });
-
-        if (!$channelPart) {
-            $this->spud->interact()
-                ->error("Unable to locate the relevant parent channel.")
-                ->respondTo($interaction, true);
-            return;
-        }
-
-        $threadOwner = $interaction->channel->owner_id ?? null;
-        $isOwner = $threadOwner === $interaction->member->id;
-        $isMod = $interaction->member->getPermissions()->manage_messages;
-
-        if (!$isOwner && !$isMod) {
-            $this->spud->interact()
-                ->error("You do not have correct permissions to apply the tag.")
-                ->respondTo($interaction, true);
-            return;
-        }
-
-        $channel = $this->channelService->findOrCreateWithPart($channelPart);
-        $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
-        $thread = $this->threadService->findWithDiscordId($threadId, $interaction->guild->id);
-        $thread->setTag($tag);
-        $thread->setGuild($guild);
-        $thread->setChannel($channel);
-
-        $this->threadService
-            ->save($thread);
-
-        $builder->setDescription("Your tag {$tag} was applied.");
-
-        try {
-            $directory = $this->directoryService->findWithForumChannel($channel);
-            if (!$directory) {
-                throw new OutOfBoundsException('Directory does not exist.');
-            }
-
-            $forumDirectoryPart = $channelPart->guild->channels
-                ->get('id', $directory->getDirectoryChannel()->getDiscordId());
-
-            if (!$forumDirectoryPart) {
-                throw new RuntimeException('The specified directory channel does not exist.');
-            }
-
-            $directoryMessage = $this->directoryParser->fromPart($channelPart)
-                ->getBody();
-
-            $embed = $this->spud->interact()
-                ->setTitle($forumDirectoryPart->name . ' thread directory')
-                ->setDescription($directoryMessage);
-
-            $success = function (Message $message) use ($embed) {
-                $message->edit($embed->build());
-            };
-
-            $rejected = function () use ($forumDirectoryPart, $embed, $directory) {
-                $embed->sendTo($forumDirectoryPart)
-                    ->done(function (Message $message) use ($directory) {
-                        $directory->setEmbedId($message->id);
-
-                        $this->directoryService
-                            ->save($directory);
-                    });
-            };
-
-            $forumDirectoryPart->messages
-                ->fetch($directory->getEmbedId())->done($success, $rejected);
-        } catch (OutOfBoundsException $exception) {
-            /**
-             * There is no directory for this channel
-             */
-        }
-
-        $builder->respondTo($interaction, true);
     }
 
     public function getCommand(): Command

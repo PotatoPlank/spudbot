@@ -44,14 +44,27 @@ class DirectoryParser
             throw new InvalidArgumentException('The provided forum channel does not have any threads.');
         }
 
+        $threadList = $forumChannel->threads->toArray();
+        // Sort threads first
+        usort($threadList, function ($a, $b) {
+            return strcasecmp($a->name, $b->name);
+        });
+
         /**
          * @var \Discord\Parts\Thread\Thread $threadPart
          */
-        foreach ($forumChannel->threads as $threadPart) {
+        foreach ($threadList as $threadPart) {
             if (!$this->isThreadEligible($threadPart)) {
                 continue;
             }
             $thread = $this->threadService->findOrCreateWithPart($threadPart);
+            $isTagEmpty = empty($thread->getTag()) || $thread->getTag() === self::DEFAULT_CATEGORY;
+            $tagList = $threadPart->applied_tags;
+            if ($isTagEmpty && !empty($tagList)) {
+                $tag = $threadPart->parent->available_tags->get('id', $tagList[0]);
+                $tagName = $tag?->name ?? '';
+                $thread->setTag($tagName);
+            }
             $this->addThread($thread);
         }
 
