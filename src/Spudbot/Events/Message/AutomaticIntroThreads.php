@@ -27,19 +27,23 @@ class AutomaticIntroThreads extends AbstractEventSubscriber
 
     public function update(?Message $message = null): void
     {
-        if (!$message || $message->channel_id !== self::INTRO_CHANNEL_ID) {
+        if (!$message) {
             return;
         }
         $username = Member::getUsernameWithPart($message->member);
-        $tenure = $message->member->joined_at?->diffInDays(Carbon::now()) ?? -99;
-        if ($tenure < 0 || $tenure > 30) {
-            return;
-        }
 
         $message->react(self::DOGE_VIBE_REACT);
         $message->react(self::MOKKA_REACT);
         $message->startThread($this->spud->twig->render('user/intro_title.twig', [
             'memberName' => $username,
         ]));
+    }
+
+    public function canRun(?Message $message = null): bool
+    {
+        if (!$message || $message->channel_id !== self::INTRO_CHANNEL_ID) {
+            return false;
+        }
+        return ($message->member->joined_at?->diffInDays(Carbon::now()) ?? -99) <= 30;
     }
 }

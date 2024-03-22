@@ -84,4 +84,12 @@ class AddedThread extends AbstractEventSubscriber
             return;
         }
     }
+
+    public function canRun(?Thread $threadPart = null): bool
+    {
+        if (!$threadPart) {
+            return false;
+        }
+        return true;
+    }
 }

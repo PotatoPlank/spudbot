@@ -90,8 +90,8 @@ class Spud
     {
         $boot = new Boot($this);
         $boot->hook();
-        $this->discord->on('ready', function () {
-            $this->eventObserver->emit('ready');
+        $this->discord->on(Events::READY->value, function () {
+            $this->eventObserver->emit(Events::READY->value);
         });
 
 

@@ -10,9 +10,7 @@ namespace Spudbot\Repositories;
 use Carbon\Carbon;
 use Discord\Parts\Part;
 use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use InvalidArgumentException;
-use JsonException;
 use Spudbot\Exception\ApiException;
 use Spudbot\Exception\ApiRequestFailure;
 use Spudbot\Exception\InvalidApiResponseException;
@@ -154,8 +152,10 @@ abstract class AbstractRepository
     public function save(AbstractModel $model): AbstractModel
     {
         $now = Carbon::now();
-        $model->setUpdatedAt($now);
-        if (!$model->getExternalId()) {
+
+        $isCreating = !$model->getExternalId();
+
+        if ($isCreating) {
             $model->setCreatedAt($now);
             $options = [
                 'json' => $model->toCreateArray(),
@@ -170,37 +170,8 @@ abstract class AbstractRepository
                 ->setDefaultMethod('put')
                 ->setVariable('id', $model->getExternalId());
         }
+        $json = $this->call($endpoint, $options);
 
-        $this->call($endpoint, $options);
-
-        return $model;
-    }
-
-    /**
-     * @throws GuzzleException
-     * @throws InvalidApiResponseException
-     * @throws ApiException|ApiRequestFailure
-     */
-    protected function handleApiRequest(string $endpoint, string $method, array $options): mixed
-    {
-        $response = $this->client->request($method, $endpoint, $options);
-        try {
-            $parsedResponse = json_decode($response->getBody()->__toString(), true, 512, JSON_THROW_ON_ERROR);
-            if (!$parsedResponse || !isset($parsedResponse['status'])) {
-                throw new InvalidApiResponseException("$method request to $endpoint returned invalid JSON.");
-            }
-            if ($method === 'delete') {
-                return $parsedResponse['status'];
-            }
-        } catch (JsonException $exception) {
-            throw new InvalidApiResponseException($exception->getMessage());
-        }
-        if (!$parsedResponse['status']) {
-            throw new ApiRequestFailure("$method to $endpoint was unsuccessful.");
-        }
-        if (!isset($parsedResponse['data'])) {
-            throw new ApiException("Unable to retrieve data from $method request to $endpoint.");
-        }
-        return $parsedResponse['data'];
+        return $this->hydrate($json);
     }
 }

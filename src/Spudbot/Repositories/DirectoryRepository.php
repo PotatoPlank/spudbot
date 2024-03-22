@@ -48,10 +48,10 @@ class DirectoryRepository extends AbstractRepository
         return Directory::create([
             'external_id' => $fields['external_id'],
             'embed_id' => $fields['embed_id'],
-            'created_at' => $fields['created_at'],
-            'updated_at' => $fields['updated_at'],
             'directory_channel' => $fields['directory_channel'],
             'forum_channel' => $fields['forum_channel'],
+            'created_at' => $fields['created_at'],
+            'updated_at' => $fields['updated_at'],
         ]);
     }
 }

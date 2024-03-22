@@ -31,8 +31,7 @@ class CountMemberComments extends AbstractEventSubscriber
             return;
         }
 
-        $isBot = isset($message->member->user->bot) && $message->member->user->bot;
-        if ($isBot) {
+        if ($message->member?->user?->bot === true) {
             $botMember = $this->memberService->findWithPart($message->member);
             if ($botMember) {
                 $this->memberService->remove($botMember);
@@ -40,9 +39,6 @@ class CountMemberComments extends AbstractEventSubscriber
             return;
         }
         $username = Member::getUsernameWithPart($message->member);
-        if ($username === 'Spudicus#8409') {
-            var_dump($message->member->user->bot, $isBot);
-        }
 
         $member = $this->memberService->findOrCreateWithPart($message->member);
         $old = $member->getTotalComments();
@@ -52,5 +48,10 @@ class CountMemberComments extends AbstractEventSubscriber
         $this->spud->discord->getLogger()->info("Updated $username comment count from $old to $new.");
 
         $this->memberService->save($member);
+    }
+
+    public function canRun(?Message $message = null): bool
+    {
+        return $message && $message->member;
     }
 }

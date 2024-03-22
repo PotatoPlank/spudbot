@@ -14,7 +14,6 @@ use Spudbot\Events\AbstractEventSubscriber;
 
 class FreshenCommands extends AbstractEventSubscriber
 {
-    protected string $event = 'ready';
 
     public function getEventName(): string
     {

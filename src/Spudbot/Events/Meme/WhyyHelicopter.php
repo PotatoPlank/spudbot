@@ -32,11 +32,16 @@ class WhyyHelicopter extends AbstractEventSubscriber
         if (!$message) {
             return;
         }
-        if (!Str::containsOnePhrase(strtolower($message->content), $this->triggerKeywords)) {
-            return;
-        }
 
         $message->react($this->whyy);
         $message->react($this->helicopter);
+    }
+
+    public function canRun(?Message $message = null): bool
+    {
+        if (!$message) {
+            return false;
+        }
+        return Str::containsOnePhrase(strtolower($message->content), $this->triggerKeywords);
     }
 }

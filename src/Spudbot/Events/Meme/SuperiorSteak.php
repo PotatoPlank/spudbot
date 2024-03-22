@@ -31,12 +31,17 @@ class SuperiorSteak extends AbstractEventSubscriber
         if (!$message) {
             return;
         }
-        $mentionedSteak = stripos('steak', $message->content) !== false;
-        $mentionedEateries = Str::hasSimilarWord($message->content, $this->triggerKeywords, 65);
-        if (!$mentionedSteak || !$mentionedEateries) {
-            return;
-        }
 
         $message->react($this->reaction);
+    }
+
+    public function canRun(?Message $message = null): bool
+    {
+        if (!$message) {
+            return false;
+        }
+        $mentionedSteak = stripos('steak', $message->content) !== false;
+        $mentionedEateries = Str::hasSimilarWord($message->content, $this->triggerKeywords, 65);
+        return $mentionedSteak && $mentionedEateries;
     }
 }

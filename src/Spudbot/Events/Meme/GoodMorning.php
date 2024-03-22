@@ -32,12 +32,20 @@ class GoodMorning extends AbstractEventSubscriber
         if (!$message) {
             return;
         }
+
+        $message->react($this->reaction);
+    }
+
+    public function canRun(?Message $message = null): bool
+    {
+        if (!$message) {
+            return false;
+        }
         $hasGreeted = Str::containsOnePhrase(strtolower($message->content), $this->triggerPhrases);
         $morningStart = Carbon::now($this->guildTimezone)->setTime(3, 0);
         $morningEnd = Carbon::now($this->guildTimezone)->setTime(12, 0);
         $isMorning = $message->timestamp->setTimezone($this->guildTimezone)->between($morningStart, $morningEnd);
-        if ($hasGreeted && $isMorning) {
-            $message->react($this->reaction);
-        }
+
+        return $hasGreeted && $isMorning;
     }
 }

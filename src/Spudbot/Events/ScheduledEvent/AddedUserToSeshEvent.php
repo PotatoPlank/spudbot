@@ -13,10 +13,10 @@ use DI\Attribute\Inject;
 use Discord\Parts\Channel\Message;
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
-use Exception;
 use Spudbot\Events\AbstractEventSubscriber;
-use Spudbot\Helpers\SeshEmbedParser;
+use Spudbot\Exception\InvalidSeshEmbed;
 use Spudbot\Model\EventAttendance;
+use Spudbot\Parsers\Sesh\SeshParser;
 use Spudbot\Services\EventAttendanceService;
 use Spudbot\Services\EventService;
 use Spudbot\Services\GuildService;
@@ -40,77 +40,83 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
         return Event::MESSAGE_UPDATE;
     }
 
-    public function update(?Message $message = null): void
+    public function update(?object $message = null): void
     {
-        if (!$message || $message->user_id !== self::SESH_BOT_ID) {
+        if (!$message instanceof Message) {
             return;
         }
         $messageContent = '';
-        $originalAttendees = [];
         try {
-            $eventInformation = new SeshEmbedParser($message);
-
+            $seshEmbed = SeshParser::fromMessage($message);
             $guild = $this->guildService->findOrCreateWithPart($message->guild);
             $output = $guild->getOutputPart($message->guild);
 
-            $event = $this->eventService->findOrCreateSesh($eventInformation->getId(), [
+            $event = $this->eventService->findOrCreateSesh($seshEmbed->id, [
                 'sesh_message_id' => $message->id,
                 'discord_channel_id' => $message->channel_id,
                 'type' => EventType::Sesh,
                 'guild' => $guild,
-                'name' => $eventInformation->getTitle(),
-                'scheduled_at' => $eventInformation->getScheduledAt(),
+                'name' => $seshEmbed->title,
+                'scheduled_at' => $seshEmbed->scheduledAt,
                 'native_event_id' => null,
             ]);
 
-            $noShowDateTime = Carbon::parse($event->getScheduledAt())
-                ->modify($_ENV['EVENT_NO_SHOW_WINDOW'] ?? '-8 hours');
+            if (!$event) {
+                return;
+            }
+            $event->setScheduledAt($seshEmbed->scheduledAt);
+            $event->setName($seshEmbed->title);
+
+            $noShowDateTime = $event->getScheduledAt()?->modify($_ENV['EVENT_NO_SHOW_WINDOW'] ?? '-8 hours');
+            if (!$noShowDateTime) {
+                return;
+            }
             $noShowBoolean = $noShowDateTime->lte(Carbon::now());
 
             $currentAttendees = $this->eventService->getAttendance($event);
-            if (!$currentAttendees->empty()) {
+            $originalAttendees = collect();
+            if ($currentAttendees->isNotEmpty()) {
                 /**
                  * @var EventAttendance $attendee
                  */
                 foreach ($currentAttendees as $attendee) {
-                    $originalAttendees[$attendee->getMember()->getDiscordId()] = $attendee;
+                    $originalAttendees->put($attendee->getMember()->getDiscordId(), $attendee);
                 }
             }
-            foreach ($eventInformation->getMembers() as $eventStatus => $attendees) {
+            foreach ($seshEmbed->members as $eventStatus => $attendees) {
                 $statusContentText = '';
                 /**
                  * @var Member $attendee
                  */
                 foreach ($attendees as $attendee) {
-                    $id = $attendee->id;
-                    $shouldAdd = !isset($originalAttendees[$id]) ||
-                        $eventStatus !== $originalAttendees[$id]->getStatus();
+                    $shouldUpdate = !$originalAttendees->has($attendee->id) ||
+                        $eventStatus !== $originalAttendees->get($attendee->id)->getStatus();
 
-                    if ($shouldAdd) {
+                    if ($shouldUpdate) {
                         $member = $this->memberService->findOrCreateWithPart($attendee);
                         $eventAttendance = $this->attendanceService->findOrCreateByMemberAndEvent($member, $event);
-                        $eventAttendance->setNoShow(false);
-                        if (str_contains($eventStatus, 'No')) {
-                            $eventAttendance->setNoShow($noShowBoolean);
-                        }
+                        $eventAttendance->setStatus($eventStatus);
+                        $eventAttendance->setNoShow(str_contains($eventStatus, 'No'));
                         $this->attendanceService->save($eventAttendance);
-                        $statusContentText .= "<@{$eventAttendance->getMember()->getDiscordId()}>" . PHP_EOL;
+                        $statusContentText .= "<@{$member->getDiscordId()}>" . PHP_EOL;
                     }
-                    unset($originalAttendees[$id]);
+                    $originalAttendees->forget($attendee->id);
                 }
                 if (!empty($statusContentText)) {
                     $messageContent .= "{$eventStatus}:" . PHP_EOL . PHP_EOL . $statusContentText;
                 }
             }
-            if (!empty($originalAttendees)) {
+
+            if ($originalAttendees->isNotEmpty()) {
                 $statusContentText = '';
                 foreach ($originalAttendees as $originalAttendee) {
-                    if ($originalAttendee->getStatus() !== 'No') {
-                        $originalAttendee->setNoShow($noShowBoolean);
-                        $originalAttendee->setStatus('No');
-                        $this->attendanceService->save($originalAttendee);
-                        $statusContentText .= "<@{$originalAttendee->getMember()->getDiscordId()}>" . PHP_EOL;
+                    if ($originalAttendee->getStatus() === 'No') {
+                        continue;
                     }
+                    $originalAttendee->setNoShow($noShowBoolean);
+                    $originalAttendee->setStatus('No');
+                    $this->attendanceService->save($originalAttendee);
+                    $statusContentText .= "<@{$originalAttendee->getMember()->getDiscordId()}>" . PHP_EOL;
                 }
                 if (!empty($statusContentText)) {
                     $messageContent .= 'Removed From List:' . PHP_EOL . PHP_EOL . $statusContentText;
@@ -119,15 +125,20 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
             $messageContent = trim($messageContent);
             if (!empty($messageContent)) {
                 $this->spud->interact()
-                    ->setTitle("{$eventInformation->getTitle()} {$eventInformation->getSeshTimeString()}")
+                    ->setTitle("{$seshEmbed->title} {$seshEmbed->seshTimeString}")
                     ->setDescription($messageContent)
                     ->setAllowedMentions([])
                     ->sendTo($output);
             }
-        } catch (Exception $exception) {
+        } catch (InvalidSeshEmbed $exception) {
             /**
              * Not a sesh embed
              */
         }
+    }
+
+    public function canRun(?object $message = null): bool
+    {
+        return $message instanceof Message && $message->user_id === self::SESH_BOT_ID;
     }
 }

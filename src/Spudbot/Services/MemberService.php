@@ -72,7 +72,7 @@ class MemberService
              * @var EventAttendance $event
              */
             foreach ($attendances as $event) {
-                if ($event->getEvent()->getScheduledAt()->gt(Carbon::now())) {
+                if ($event->getEvent()->getScheduledAt()?->gt(Carbon::now())) {
                     $totalInterested--;
                 } elseif (!$event->getNoShow()) {
                     $totalAttended++;

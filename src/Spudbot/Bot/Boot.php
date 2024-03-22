@@ -26,7 +26,7 @@ class Boot extends AbstractEventSubscriber
             });
         });
 
-        $this->spud->eventObserver->destroy('ready');
+        $this->spud->eventObserver->destroy(Events::READY->value);
         $this->spud->eventObserver->all()->forEach(function ($listeners, $eventName) {
             $this->spud->discord->on($eventName, function (...$args) use ($eventName) {
                 $this->spud->eventObserver->emit($eventName, ...$args);

@@ -9,7 +9,6 @@ namespace Spudbot\Services;
 
 use Discord\Parts\Guild\ScheduledEvent;
 use OutOfBoundsException;
-use Spudbot\Helpers\Collection;
 use Spudbot\Model\Event;
 use Spudbot\Repositories\EventAttendanceRepository;
 use Spudbot\Repositories\EventRepository;
@@ -54,7 +53,7 @@ class EventService
         }
     }
 
-    public function getAttendance(Event $event): Collection
+    public function getAttendance(Event $event): \Illuminate\Support\Collection
     {
         return $this->attendanceRepository->getEventAttendance($event);
     }

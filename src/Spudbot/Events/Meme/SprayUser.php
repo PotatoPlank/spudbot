@@ -77,4 +77,15 @@ class SprayUser extends AbstractEventSubscriber
     {
         return random_int($min, $max);
     }
+
+    public function canRun(?Message $message = null): bool
+    {
+        if (!$message) {
+            return false;
+        }
+
+        $wordCount = str_word_count($message->content);
+        $normalizedMessage = strtolower($message->content);
+        return $wordCount === 1 && in_array($normalizedMessage, $this->triggerKeywords, true);
+    }
 }

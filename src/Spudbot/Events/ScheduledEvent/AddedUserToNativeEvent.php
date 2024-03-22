@@ -56,7 +56,7 @@ class AddedUserToNativeEvent extends AbstractEventSubscriber
         $this->attendanceService->findOrCreateByMemberAndEvent($member, $eventModel);
 
         $message = "<@{$member->getDiscordId()}> marked they were interested in {$eventModel->getName()}";
-        $message .= " scheduled at {$eventModel->getScheduledAt()->format('m/d/Y H:i')}";
+        $message .= " scheduled at {$eventModel->getScheduledAt()?->format('m/d/Y H:i')}";
 
         $this->spud->interact()
             ->setTitle('Native Event Attendee')

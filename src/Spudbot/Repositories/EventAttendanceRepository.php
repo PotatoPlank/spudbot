@@ -126,11 +126,11 @@ class EventAttendanceRepository extends AbstractRepository
     public function getMembersEventAttendance(Member $member, Event $event): EventAttendance
     {
         $attendees = $this->getEventAttendance($event);
-        $attendees->filter(function (EventAttendance $attendance) use ($member) {
+        $attendees = $attendees->filter(function (EventAttendance $attendance) use ($member) {
             return $attendance->getMember()->getExternalId() === $member->getExternalId();
         });
 
-        if ($attendees->empty()) {
+        if ($attendees->isEmpty()) {
             throw new OutOfBoundsException("Event data associated with specified user and event does not exist.");
         }
 
@@ -141,7 +141,7 @@ class EventAttendanceRepository extends AbstractRepository
      * @throws ApiRequestFailure
      * @throws ApiException
      */
-    public function getEventAttendance(Event $event): Collection
+    public function getEventAttendance(Event $event): \Illuminate\Support\Collection
     {
         $this->endpointVars = [
             'eventId' => $event->getExternalId(),
@@ -151,7 +151,7 @@ class EventAttendanceRepository extends AbstractRepository
             ->setDefaultMethod('get');
 
         $json = $this->call($endpoint);
-        $results = Collection::collect($json);
+        $results = collect($json);
         $results->transform(function ($item) {
             return $this->hydrate($item);
         });

@@ -23,7 +23,7 @@ class Event extends AbstractModel
     private EventType $type;
     private ?string $seshMessageId;
     private ?string $nativeEventId;
-    private Carbon $scheduledAt;
+    private ?Carbon $scheduledAt;
 
     public function toCreateArray(): array
     {
@@ -34,7 +34,7 @@ class Event extends AbstractModel
             'native_id' => $this->getNativeEventId(),
             'discord_channel_id' => $this->getDiscordChannelId(),
             'name' => $this->getName(),
-            'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
+            'scheduled_at' => $this->getScheduledAt()?->toIso8601String(),
         ];
     }
 
@@ -98,12 +98,12 @@ class Event extends AbstractModel
         $this->name = $name;
     }
 
-    public function getScheduledAt(): Carbon
+    public function getScheduledAt(): ?Carbon
     {
         return $this->scheduledAt;
     }
 
-    public function setScheduledAt(Carbon $scheduledAt): void
+    public function setScheduledAt(?Carbon $scheduledAt): void
     {
         $this->scheduledAt = $scheduledAt;
     }
@@ -113,7 +113,7 @@ class Event extends AbstractModel
         return [
             'discord_channel_id' => $this->getDiscordChannelId(),
             'name' => $this->getName(),
-            'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
+            'scheduled_at' => $this->getScheduledAt()?->toIso8601String(),
         ];
     }
 }
