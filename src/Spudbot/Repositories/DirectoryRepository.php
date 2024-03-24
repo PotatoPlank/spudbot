@@ -27,7 +27,7 @@ class DirectoryRepository extends AbstractRepository
         'delete' => 'delete|directories/:id',
     ];
 
-    public function findByForumChannel(Channel $channel): Directory
+    public function findByForumChannel(Channel $channel): ?Directory
     {
         $response = $this->find([
             'query' => [
