@@ -22,6 +22,7 @@ class IntervalLoop extends AbstractEventSubscriber
     {
         $this->spud->discord->getLoop()->addPeriodicTimer(60, function () {
             $this->spud->discord->emit(Events::EVERY_MINUTE->value);
+            $this->spud->discord->emit(Events::EVERY_TEN_MINUTES->value);
         });
     }
 }
