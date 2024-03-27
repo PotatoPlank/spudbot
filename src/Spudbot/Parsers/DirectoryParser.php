@@ -8,8 +8,8 @@
 namespace Spudbot\Parsers;
 
 use Discord\Parts\Channel\Channel;
+use Discord\Parts\Thread\Thread;
 use InvalidArgumentException;
-use Spudbot\Model\Thread;
 use Spudbot\Services\ThreadService;
 use Spudbot\Util\DiscordFormatter;
 
@@ -51,38 +51,40 @@ class DirectoryParser
         });
 
         /**
-         * @var \Discord\Parts\Thread\Thread $threadPart
+         * @var Thread $thread
          */
-        foreach ($threadList as $threadPart) {
-            if (!$this->isThreadEligible($threadPart)) {
+
+        foreach ($threadList as $thread) {
+            if (!$this->isThreadEligible($thread)) {
                 continue;
             }
-            $thread = $this->threadService->findOrCreateWithPart($threadPart);
-            $isTagEmpty = empty($thread->getTag()) || $thread->getTag() === self::DEFAULT_CATEGORY;
-            $tagList = $threadPart->applied_tags;
-            if ($isTagEmpty && !empty($tagList)) {
-                $tag = $threadPart->parent->available_tags->get('id', $tagList[0]);
-                $tagName = $tag?->name ?? '';
-                $thread->setTag($tagName);
+            $tagList = $thread->applied_tags;
+            $tagName = self::DEFAULT_CATEGORY;
+            if (empty($tagList)) {
+                $this->addThread($thread, $tagName);
+                continue;
             }
-            $this->addThread($thread);
+            foreach ($tagList as $tagId) {
+                $tag = $thread->parent->available_tags->get('id', $tagId);
+                $tagName = $tag?->name ?? '';
+                $this->addThread($thread, $tagName);
+            }
         }
 
         return $this;
     }
 
-    protected function isThreadEligible(\Discord\Parts\Thread\Thread $thread): bool
+    protected function isThreadEligible(Thread $thread): bool
     {
         $threadIsLocked = $thread->locked;
         $threadRecentlyArchived = $thread->archived && $thread->archive_timestamp->diffInWeeks() < 2;
         return !$threadIsLocked && (!$thread->archived || $threadRecentlyArchived);
     }
 
-    public function addThread(Thread $thread): void
+    public function addThread(Thread $thread, ?string $categoryName): void
     {
-        $name = empty($thread->getTag()) ? self::DEFAULT_CATEGORY : $thread->getTag();
-        $id = $thread->getDiscordId();
-        $this->addCategory($name, $id);
+        $name = empty($categoryName) ? self::DEFAULT_CATEGORY : $categoryName;
+        $this->addCategory($name, $thread->id);
     }
 
     protected function addCategory(string $category, string $threadDiscordId): void
@@ -116,8 +118,4 @@ class DirectoryParser
         return !empty($body) ? $body : self::MESSAGE_NO_THREADS_FOUND;
     }
 
-    public function getCategories(): array
-    {
-        return array_keys($this->categories);
-    }
 }
