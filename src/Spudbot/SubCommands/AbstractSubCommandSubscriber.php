@@ -7,12 +7,12 @@
 
 namespace Spudbot\SubCommands;
 
-use Discord\Repository\Interaction\OptionRepository;
+use Discord\Helpers\Collection;
 use Spudbot\Bot\AbstractSubscriber;
 
 abstract class AbstractSubCommandSubscriber extends AbstractSubscriber
 {
-    protected OptionRepository $options;
+    protected Collection $options;
 
     public function hook(): void
     {
@@ -21,7 +21,7 @@ abstract class AbstractSubCommandSubscriber extends AbstractSubscriber
 
     abstract public function getCommandName(): string;
 
-    public function setOptionRepository(OptionRepository $options): void
+    public function setOptionRepository(Collection $options): void
     {
         $this->options = $options;
     }

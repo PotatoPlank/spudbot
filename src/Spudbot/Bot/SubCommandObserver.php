@@ -8,7 +8,6 @@
 namespace Spudbot\Bot;
 
 use Closure;
-use Discord\Repository\Interaction\OptionRepository;
 use Spudbot\Helpers\Collection;
 use Spudbot\SubCommands\AbstractSubCommandSubscriber;
 
