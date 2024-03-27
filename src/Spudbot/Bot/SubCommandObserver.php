@@ -36,7 +36,7 @@ class SubCommandObserver
         $this->subscribers->set($subscriber->getCommandName(), $subscriber);
     }
 
-    public function notify(OptionRepository $options, mixed ...$arguments): void
+    public function notify(\Discord\Helpers\Collection $options, mixed ...$arguments): void
     {
         $notified = false;
         /**
