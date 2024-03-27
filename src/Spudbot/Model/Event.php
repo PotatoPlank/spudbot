@@ -100,7 +100,7 @@ class Event extends AbstractModel
 
     public function getScheduledAt(): ?Carbon
     {
-        return $this->scheduledAt;
+        return $this->scheduledAt?->copy();
     }
 
     public function setScheduledAt(?Carbon $scheduledAt): void

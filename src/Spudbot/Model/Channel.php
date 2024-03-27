@@ -18,7 +18,7 @@ class Channel extends AbstractModel
     {
         return [
             'discord_id' => $this->getDiscordId(),
-            'guild_id' => $this->getGuild()->getExternalId(),
+            'guild' => $this->getGuild()->getExternalId(),
         ];
     }
 
@@ -58,7 +58,7 @@ class Channel extends AbstractModel
     {
         return [
             'discord_id' => $this->getDiscordId(),
-            'guild_id' => $this->getGuild()->getExternalId(),
+            'guild' => $this->getGuild()->getExternalId(),
         ];
     }
 }

@@ -48,7 +48,7 @@ class ThreadService
         return $this->threadRepository->remove($thread);
     }
 
-    public function findWithDiscordId(string $discordId, string $discordGuildId): Thread
+    public function findWithDiscordId(string $discordId, string $discordGuildId): ?Thread
     {
         try {
             return $this->threadRepository->findByDiscordId($discordId, $discordGuildId)->first();
