@@ -78,7 +78,7 @@ class Verify extends AbstractCommandSubscriber
         $verifyingMember = $this->memberService->findOrCreateWithPart($interaction->member);
         try {
             $verifiedMember = $this->memberService->findOrCreateWithPart($memberToBeVerified);
-            $verifiedMember->setVerifiedBy($verifyingMember->getExternalId());
+            $verifiedMember->setVerifiedBy($verifyingMember);
 
             $this->memberService->save($verifiedMember);
         } catch (OutOfBoundsException $exception) {
