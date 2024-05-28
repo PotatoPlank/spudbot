@@ -55,6 +55,6 @@ class CheckLinks extends AbstractEventSubscriber
         if (!$message) {
             return false;
         }
-        return ($message->member->joined_at?->diffInDays(Carbon::now()) ?? -99) <= 10;
+        return $message->member && ($message->member->joined_at?->diffInDays(Carbon::now()) ?? -99) <= 10;
     }
 }
