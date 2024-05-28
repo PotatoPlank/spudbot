@@ -173,7 +173,7 @@ class Guild extends AbstractModel
                 "Failed locating channel {$channelId} for {$guild->id}."
             );
         }
-        if (!empty($this->getChannelThreadAnnounceId())) {
+        if (!empty($threadId)) {
             $outputPart = $outputPart->threads->get('id', $threadId);
             if (!$outputPart) {
                 throw new BadMethodCallException(
