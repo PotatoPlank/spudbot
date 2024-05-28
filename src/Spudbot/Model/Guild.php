@@ -162,6 +162,7 @@ class Guild extends AbstractModel
             case self::VERIFIED_CHANNEL:
                 $channelId = $this->verifiedMembersChannelId;
                 $threadId = null;
+                break;
             default:
                 throw new \InvalidArgumentException("$logType is not a valid channel type.");
         }
