@@ -29,6 +29,9 @@ class ModelStrategy implements StrategyInterface
 
     public function hydrate(mixed $value, ?array $data = null): mixed
     {
+        if ($value instanceof $this->class) {
+            return $value;
+        }
         if (empty($value)) {
             return null;
         }
