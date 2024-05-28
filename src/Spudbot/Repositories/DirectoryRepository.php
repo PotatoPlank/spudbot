@@ -21,6 +21,7 @@ use Spudbot\Model\Directory;
  */
 class DirectoryRepository extends AbstractRepository
 {
+    protected string $model = Directory::class;
     protected array $endpoints = [
         'default' => 'directories',
         'put' => 'put|directories/:id',
@@ -41,17 +42,5 @@ class DirectoryRepository extends AbstractRepository
     public function findWithPart(Part $part): void
     {
         throw new BadMethodCallException('Directories cannot be located by part.');
-    }
-
-    public function hydrate(array $fields): Directory
-    {
-        return Directory::create([
-            'external_id' => $fields['external_id'],
-            'embed_id' => $fields['embed_id'],
-            'directory_channel' => $fields['directory_channel'],
-            'forum_channel' => $fields['forum_channel'],
-            'created_at' => $fields['created_at'],
-            'updated_at' => $fields['updated_at'],
-        ]);
     }
 }

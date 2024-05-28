@@ -36,7 +36,7 @@ class EventAttendanceService
         try {
             return $this->attendanceRepository->getMembersEventAttendance($member, $event);
         } catch (OutOfBoundsException $exception) {
-            return $this->attendanceRepository->save(EventAttendance::create([
+            return $this->save($this->attendanceRepository->new([
                 'status' => 'Attendees',
                 'event' => $event,
                 'member' => $member,

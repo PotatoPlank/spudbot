@@ -33,7 +33,7 @@ class MemberService
             }
             throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
-            return $this->save(Member::create([
+            return $this->save($this->memberRepository->new([
                 'discordId' => $member->id,
                 'totalComments' => 0,
                 'username' => Member::getUsernameWithPart($member),

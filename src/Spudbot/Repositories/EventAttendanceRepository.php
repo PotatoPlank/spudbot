@@ -25,6 +25,7 @@ use Spudbot\Model\Member;
 // */
 class EventAttendanceRepository extends AbstractRepository
 {
+    protected string $model = EventAttendance::class;
     protected array $endpoints = [
         'default' => 'events/:eventId/attendance',
         'post' => 'post|events/:eventId/attendance',
@@ -37,6 +38,9 @@ class EventAttendanceRepository extends AbstractRepository
         'attendanceId' => null,
         'eventId' => null,
         'memberId' => null,
+    ];
+    protected array $updateFilter = [
+        'member',
     ];
 
     /**
@@ -71,6 +75,12 @@ class EventAttendanceRepository extends AbstractRepository
         throw new MethodNotImplementedException();
     }
 
+    /**
+     * @param EventAttendance|AbstractModel $model
+     * @return EventAttendance
+     * @throws ApiException
+     * @throws ApiRequestFailure
+     */
     public function save(EventAttendance|AbstractModel $model): AbstractModel
     {
         $this->endpointVars = [
@@ -104,19 +114,6 @@ class EventAttendanceRepository extends AbstractRepository
             return $this->hydrate($item);
         });
         return $results;
-    }
-
-    public function hydrate(array $fields): EventAttendance
-    {
-        return EventAttendance::create([
-            'external_id' => $fields['external_id'],
-            'status' => $fields['status'],
-            'no_show' => $fields['no_show'],
-            'member' => Member::create($fields['member']),
-            'event' => Event::create($fields['event']),
-            'created_at' => $fields['created_at'],
-            'updated_at' => $fields['updated_at'],
-        ]);
     }
 
     /**

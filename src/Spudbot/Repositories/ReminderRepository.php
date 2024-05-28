@@ -13,8 +13,6 @@ use Carbon\Carbon;
 use Discord\Parts\Part;
 use OutOfBoundsException;
 use Spudbot\Helpers\Collection;
-use Spudbot\Model\Channel;
-use Spudbot\Model\Guild;
 use Spudbot\Model\Reminder;
 
 /**
@@ -24,11 +22,15 @@ use Spudbot\Model\Reminder;
  */
 class ReminderRepository extends AbstractRepository
 {
-
+    protected string $model = Reminder::class;
     protected array $endpoints = [
         'default' => 'reminders',
         'put' => 'put|reminders/:id',
         'delete' => 'delete|members/:id',
+    ];
+    protected array $updateFilter = [
+        'guild',
+        'channel',
     ];
 
     public function findElapsed(): Collection
@@ -43,20 +45,5 @@ class ReminderRepository extends AbstractRepository
     public function findWithPart(Part $part): void
     {
         throw new OutOfBoundsException('Reminders cannot be located with a part.');
-    }
-
-    public function hydrate(array $fields): Reminder
-    {
-        return Reminder::create([
-            'external_id' => $fields['external_id'],
-            'description' => $fields['description'],
-            'mention_role' => $fields['mention_role'],
-            'scheduled_at' => $fields['scheduled_at'],
-            'repeats' => $fields['repeats'],
-            'guild' => Guild::create($fields['guild']),
-            'channel' => Channel::create($fields['channel']),
-            'created_at' => $fields['created_at'],
-            'updated_at' => $fields['updated_at'],
-        ]);
     }
 }

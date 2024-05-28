@@ -11,12 +11,15 @@ namespace Spudbot\SubCommands;
 use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
+use Spudbot\Services\GuildService;
 use Spudbot\Services\MemberService;
 
 class UserInformation extends AbstractSubCommandSubscriber
 {
     #[Inject]
     protected MemberService $memberService;
+    #[Inject]
+    protected GuildService $guildService;
 
     public function update(?Interaction $interaction = null): void
     {
@@ -25,14 +28,17 @@ class UserInformation extends AbstractSubCommandSubscriber
         }
         $title = 'User Information';
         $userId = $this->options['user']->value;
+        $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
+        $verifiedId = $guild->getVerifiedMembersRoleId();
+        $tenureRoleId = $guild->getTenuredMemberRoleId();
         $memberPart = $interaction->guild->members->get('id', $userId);
         if (!$memberPart) {
             $this->spud->interact()
                 ->error("Unable to find member $userId");
             return;
         }
-        $levelOneRole = $interaction->guild->roles->get('id', 1114365923730665481);
-        $verificationRole = $interaction->guild->roles->get('id', 1114365923730665482);
+        $levelOneRole = $interaction->guild->roles->get('id', $tenureRoleId);
+        $verificationRole = $interaction->guild->roles->get('id', $verifiedId);
         if (!$levelOneRole || !$verificationRole) {
             $this->spud->interact()
                 ->error("Unable to find role levels.")

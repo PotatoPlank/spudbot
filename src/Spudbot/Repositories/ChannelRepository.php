@@ -13,7 +13,6 @@ use Discord\Parts\Part;
 use Spudbot\Exception\ApiException;
 use Spudbot\Exception\ApiRequestFailure;
 use Spudbot\Model\Channel;
-use Spudbot\Model\Guild;
 
 /**
  * @method Channel save(Channel $model)
@@ -21,7 +20,7 @@ use Spudbot\Model\Guild;
  */
 class ChannelRepository extends AbstractRepository
 {
-
+    protected string $model = Channel::class;
     protected array $endpoints = [
         'default' => 'channels',
         'put' => 'put|channels/:id',
@@ -35,16 +34,5 @@ class ChannelRepository extends AbstractRepository
     public function findWithPart(Part $part): ?Channel
     {
         return $this->findByDiscordId($part->id)->first();
-    }
-
-    public function hydrate(array $fields): Channel
-    {
-        return Channel::create([
-            'external_id' => $fields['external_id'],
-            'discord_id' => $fields['discord_id'],
-            'guild' => Guild::create($fields['guild']),
-            'created_at' => $fields['created_at'],
-            'updated_at' => $fields['updated_at'],
-        ]);
     }
 }

@@ -1,13 +1,16 @@
 <?php
+
 /*
  * This file is a part of the SpudBot Framework.
  * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
+declare(strict_types=1);
 
 namespace Spudbot\Repositories;
 
 use Carbon\Carbon;
+use DI\Attribute\Inject;
 use Discord\Parts\Part;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
@@ -18,15 +21,32 @@ use Spudbot\Helpers\Collection;
 use Spudbot\Http\ApiService;
 use Spudbot\Http\Endpoint;
 use Spudbot\Http\Router;
+use Spudbot\Hydrator\EntityHydrator;
 use Spudbot\Model\AbstractModel;
 use Spudbot\Model\Guild;
 
+/**
+ * @template T
+ */
 abstract class AbstractRepository
 {
+    protected static array $storage = [];
+    #[Inject]
+    public EntityHydrator $hydrator;
     protected array $endpoints = [];
     protected Router $router;
-
     protected array $endpointVars = [];
+    protected array $excluded = [
+        'external_id',
+        'created_at',
+        'updated_at',
+    ];
+    protected array $createFilter = [];
+    protected array $updateFilter = [];
+    /**
+     * @var class-string<T> $model
+     */
+    protected string $model;
 
     public function __construct(protected Client $client)
     {
@@ -44,12 +64,17 @@ abstract class AbstractRepository
      */
     public function findById(string $id): AbstractModel
     {
+        if (isset(self::$storage[$id])) {
+            return self::$storage[$id];
+        }
         $endpoint = $this->router
             ->getEndpoint('get', '/:id')
             ->setVariable('id', $id)
             ->setDefaultMethod('get');
         $json = $this->call($endpoint);
-        return $this->hydrate($json);
+        $model = $this->hydrate($json);
+        self::$storage[$id] = $model;
+        return $model;
     }
 
     /**
@@ -64,10 +89,38 @@ abstract class AbstractRepository
     {
         $endpoint->addVariables($this->endpointVars);
         return ApiService::new($this->client)
-            ->handle($endpoint->getMethod(), $endpoint, $options);
+            ->handle($endpoint->getMethod(), (string)$endpoint, $options);
     }
 
-    abstract public function hydrate(array $fields);
+    public function new(array $fields = [])
+    {
+        $fields = [
+            'updated_at' => Carbon::now(),
+            'created_at' => Carbon::now(),
+            ...$fields,
+        ];
+        $model = $this->getModel();
+        $this->hydrator->hydrate($fields, $model);
+        return $model;
+    }
+
+    protected function getModel(): object
+    {
+        if (!isset($this->model)) {
+            throw new \BadMethodCallException(static::class . " does not have a hydration model specified.");
+        }
+        $model = $this->model;
+        return new $model();
+    }
+
+    /**
+     * @param array $fields
+     * @return object<T>
+     */
+    public function hydrate(array $fields): object
+    {
+        return $this->hydrator->hydrate($fields, $this->getModel());
+    }
 
     /**
      * @throws ApiRequestFailure
@@ -158,19 +211,26 @@ abstract class AbstractRepository
         if ($isCreating) {
             $model->setCreatedAt($now);
             $options = [
-                'json' => $model->toCreateArray(),
+                'json' => $this->hydrator->extract($model, [
+                    ...$this->excluded,
+                    ...$this->createFilter,
+                ]),
             ];
             $endpoint = $this->router->getEndpoint('post')
                 ->setDefaultMethod('post');
         } else {
             $options = [
-                'json' => $model->toUpdateArray(),
+                'json' => $this->hydrator->extract($model, [
+                    ...$this->excluded,
+                    ...$this->updateFilter,
+                ]),
             ];
             $endpoint = $this->router->getEndpoint('put')
                 ->setDefaultMethod('put')
                 ->setVariable('id', $model->getExternalId());
         }
         $json = $this->call($endpoint, $options);
+        self::$storage = [];
 
         return $this->hydrate($json);
     }

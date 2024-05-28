@@ -11,7 +11,9 @@ use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\Discord;
 use Psr\Container\ContainerInterface;
+use Spudbot\Builder\CommandBuilder;
 use Spudbot\Builder\EmbeddedResponse;
+use Spudbot\Builder\OptionBuilder;
 use Spudbot\Exception\BotTerminationException;
 use Spudbot\Handler\ExceptionQueue;
 use Spudbot\Handler\SentryExceptions;
@@ -103,7 +105,7 @@ class Spud
             if (!$guild) {
                 return;
             }
-            $output = $this->logGuild->getOutputPart($guild);
+            $output = $this->logGuild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $guild);
             $this->interact()
                 ->setTitle('Bot Started')
                 ->setDescription('Bot started at ' . Carbon::now()->toIso8601String())
@@ -113,7 +115,20 @@ class Spud
 
     public function interact(): EmbeddedResponse
     {
-        return new EmbeddedResponse($this->discord);
+        return $this->container->injectOn(new EmbeddedResponse($this->discord));
+    }
+
+    public function command(string $name, string $description = CommandBuilder::DEFAULT_DESCRIPTION): CommandBuilder
+    {
+        return $this->container->injectOn(new CommandBuilder($name, $description));
+    }
+
+
+    public function commandOption(
+        string $name,
+        string $description = OptionBuilder::DEFAULT_DESCRIPTION
+    ): OptionBuilder {
+        return $this->container->injectOn(new OptionBuilder($name, $description));
     }
 
 }

@@ -9,16 +9,20 @@ namespace Spudbot\Events\Message;
 
 
 use Carbon\Carbon;
+use DI\Attribute\Inject;
 use Discord\Parts\Channel\Message;
 use Discord\WebSockets\Event;
 use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Model\Member;
+use Spudbot\Services\GuildService;
 
 class AutomaticIntroThreads extends AbstractEventSubscriber
 {
-    private const INTRO_CHANNEL_ID = '1114365925366440038';
     private const MOKKA_REACT = ':mokka:1115005842102681770';
     private const DOGE_VIBE_REACT = ':dogevibe:1115010156728680478';
+
+    #[Inject]
+    private GuildService $guildService;
 
     public function getEventName(): string
     {
@@ -41,7 +45,11 @@ class AutomaticIntroThreads extends AbstractEventSubscriber
 
     public function canRun(?Message $message = null): bool
     {
-        if (!$message || $message->channel_id !== self::INTRO_CHANNEL_ID) {
+        if (!$message) {
+            return false;
+        }
+        $guild = $this->guildService->findOrCreateWithPart($message->guild);
+        if (empty($guild->getChannelIntroductionId()) || $message->channel_id !== $guild->getChannelIntroductionId()) {
             return false;
         }
         return ($message->member->joined_at?->diffInDays(Carbon::now()) ?? -99) <= 30;

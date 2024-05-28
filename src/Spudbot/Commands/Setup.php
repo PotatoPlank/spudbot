@@ -7,25 +7,21 @@
 
 namespace Spudbot\Commands;
 
-use DI\Attribute\Inject;
-use Discord\Parts\Channel\Channel;
+use Discord\Parts\Interactions\Command\Command;
+use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
-use Spudbot\Services\GuildService;
+use Discord\Parts\Permissions\Permission;
+use Spudbot\SubCommands\Setup\SetIntroChannel;
+use Spudbot\SubCommands\Setup\SetLogChannel;
+use Spudbot\SubCommands\Setup\SetMarketplaceChannel;
+use Spudbot\SubCommands\Setup\SetModAlertChannel;
+use Spudbot\SubCommands\Setup\SetPublicModLog;
+use Spudbot\SubCommands\Setup\SetTenuredRole;
+use Spudbot\SubCommands\Setup\SetVerifiedChannel;
+use Spudbot\SubCommands\Setup\SetVerifiedRole;
 
 class Setup extends AbstractCommandSubscriber
 {
-    #[Inject]
-    protected GuildService $guildService;
-
-    public function getCommandName(): string
-    {
-        return 'setup';
-    }
-
-    public function getCommandDescription(): string
-    {
-        return 'Setup the guild and the selected channel as the log output location.';
-    }
 
     public function update(?Interaction $interaction = null): void
     {
@@ -38,35 +34,100 @@ class Setup extends AbstractCommandSubscriber
                 ->respondTo($interaction);
             return;
         }
+        $this->subCommandObserver->subscribeAll([
+            SetLogChannel::class,
+            SetPublicModLog::class,
+            SetModAlertChannel::class,
+            SetIntroChannel::class,
+            SetMarketplaceChannel::class,
+            SetVerifiedChannel::class,
+            SetVerifiedRole::class,
+            SetTenuredRole::class,
+        ]);
+        $this->subCommandObserver->notify($interaction->data->options, $interaction);
+    }
 
-        $interaction->guild->channels->fetch($interaction->channel_id)
-            ->done(function (Channel $channel) use ($interaction) {
-                $channelId = $channel->id;
-                $threadTypes = [
-                    Channel::TYPE_ANNOUNCEMENT_THREAD,
-                    Channel::TYPE_PUBLIC_THREAD,
-                    Channel::TYPE_PRIVATE_THREAD
-                ];
-                $isThread = in_array($channel->type, $threadTypes, true);
+    public function getCommand(): Command
+    {
+        $options = [
+            'channel_id' => $this->spud->commandOption('channel_id', 'The channel to target.')
+                ->setRequired()->asChannel()->create(),
+        ];
+        $role = $this->spud->commandOption('role_id', 'The role to target.')
+            ->setRequired()->asRole()->create();
+        $subCommands = [
+            [
+                'name' => 'log_channel',
+                'description' => 'Establish a bot log channel.',
+                'options' => $options,
+            ],
+            [
+                'name' => 'public_log_channel',
+                'description' => 'Establish a log channel for public actions.',
+                'options' => $options,
+            ],
+            [
+                'name' => 'mod_alert_channel',
+                'description' => 'Establish a mod alert channel for reviewable actions.',
+                'options' => $options,
+            ],
+            [
+                'name' => 'intro_channel',
+                'description' => 'Establish a user introduction channel.',
+                'options' => $options,
+            ],
+            [
+                'name' => 'marketplace_channel',
+                'description' => 'Establish a marketplace channel.',
+                'options' => $options,
+            ],
+            [
+                'name' => 'verified_channel',
+                'description' => 'Establish a verified channel.',
+                'options' => $options,
+            ],
+            [
+                'name' => 'verified_role',
+                'description' => 'Establish a verified role.',
+                'options' => [
+                    'role_id' => $role,
+                ],
+            ],
+            [
+                'name' => 'tenured_role',
+                'description' => 'Establish a member tenure role.',
+                'options' => [
+                    'role_id' => $role,
+                ],
+            ],
+        ];
 
-                if ($isThread) {
-                    $channelId = $channel->parent_id;
-                    $threadId = $channel->id;
-                }
+        $command = $this->spud->command($this->getCommandName(), $this->getCommandDescription());
 
-                $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
+        foreach ($subCommands as $info) {
+            $subCommand = $this->spud
+                ->commandOption($info['name'], $info['description'])
+                ->setType(Option::SUB_COMMAND)
+                ->setOptions($info['options'])->create();
 
-                $guild->setChannelAnnounceId($channelId);
-                if ($isThread) {
-                    $guild->setChannelThreadAnnounceId($threadId);
-                }
-                $this->guildService->save($guild);
+            $command->addOption(
+                $info['name'],
+                $subCommand
+            );
+        }
 
-                $this->spud->interact()
-                    ->setTitle('Setup complete')
-                    ->setDescription(
-                        "Set the guild output location to <#{$guild->getOutputLocationId()}>."
-                    )->respondTo($interaction, true);
-            });
+        $command->setDefaultPermissions(Permission::ROLE_PERMISSIONS['manage_guild']);
+
+        return $command->create();
+    }
+
+    public function getCommandName(): string
+    {
+        return 'setup';
+    }
+
+    public function getCommandDescription(): string
+    {
+        return 'Setup the guild and the selected channel as the log output location.';
     }
 }

@@ -13,6 +13,7 @@ use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use OutOfBoundsException;
+use Spudbot\Model\Guild;
 use Spudbot\Services\GuildService;
 use Spudbot\Services\MemberService;
 
@@ -28,6 +29,10 @@ class Verify extends AbstractCommandSubscriber
         if (!$interaction) {
             return;
         }
+        $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
+        $verifiedId = $guild->getVerifiedMembersRoleId();
+        $botLogChannel = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $interaction->guild);
+        $verifiedChannel = $guild->getChannelThreadPart(Guild::VERIFIED_CHANNEL, $interaction->guild);
 
         $builder = $this->spud->interact()
             ->setTitle('User Verification');
@@ -36,7 +41,7 @@ class Verify extends AbstractCommandSubscriber
         $sourceMemberName = $interaction->member->nick ?? $interaction->member->displayname;
 
         $memberToBeVerified = $interaction->guild->members->get('id', $targetMemberId);
-        $sourceMemberIsVerified = $interaction->member->roles->isset(1114365923730665482);
+        $sourceMemberIsVerified = $interaction->member->roles->isset($verifiedId);
 
         if (!$memberToBeVerified) {
             $this->spud->interact()
@@ -52,9 +57,6 @@ class Verify extends AbstractCommandSubscriber
             return;
         }
 
-        $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
-        $output = $guild->getOutputPart($interaction->guild);
-
         $context = [
             'sourceMemberId' => $interaction->member->id,
             'targetMemberId' => $memberToBeVerified->id,
@@ -66,11 +68,11 @@ class Verify extends AbstractCommandSubscriber
                 ->respondTo($interaction, true);
 
             $builder->setDescription($this->spud->twig->render('user/verification_error.twig', $context));
-            $builder->sendTo($output);
+            $builder->sendTo($botLogChannel);
             return;
         }
 
-        $memberToBeVerified->addRole(1114365923730665482, "Verified by {$sourceMemberName}");
+        $memberToBeVerified->addRole($verifiedId, "Verified by {$sourceMemberName}");
 
         $builder->setDescription($this->spud->twig->render('user/verification.twig', $context));
 
@@ -87,8 +89,9 @@ class Verify extends AbstractCommandSubscriber
             );
         }
 
-        $builder->respondTo($interaction);
-        $builder->sendTo($output);
+        $builder->respondTo($interaction, true);
+        $builder->sendTo($botLogChannel);
+        $builder->sendTo($verifiedChannel);
     }
 
     public function getCommand(): Command

@@ -20,6 +20,9 @@ class IntervalLoop extends AbstractEventSubscriber
 
     public function update(): void
     {
+        $this->spud->discord->getLoop()->addPeriodicTimer($this->getSecondsInMinutes(0.5), function () {
+            $this->spud->discord->emit(Events::EVERY_HALF_MINUTE->value);
+        });
         $this->spud->discord->getLoop()->addPeriodicTimer($this->getSecondsInMinutes(1), function () {
             $this->spud->discord->emit(Events::EVERY_MINUTE->value);
         });
@@ -28,7 +31,7 @@ class IntervalLoop extends AbstractEventSubscriber
         });
     }
 
-    protected function getSecondsInMinutes(int $minutes): int
+    protected function getSecondsInMinutes(int|float $minutes): int
     {
         return $minutes * 60;
     }

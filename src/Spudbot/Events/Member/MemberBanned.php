@@ -9,13 +9,16 @@ namespace Spudbot\Events\Member;
 
 
 use Carbon\Carbon;
+use DI\Attribute\Inject;
 use Discord\Parts\Guild\Ban;
 use Discord\WebSockets\Event;
 use Spudbot\Events\AbstractEventSubscriber;
+use Spudbot\Services\GuildService;
 
 class MemberBanned extends AbstractEventSubscriber
 {
-    private const MOD_LOG_CHANNEL_ID = 1114365924733104133;
+    #[Inject]
+    private GuildService $guildService;
 
     public function getEventName(): string
     {
@@ -30,7 +33,11 @@ class MemberBanned extends AbstractEventSubscriber
         $getBan = function () use ($ban) {
             $this->spud->discord->guilds->get('id', $ban->guild_id)->bans->fetch($ban->user_id)
                 ->done(function (Ban $ban) {
-                    $publicModLogChannel = $ban->guild->channels->get('id', self::MOD_LOG_CHANNEL_ID);
+                    $guild = $this->guildService->findOrCreateWithPart($ban->guild);
+                    if (empty($guild->getChannelPublicLogId())) {
+                        return;
+                    }
+                    $publicModLogChannel = $ban->guild->channels->get('id', $guild->getChannelPublicLogId());
                     if (!$publicModLogChannel) {
                         return;
                     }

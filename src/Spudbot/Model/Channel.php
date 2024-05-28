@@ -9,18 +9,14 @@ declare(strict_types=1);
 
 namespace Spudbot\Model;
 
+use Spudbot\Hydrator\Strategy\ModelStrategy;
+use Spudbot\Hydrator\Strategy\UsesStrategy;
+
 class Channel extends AbstractModel
 {
+    #[UsesStrategy(new ModelStrategy(Guild::class))]
     private Guild $guild;
     private string $discordId;
-
-    public function toCreateArray(): array
-    {
-        return [
-            'discord_id' => $this->getDiscordId(),
-            'guild' => $this->getGuild()->getExternalId(),
-        ];
-    }
 
     /**
      * @return string
@@ -52,13 +48,5 @@ class Channel extends AbstractModel
     public function setGuild(Guild $guild): void
     {
         $this->guild = $guild;
-    }
-
-    public function toUpdateArray(): array
-    {
-        return [
-            'discord_id' => $this->getDiscordId(),
-            'guild' => $this->getGuild()->getExternalId(),
-        ];
     }
 }

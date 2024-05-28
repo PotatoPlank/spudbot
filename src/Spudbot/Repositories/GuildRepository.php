@@ -24,21 +24,18 @@ class GuildRepository extends AbstractRepository
         'put' => 'put|guilds/:id',
         'delete' => 'delete|guilds/:id',
     ];
+    protected string $model = Guild::class;
+    protected array $updateFilter = [
+        'discord_id',
+        'time_zone',
+    ];
+
+    protected array $createFilter = [
+        'time_zone',
+    ];
 
     public function findWithPart(Part $part): ?Guild
     {
         return $this->findByDiscordId($part->id)->first();
-    }
-
-    public function hydrate(array $fields): Guild
-    {
-        return Guild::create([
-            'external_id' => $fields['external_id'],
-            'discord_id' => $fields['discord_id'],
-            'channel_announce_id' => $fields['channel_announce_id'],
-            'channel_thread_announce_id' => $fields['channel_thread_announce_id'],
-            'created_at' => $fields['created_at'],
-            'updated_at' => $fields['updated_at'],
-        ]);
     }
 }

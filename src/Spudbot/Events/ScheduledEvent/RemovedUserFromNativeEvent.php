@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\WebSockets\Event;
 use Spudbot\Events\AbstractEventSubscriber;
+use Spudbot\Model\Guild;
 use Spudbot\Services\EventAttendanceService;
 use Spudbot\Services\EventService;
 use Spudbot\Services\GuildService;
@@ -47,7 +48,7 @@ class RemovedUserFromNativeEvent extends AbstractEventSubscriber
             return;
         }
         $guild = $this->guildService->findOrCreateWithPart($guildPart);
-        $output = $guild->getOutputPart($guildPart);
+        $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $guildPart);
 
         $eventModel = $this->eventService->findOrCreateNativeWithPart($eventPart);
 

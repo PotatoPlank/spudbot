@@ -9,12 +9,17 @@ declare(strict_types=1);
 
 namespace Spudbot\Model;
 
+use Spudbot\Hydrator\Strategy\ModelStrategy;
+use Spudbot\Hydrator\Strategy\UsesStrategy;
+
 class Member extends AbstractModel
 {
     private string $discordId;
+    #[UsesStrategy(new ModelStrategy(Guild::class))]
     private Guild $guild;
     private int $totalComments = 0;
     private ?string $username = null;
+    #[UsesStrategy(new ModelStrategy(Member::class))]
     private ?Member $verifiedBy = null;
 
     public static function getUsernameWithPart(\Discord\Parts\User\Member $member): string
@@ -25,17 +30,6 @@ class Member extends AbstractModel
     public function hasMetCommentThreshold(): bool
     {
         return $this->totalComments >= $_ENV['MEMBER_COMMENT_THRESHOLD'];
-    }
-
-    public function toCreateArray(): array
-    {
-        return [
-            'discord_id' => $this->getDiscordId(),
-            'guild' => $this->getGuild()->getExternalId(),
-            'total_comments' => $this->getTotalComments(),
-            'username' => $this->getUsername(),
-            'verified_by_member' => $this->getVerifiedBy()?->getExternalId(),
-        ];
     }
 
     public function getDiscordId(): string
@@ -98,14 +92,5 @@ class Member extends AbstractModel
     public function setVerifiedBy(?Member $verifiedBy): void
     {
         $this->verifiedBy = $verifiedBy;
-    }
-
-    public function toUpdateArray(): array
-    {
-        return [
-            'total_comments' => $this->getTotalComments(),
-            'username' => $this->getUsername(),
-            'verified_by_member' => $this->getVerifiedBy()?->getExternalId(),
-        ];
     }
 }

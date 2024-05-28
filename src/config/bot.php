@@ -11,6 +11,7 @@ use Discord\WebSockets\Intents;
 use Psr\Container\ContainerInterface;
 use Spudbot\Bot\Spud;
 use Spudbot\Bot\SpudOptions;
+use Spudbot\Hydrator\EntityHydrator;
 use Spudbot\Parsers\DirectoryParser;
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -40,5 +41,6 @@ return [
     },
     Spud::class => DI\autowire(),
     DirectoryParser::class => DI\autowire(),
+    EntityHydrator::class => DI\autowire(),
 ];
 

@@ -12,6 +12,7 @@ use DI\Attribute\Inject;
 use Discord\Parts\User\Member;
 use Discord\WebSockets\Event;
 use Spudbot\Events\AbstractEventSubscriber;
+use Spudbot\Model\Guild;
 use Spudbot\Services\GuildService;
 
 class AddedUserToNativeSeshEvent extends AbstractEventSubscriber
@@ -42,7 +43,7 @@ class AddedUserToNativeSeshEvent extends AbstractEventSubscriber
         );
 
         $guild = $this->guildService->findOrCreateWithPart($guildPart);
-        $output = $guild->getOutputPart($guildPart);
+        $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $guildPart);
 
         $message = "<@{$event->user_id}> was sent a DM with the link to the sesh event for {$eventPart->name}.";
         $this->spud->interact()

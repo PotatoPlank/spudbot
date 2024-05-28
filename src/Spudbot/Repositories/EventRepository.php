@@ -22,11 +22,17 @@ use stdClass;
  */
 class EventRepository extends AbstractRepository
 {
-
+    protected string $model = Event::class;
     protected array $endpoints = [
         'default' => 'events',
         'put' => 'put|events/:id',
         'delete' => 'delete|events/:id',
+    ];
+    protected array $updateFilter = [
+        'guild',
+        'type',
+        'sesh_id',
+        'native_id',
     ];
 
     public function findBySeshId(string $seshId): ?Event
@@ -49,21 +55,5 @@ class EventRepository extends AbstractRepository
         $id = $part instanceof ScheduledEvent ? $part->id : $part->guild_scheduled_event_id;
 
         return $this->findByDiscordId($id, $part->guild_id)->first();
-    }
-
-    public function hydrate(array $fields): Event
-    {
-        return Event::create([
-            'external_id' => $fields['external_id'],
-            'guild' => $fields['guild'],
-            'discord_channel_id' => $fields['discord_channel_id'],
-            'name' => $fields['name'],
-            'type' => $fields['type'],
-            'sesh_message_id' => $fields['sesh_message_id'],
-            'native_event_id' => $fields['native_event_id'],
-            'scheduled_at' => $fields['scheduled_at'],
-            'created_at' => $fields['created_at'],
-            'updated_at' => $fields['updated_at'],
-        ]);
     }
 }

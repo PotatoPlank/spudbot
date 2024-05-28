@@ -12,6 +12,7 @@ use Exception;
 use Spudbot\Bot\ApplicationVersion;
 use Spudbot\Bot\Events;
 use Spudbot\Events\AbstractEventSubscriber;
+use Spudbot\Model\Guild;
 
 class LogGuildChannel extends AbstractEventSubscriber
 {
@@ -28,7 +29,7 @@ class LogGuildChannel extends AbstractEventSubscriber
             if (!$part) {
                 throw new BadMethodCallException("Invalid guild {$this->spud->logGuild->getDiscordId()}");
             }
-            $output = $this->spud->logGuild->getOutputPart($part);
+            $output = $this->spud->logGuild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $part);
         } catch (Exception $exception) {
             $this->spud->discord->getLogger()
                 ->error($exception->getMessage());

@@ -32,7 +32,7 @@ class DirectoryService
         try {
             return $this->directoryRepository->findByForumChannel($channel);
         } catch (OutOfBoundsException $exception) {
-            return $this->save(Directory::create($defaults));
+            return $this->save($this->directoryRepository->new($defaults));
         }
     }
 

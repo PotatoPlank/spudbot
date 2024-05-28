@@ -16,6 +16,7 @@ use Discord\WebSockets\Event;
 use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Exception\InvalidSeshEmbed;
 use Spudbot\Model\EventAttendance;
+use Spudbot\Model\Guild;
 use Spudbot\Parsers\Sesh\SeshParser;
 use Spudbot\Services\EventAttendanceService;
 use Spudbot\Services\EventService;
@@ -49,7 +50,7 @@ class AddedUserToSeshEvent extends AbstractEventSubscriber
         try {
             $seshEmbed = SeshParser::fromMessage($message);
             $guild = $this->guildService->findOrCreateWithPart($message->guild);
-            $output = $guild->getOutputPart($message->guild);
+            $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $message->guild);
 
             $event = $this->eventService->findOrCreateSesh($seshEmbed->id, [
                 'sesh_message_id' => $message->id,

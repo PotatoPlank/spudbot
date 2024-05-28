@@ -21,11 +21,16 @@ use Spudbot\Model\Member;
  */
 class MemberRepository extends AbstractRepository
 {
+    protected string $model = Member::class;
 
     protected array $endpoints = [
         'default' => 'members',
         'put' => 'put|members/:id',
         'delete' => 'delete|members/:id',
+    ];
+    protected array $updateFilter = [
+        'discord_id',
+        'guild',
     ];
 
     public function findByGuild(Guild $guild): Collection
@@ -55,19 +60,5 @@ class MemberRepository extends AbstractRepository
     {
         return $this->findByDiscordId($part->id, $part->guild->id)
             ->first();
-    }
-
-    public function hydrate(array $fields): Member
-    {
-        return Member::create([
-            'external_id' => $fields['external_id'],
-            'discord_id' => $fields['discord_id'],
-            'total_comments' => $fields['total_comments'],
-            'username' => $fields['username'],
-            'guild' => Guild::create($fields['guild']),
-            'verified_by' => !empty($fields['verified_by']) ? Member::create($fields['verified_by']) : null,
-            'created_at' => $fields['created_at'],
-            'updated_at' => $fields['updated_at'],
-        ]);
     }
 }

@@ -8,6 +8,7 @@
 namespace Spudbot\Services;
 
 use OutOfBoundsException;
+use Spudbot\Model\Channel;
 use Spudbot\Model\Thread;
 use Spudbot\Repositories\ThreadRepository;
 
@@ -29,7 +30,7 @@ class ThreadService
             }
             throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
-            return $this->threadRepository->save(Thread::create([
+            return $this->save($this->threadRepository->new([
                 'discord_id' => $thread->id,
                 'guild' => $this->guildService->findOrCreateWithPart($thread->guild),
                 'channel' => $this->channelService->findOrCreateWithPart($thread->parent),
@@ -53,10 +54,19 @@ class ThreadService
         try {
             return $this->threadRepository->findByDiscordId($discordId, $discordGuildId)->first();
         } catch (OutOfBoundsException $exception) {
-            return Thread::create([
+            return $this->save($this->threadRepository->new([
                 'discord_id' => $discordId,
                 'tag' => '',
-            ]);
+            ]));
         }
+    }
+
+    public function makeWithChannel(string $discordId, Channel $channel): ?Thread
+    {
+        return $this->save($this->threadRepository->new([
+            'discord_id' => $discordId,
+            'guild' => $channel->getGuild(),
+            'channel' => $channel,
+        ]));
     }
 }

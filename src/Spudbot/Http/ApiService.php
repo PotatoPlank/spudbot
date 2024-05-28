@@ -44,11 +44,11 @@ class ApiService
             );
         }
         $content = $this->getParsedBody($response);
-        $success = $this->wasSuccessful($content);
+        //$success = $this->wasSuccessful($content);
         if ($method === 'delete') {
-            return $success;
+            return true;
         }
-        if (!$success) {
+        if (isset($content['errors'])) {
             if (isset($content['message'])) {
                 throw new ApiRequestFailure($content['message']);
             }

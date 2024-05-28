@@ -26,8 +26,8 @@ class ChannelService
             }
             throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
-            return $this->save(Channel::create([
-                'discordId' => $channel->id,
+            return $this->save($this->channelRepository->new([
+                'discord_id' => $channel->id,
                 'guild' => $this->guildService->findOrCreateWithPart($channel->guild),
             ]));
         }

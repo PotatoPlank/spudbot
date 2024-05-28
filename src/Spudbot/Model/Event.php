@@ -10,33 +10,24 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
+use Spudbot\Hydrator\Strategy\BackedEnumStrategy;
+use Spudbot\Hydrator\Strategy\CarbonStrategy;
+use Spudbot\Hydrator\Strategy\ModelStrategy;
+use Spudbot\Hydrator\Strategy\UsesStrategy;
 use Spudbot\Types\EventType;
 
 class Event extends AbstractModel
 {
-    protected array $dates = [
-        'scheduled_at'
-    ];
+    #[UsesStrategy(new ModelStrategy(Guild::class))]
     private Guild $guild;
     private ?string $discordChannelId;
     private string $name;
+    #[UsesStrategy(new BackedEnumStrategy(EventType::class))]
     private EventType $type;
     private ?string $seshMessageId;
     private ?string $nativeEventId;
+    #[UsesStrategy(new CarbonStrategy())]
     private ?Carbon $scheduledAt;
-
-    public function toCreateArray(): array
-    {
-        return [
-            'guild' => $this->getGuild()->getExternalId(),
-            'type' => $this->getType()->value,
-            'sesh_id' => $this->getSeshMessageId(),
-            'native_id' => $this->getNativeEventId(),
-            'discord_channel_id' => $this->getDiscordChannelId(),
-            'name' => $this->getName(),
-            'scheduled_at' => $this->getScheduledAt()?->toIso8601String(),
-        ];
-    }
 
     public function getGuild(): Guild
     {
@@ -106,14 +97,5 @@ class Event extends AbstractModel
     public function setScheduledAt(?Carbon $scheduledAt): void
     {
         $this->scheduledAt = $scheduledAt;
-    }
-
-    public function toUpdateArray(): array
-    {
-        return [
-            'discord_channel_id' => $this->getDiscordChannelId(),
-            'name' => $this->getName(),
-            'scheduled_at' => $this->getScheduledAt()?->toIso8601String(),
-        ];
     }
 }

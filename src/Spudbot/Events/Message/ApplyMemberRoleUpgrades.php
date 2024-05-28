@@ -15,14 +15,13 @@ use Discord\Parts\Guild\Role;
 use Discord\WebSockets\Event;
 use Exception;
 use Spudbot\Events\AbstractEventSubscriber;
+use Spudbot\Model\Guild;
 use Spudbot\Services\GuildService;
 use Spudbot\Services\MemberService;
 
 class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
 {
     private const APPLIES_TO_GUILD = '1114365923625816155';
-    private const LEVEL_ONE_ROLE = '1114365923730665481';
-    private const VERIFIED_ROLE = '1114365923730665482';
     private const MEMBER_TENURE_MINIMUM = 10;
     private const MEMBER_COMMENTS_MINIMUM = 10;
     #[Inject]
@@ -45,9 +44,11 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
             ->info("Checking to upgrade the membership of {$message->member->displayname}");
 
         $guild = $this->guildService->findOrCreateWithPart($message->member->guild);
+        $verifiedRole = $guild->getVerifiedMembersRoleId();
+        $tenuredRoleId = $guild->getTenuredMemberRoleId();
 
         try {
-            $output = $guild->getOutputPart($message->guild);
+            $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $message->guild);
         } catch (Exception $exception) {
             $this->spud->discord->getLogger()
                 ->error($exception->getMessage());
@@ -61,11 +62,11 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
         $hasMetMembershipLength = $memberTenure >= self::MEMBER_TENURE_MINIMUM;
         $hasEnoughComments = $member->getTotalComments() >= self::MEMBER_COMMENTS_MINIMUM;
 
-        $isAlreadyUpgraded = $message->member->roles->isset(self::LEVEL_ONE_ROLE);
+        $isAlreadyUpgraded = $message->member->roles->isset($tenuredRoleId);
         if ($isAlreadyUpgraded) {
             return;
         }
-        $isAlreadyVerified = $message->member->roles->isset(self::VERIFIED_ROLE);
+        $isAlreadyVerified = $message->member->roles->isset($verifiedRole);
         $canModerateMembers = $message->member->getPermissions()->moderate_members;
 
         $meetsRequirements = $hasMetMembershipLength && $hasEnoughComments;
@@ -74,9 +75,9 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
             return;
         }
 
-        $message->member->addRole(self::LEVEL_ONE_ROLE);
+        $message->member->addRole($tenuredRoleId);
 
-        $message->guild->roles->fetch(self::LEVEL_ONE_ROLE)
+        $message->guild->roles->fetch($tenuredRoleId)
             ->done(function (Role $role) use ($member, $output) {
                 $this->spud->interact()
                     ->setTitle("Member Given {$role->name}")

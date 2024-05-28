@@ -7,9 +7,14 @@
 
 namespace Spudbot\Model;
 
+use Spudbot\Hydrator\Strategy\ModelStrategy;
+use Spudbot\Hydrator\Strategy\UsesStrategy;
+
 class EventAttendance extends AbstractModel
 {
+    #[UsesStrategy(new ModelStrategy(Event::class))]
     private Event $event;
+    #[UsesStrategy(new ModelStrategy(Member::class))]
     private Member $member;
     private string $status;
     private bool $noShow = false;
@@ -22,15 +27,6 @@ class EventAttendance extends AbstractModel
     public function setEvent(Event $event): void
     {
         $this->event = $event;
-    }
-
-    public function toCreateArray(): array
-    {
-        return [
-            'member' => $this->getMember()->getExternalId(),
-            'status' => $this->getStatus(),
-            'no_show' => $this->getNoShow(),
-        ];
     }
 
     public function getMember(): Member
@@ -61,13 +57,5 @@ class EventAttendance extends AbstractModel
     public function setNoShow(bool $status): void
     {
         $this->noShow = $status;
-    }
-
-    public function toUpdateArray(): array
-    {
-        return [
-            'status' => $this->getStatus(),
-            'no_show' => $this->getNoShow(),
-        ];
     }
 }

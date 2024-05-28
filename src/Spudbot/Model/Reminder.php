@@ -10,12 +10,18 @@ declare(strict_types=1);
 namespace Spudbot\Model;
 
 use Carbon\Carbon;
+use Spudbot\Hydrator\Strategy\CarbonStrategy;
+use Spudbot\Hydrator\Strategy\ModelStrategy;
+use Spudbot\Hydrator\Strategy\UsesStrategy;
 
 class Reminder extends AbstractModel
 {
+    #[UsesStrategy(new ModelStrategy(Guild::class))]
     private Guild $guild;
+    #[UsesStrategy(new ModelStrategy(Channel::class))]
     private Channel $channel;
     private ?string $mentionRole = null;
+    #[UsesStrategy(new CarbonStrategy())]
     private Carbon $scheduledAt;
     private ?string $repeats = null;
     private string $description;
@@ -39,18 +45,6 @@ class Reminder extends AbstractModel
     public function setGuild(Guild $guild): void
     {
         $this->guild = $guild;
-    }
-
-    public function toCreateArray(): array
-    {
-        return [
-            'guild' => $this->getGuild()->getExternalId(),
-            'channel' => $this->getChannel()->getExternalId(),
-            'description' => $this->getDescription(),
-            'mention_role' => $this->getMentionRole(),
-            'repeats' => $this->getRepeats(),
-            'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
-        ];
     }
 
     /**
@@ -131,15 +125,5 @@ class Reminder extends AbstractModel
     public function setScheduledAt(Carbon $scheduledAt): void
     {
         $this->scheduledAt = $scheduledAt->copy()->setTimezone('UTC');
-    }
-
-    public function toUpdateArray(): array
-    {
-        return [
-            'repeats' => $this->getRepeats(),
-            'scheduled_at' => $this->getScheduledAt()->toIso8601String(),
-            'mention_role' => $this->getMentionRole(),
-            'description' => $this->getDescription(),
-        ];
     }
 }

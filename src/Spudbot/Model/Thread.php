@@ -9,22 +9,17 @@ declare(strict_types=1);
 
 namespace Spudbot\Model;
 
+use Spudbot\Hydrator\Strategy\ModelStrategy;
+use Spudbot\Hydrator\Strategy\UsesStrategy;
+
 class Thread extends AbstractModel
 {
     private string $discordId;
+    #[UsesStrategy(new ModelStrategy(Guild::class))]
     private Guild $guild;
+    #[UsesStrategy(new ModelStrategy(Channel::class))]
     private Channel $channel;
     private ?string $tag = '';
-
-    public function toCreateArray(): array
-    {
-        return [
-            'discord_id' => $this->getDiscordId(),
-            'guild' => $this->getGuild()->getExternalId(),
-            'channel' => $this->getChannel()->getExternalId(),
-            'tag' => $this->getTag(),
-        ];
-    }
 
     public function getDiscordId(): string
     {
@@ -70,12 +65,5 @@ class Thread extends AbstractModel
     public function setTag(?string $tag): void
     {
         $this->tag = $tag;
-    }
-
-    public function toUpdateArray(): array
-    {
-        return [
-            'tag' => $this->getTag(),
-        ];
     }
 }

@@ -9,24 +9,20 @@ declare(strict_types=1);
 
 namespace Spudbot\Model;
 
+use Spudbot\Hydrator\Strategy\ModelStrategy;
+use Spudbot\Hydrator\Strategy\UsesStrategy;
+
 class Directory extends AbstractModel
 {
+    #[UsesStrategy(new ModelStrategy(Channel::class))]
     private Channel $directoryChannel;
+    #[UsesStrategy(new ModelStrategy(Channel::class))]
     private Channel $forumChannel;
     private string $embedId;
 
     public function getTitle(\Discord\Parts\Channel\Channel $channel): string
     {
         return $channel->name . ' thread directory';
-    }
-
-    public function toCreateArray(): array
-    {
-        return [
-            'embed_id' => $this->getEmbedId(),
-            'directory_channel' => $this->getDirectoryChannel()->getExternalId(),
-            'forum_channel' => $this->getForumChannel()->getExternalId(),
-        ];
     }
 
     /**
@@ -75,14 +71,5 @@ class Directory extends AbstractModel
     public function setForumChannel(Channel $forumChannel): void
     {
         $this->forumChannel = $forumChannel;
-    }
-
-    public function toUpdateArray(): array
-    {
-        return [
-            'embed_id' => $this->getEmbedId(),
-            'directory_channel' => $this->getDirectoryChannel()->getExternalId(),
-            'forum_channel' => $this->getForumChannel()->getExternalId(),
-        ];
     }
 }

@@ -30,7 +30,7 @@ class GuildService
             }
             throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
-            return $this->save(Guild::create([
+            return $this->save($this->guildRepository->new([
                 'discord_id' => $guild->id,
                 'channel_announce_id' => null,
                 'channel_thread_announce_id' => null,

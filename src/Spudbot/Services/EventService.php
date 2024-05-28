@@ -32,7 +32,7 @@ class EventService
             }
             throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
-            return $this->eventRepository->save(Event::create([
+            return $this->save($this->eventRepository->new([
                 'native_event_id' => $event->guild_scheduled_event_id ?? $event->id,
                 'type' => EventType::Native,
                 'guild' => $this->guildService->findOrCreateWithPart($event->guild),
@@ -67,7 +67,7 @@ class EventService
             }
             throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
-            return $this->eventRepository->save(Event::create($defaults));
+            return $this->save($this->eventRepository->new($defaults));
         }
     }
 }

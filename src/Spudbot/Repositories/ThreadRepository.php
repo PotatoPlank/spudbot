@@ -12,8 +12,6 @@ namespace Spudbot\Repositories;
 use Discord\Parts\Part;
 use Spudbot\Exception\ApiException;
 use Spudbot\Exception\ApiRequestFailure;
-use Spudbot\Model\Channel;
-use Spudbot\Model\Guild;
 use Spudbot\Model\Thread;
 
 /**
@@ -23,6 +21,12 @@ use Spudbot\Model\Thread;
  */
 class ThreadRepository extends AbstractRepository
 {
+    protected string $model = Thread::class;
+    protected array $updateFilter = [
+        'discord_id',
+        'guild',
+        'channel',
+    ];
 
     protected array $endpoints = [
         'default' => 'threads',
@@ -37,18 +41,5 @@ class ThreadRepository extends AbstractRepository
     public function findWithPart(Part $part): ?Thread
     {
         return $this->findByDiscordId($part->id)->first();
-    }
-
-    public function hydrate(array $fields): Thread
-    {
-        return Thread::create([
-            'external_id' => $fields['external_id'],
-            'discord_id' => $fields['discord_id'],
-            'guild' => Guild::create($fields['guild']),
-            'channel' => Channel::create($fields['channel']),
-            'tag' => $fields['tag'],
-            'created_at' => $fields['created_at'],
-            'updated_at' => $fields['updated_at'],
-        ]);
     }
 }
