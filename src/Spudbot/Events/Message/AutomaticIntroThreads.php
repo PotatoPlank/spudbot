@@ -48,10 +48,15 @@ class AutomaticIntroThreads extends AbstractEventSubscriber
         if (!$message) {
             return false;
         }
-        $guild = $this->guildService->findOrCreateWithPart($message->guild);
-        if (empty($guild->getChannelIntroductionId()) || $message->channel_id !== $guild->getChannelIntroductionId()) {
+        $guildPart = $this->spud->discord->guilds->get('id', $message->guild_id);
+        if (!$guildPart) {
             return false;
         }
-        return ($message->member->joined_at?->diffInDays(Carbon::now()) ?? -99) <= 30;
+        $guild = $this->guildService->findOrCreateWithPart($guildPart);
+        $hasIntroChannel = empty(
+            $guild->getChannelIntroductionId()
+            ) || $message->channel_id !== $guild->getChannelIntroductionId();
+        $isNewMember = ($message->member->joined_at?->diffInDays(Carbon::now()) ?? -99) <= 30;
+        return $isNewMember && $hasIntroChannel;
     }
 }
