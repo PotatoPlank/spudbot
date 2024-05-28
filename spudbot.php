@@ -10,6 +10,7 @@ use Spudbot\Bot\ConfigurationException;
 use Spudbot\Bot\Spud;
 use Spudbot\Events\Member\MemberBanned;
 use Spudbot\Events\Reactions\MessageHasManyReactions;
+use Spudbot\Events\Routine\CheckBuyNothing;
 use Spudbot\Events\Thread\DeletedThread;
 
 
@@ -41,6 +42,7 @@ $excludedEvents = [
     MessageHasManyReactions::class,
     MemberBanned::class,
     DeletedThread::class,
+    CheckBuyNothing::class,
 ];
 $spud->attachAll($container->get('spud.commands'), $excludedCommands);
 $spud->attachAll($container->get('spud.events'), $excludedEvents);
