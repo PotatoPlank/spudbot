@@ -86,16 +86,6 @@ class Guild extends AbstractModel
         $this->tenuredMemberRoleId = $tenuredMemberRoleId;
     }
 
-    public function getVerifiedMembersChannelId(): ?string
-    {
-        return $this->verifiedMembersChannelId;
-    }
-
-    public function setVerifiedMembersChannelId(?string $verifiedMembersChannelId): void
-    {
-        $this->verifiedMembersChannelId = $verifiedMembersChannelId;
-    }
-
     public function getVerifiedMembersRoleId(): ?string
     {
         return $this->verifiedMembersRoleId;
@@ -160,7 +150,7 @@ class Guild extends AbstractModel
                 $threadId = $this->getChannelThreadPublicLogId();
                 break;
             case self::VERIFIED_CHANNEL:
-                $channelId = $this->verifiedMembersChannelId;
+                $channelId = $this->getVerifiedMembersChannelId();
                 $threadId = null;
                 break;
             default:
@@ -262,6 +252,16 @@ class Guild extends AbstractModel
     public function setChannelThreadPublicLogId(?string $channelThreadPublicLogId): void
     {
         $this->channelThreadPublicLogId = $channelThreadPublicLogId;
+    }
+
+    public function getVerifiedMembersChannelId(): ?string
+    {
+        return $this->verifiedMembersChannelId;
+    }
+
+    public function setVerifiedMembersChannelId(?string $verifiedMembersChannelId): void
+    {
+        $this->verifiedMembersChannelId = $verifiedMembersChannelId;
     }
 
     /**

@@ -11,12 +11,12 @@ use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
 use Discord\Parts\Permissions\Permission;
+use Spudbot\SubCommands\Setup\ListGuildSetup;
 use Spudbot\SubCommands\Setup\SetIntroChannel;
 use Spudbot\SubCommands\Setup\SetLogChannel;
 use Spudbot\SubCommands\Setup\SetMarketplaceChannel;
 use Spudbot\SubCommands\Setup\SetModAlertChannel;
 use Spudbot\SubCommands\Setup\SetPublicModLog;
-use Spudbot\SubCommands\Setup\SetTenuredRole;
 use Spudbot\SubCommands\Setup\SetVerifiedChannel;
 use Spudbot\SubCommands\Setup\SetVerifiedRole;
 
@@ -42,7 +42,7 @@ class Setup extends AbstractCommandSubscriber
             SetMarketplaceChannel::class,
             SetVerifiedChannel::class,
             SetVerifiedRole::class,
-            SetTenuredRole::class,
+            ListGuildSetup::class,
         ]);
         $this->subCommandObserver->notify($interaction->data->options, $interaction);
     }
@@ -99,6 +99,11 @@ class Setup extends AbstractCommandSubscriber
                 'options' => [
                     'role_id' => $role,
                 ],
+            ],
+            [
+                'name' => 'list',
+                'description' => 'List guild setup.',
+                'options' => [],
             ],
         ];
 
