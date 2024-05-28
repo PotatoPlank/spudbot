@@ -43,7 +43,7 @@ class SetVerifiedChannel extends AbstractSubCommandSubscriber
         $interaction->guild->channels->fetch($channelId)
             ->done(function (Channel $channelPart) use ($interaction) {
                 $isThread = ChannelTypes::isThread($channelPart->type);
-                if (!$isThread) {
+                if ($isThread) {
                     $this->spud->interact()
                         ->setTitle('Set Verified Channel')
                         ->setDescription(
