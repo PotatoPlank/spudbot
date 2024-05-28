@@ -17,6 +17,7 @@ use Spudbot\SubCommands\Setup\SetLogChannel;
 use Spudbot\SubCommands\Setup\SetMarketplaceChannel;
 use Spudbot\SubCommands\Setup\SetModAlertChannel;
 use Spudbot\SubCommands\Setup\SetPublicModLog;
+use Spudbot\SubCommands\Setup\SetTenuredRole;
 use Spudbot\SubCommands\Setup\SetVerifiedChannel;
 use Spudbot\SubCommands\Setup\SetVerifiedRole;
 
@@ -42,6 +43,7 @@ class Setup extends AbstractCommandSubscriber
             SetMarketplaceChannel::class,
             SetVerifiedChannel::class,
             SetVerifiedRole::class,
+            SetTenuredRole::class,
             ListGuildSetup::class,
         ]);
         $this->subCommandObserver->notify($interaction->data->options, $interaction);
