@@ -43,11 +43,12 @@ class ApiService
                 ) . " error: " . $exception->getMessage(), 0, $exception
             );
         }
+        if ($method === 'delete') {
+            return $response->getStatusCode() === 204;
+        }
         $content = $this->getParsedBody($response);
         //$success = $this->wasSuccessful($content);
-        if ($method === 'delete') {
-            return true;
-        }
+
         if (isset($content['errors'])) {
             if (isset($content['message'])) {
                 throw new ApiRequestFailure($content['message']);
