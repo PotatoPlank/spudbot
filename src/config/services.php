@@ -11,6 +11,7 @@ use Spudbot\Services\DirectoryService;
 use Spudbot\Services\EventAttendanceService;
 use Spudbot\Services\EventService;
 use Spudbot\Services\GuildService;
+use Spudbot\Services\MarketplaceService;
 use Spudbot\Services\MemberService;
 use Spudbot\Services\ReminderService;
 
@@ -22,4 +23,5 @@ return [
     EventAttendanceService::class => DI\autowire(),
     DirectoryService::class => DI\autowire(),
     ReminderService::class => DI\autowire(),
+    MarketplaceService::class => DI\autowire(),
 ];

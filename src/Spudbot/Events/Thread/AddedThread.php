@@ -15,9 +15,11 @@ use Discord\Parts\Thread\Thread;
 use Discord\WebSockets\Event;
 use OutOfBoundsException;
 use Spudbot\Events\AbstractEventSubscriber;
+use Spudbot\Model\Guild;
 use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Services\ChannelService;
 use Spudbot\Services\DirectoryService;
+use Spudbot\Services\MarketplaceService;
 
 class AddedThread extends AbstractEventSubscriber
 {
@@ -25,6 +27,8 @@ class AddedThread extends AbstractEventSubscriber
     protected ChannelService $channelService;
     #[Inject]
     protected DirectoryService $directoryService;
+    #[Inject]
+    protected MarketplaceService $marketplaceService;
     #[Inject]
     protected DirectoryParser $directoryParser;
 
@@ -39,7 +43,7 @@ class AddedThread extends AbstractEventSubscriber
             return;
         }
         $forumChannel = $this->channelService->findOrCreateWithPart($threadPart->parent);
-
+        $this->saveMarketplace($threadPart, $forumChannel->getGuild());
 
         try {
             $directory = $this->directoryService
@@ -83,6 +87,26 @@ class AddedThread extends AbstractEventSubscriber
              */
             return;
         }
+    }
+
+    protected function saveMarketplace(Thread $thread, Guild $guild): void
+    {
+        if (empty($guild->getChannelMarketplaceId())) {
+            return;
+        }
+        $part = $this->spud->discord->guilds->get('id', $guild->getDiscordId());
+        if ($part === null) {
+            return;
+        }
+        $channel = $guild->getChannelThreadPart(Guild::MARKETPLACE_CHANNEL, $part);
+        if ($channel->id !== $thread->parent_id) {
+            return;
+        }
+        $marketplace = $this->marketplaceService->findOrCreateWithPart($thread);
+        $marketplace->name = $thread->name;
+        $marketplace->lastStatus = $marketplace::makeStatus($thread);
+        $marketplace->tags = $marketplace::makeTags($thread);
+        $this->marketplaceService->save($marketplace);
     }
 
     public function canRun(?Thread $threadPart = null): bool

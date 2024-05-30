@@ -8,6 +8,8 @@
 namespace Spudbot\Services;
 
 use OutOfBoundsException;
+use Spudbot\Exception\ApiException;
+use Spudbot\Exception\ApiRequestFailure;
 use Spudbot\Helpers\Collection;
 use Spudbot\Model\Guild;
 use Spudbot\Repositories\GuildRepository;
@@ -46,5 +48,20 @@ class GuildService
     public function getTopPosters(Guild $guild, $limit = 10): Collection
     {
         return $this->memberRepository->getTopCommentersByGuild($guild, $limit);
+    }
+
+    /**
+     * @param callable|null $filter
+     * @return Collection|Guild[]
+     * @throws ApiException
+     * @throws ApiRequestFailure
+     */
+    public function all(?callable $filter = null): Collection
+    {
+        $guilds = $this->guildRepository->all();
+        if ($filter !== null) {
+            $guilds->filter($filter);
+        }
+        return $guilds;
     }
 }
