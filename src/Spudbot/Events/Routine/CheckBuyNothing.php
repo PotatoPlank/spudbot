@@ -96,17 +96,17 @@ class CheckBuyNothing extends AbstractEventSubscriber
                             $marketplace->taken();
                         }
                         $this->marketplaceService->save($marketplace);
-                    } catch (\Exception $exception) {
+                    } catch (\InvalidArgumentException $exception) {
                         // Saving marketplace without a member owner failed, don't track those.
                     }
-//                    $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $part);
-//                    $this->spud->interact()->setTitle("Removed $thread->name")
-//                        ->setDescription(
-//                            "Aged: " . ($hasAged ? 'true' : 'false') . PHP_EOL .
-//                            "Taken: " . ($shouldBeRemoved ? 'true' : 'false') . PHP_EOL
-//                        )
-//                        ->sendTo($output);
-//                    $channel->threads->delete($thread);
+                    $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $part);
+                    $this->spud->interact()->setTitle("Removed $thread->name")
+                        ->setDescription(
+                            "Aged: " . ($hasAged ? 'true' : 'false') . PHP_EOL .
+                            "Taken: " . ($shouldBeRemoved ? 'true' : 'false') . PHP_EOL
+                        )
+                        ->sendTo($output);
+                    $channel->threads->delete($thread);
                 }
                 exit;
             });
