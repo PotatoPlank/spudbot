@@ -58,13 +58,14 @@ class ReflectionHydrator extends AbstractHydrator
     {
         $reflProperties = self::getReflectionProperties($object);
         foreach ($reflProperties as $property) {
-            if (isset($this->strategies[$property->getName()])) {
+            $propName = $this->extractName($property->getName(), $object);
+            if (isset($this->strategies[$propName])) {
                 continue;
             }
             $attributes = $property->getAttributes();
             if (!empty($attributes)) {
                 foreach ($attributes as $attribute) {
-                    $this->addStrategy($property->getName(), $attribute->newInstance()->strategy);
+                    $this->addStrategy($propName, $attribute->newInstance()->strategy);
                 }
             }
         }
