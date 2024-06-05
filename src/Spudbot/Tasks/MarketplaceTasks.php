@@ -35,9 +35,10 @@ class MarketplaceTasks
             return $removeNoTags;
         }
         foreach ($thread->applied_tags as $tag) {
-            $hasStatus = self::getRemovableTags($thread->guild_id)->find(function ($status) use ($tag) {
-                return $status->id === $tag;
-            });
+            $hasStatus = self::getRemovableTags($thread->guild_id, $thread->parent)
+                ->find(function ($status) use ($tag) {
+                    return $status->id === $tag;
+                });
             if ($hasStatus !== null) {
                 return true;
             }
@@ -48,7 +49,7 @@ class MarketplaceTasks
     protected static function getRemovableTags(string $guildId, ?Channel $channel = null): Collection
     {
         self::$removableTags[$guildId] ??= new Collection();
-        if ($channel !== null && empty(self::$removableTags[$guildId])) {
+        if ($channel !== null && self::$removableTags[$guildId]->count() === 0) {
             self::$removableTags[$guildId] = $channel->available_tags->filter(function ($tag) {
                 return in_array(strtolower($tag->name), ['taken', 'fulfilled'], true);
             });

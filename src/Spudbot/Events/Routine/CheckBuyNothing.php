@@ -59,7 +59,7 @@ class CheckBuyNothing extends AbstractEventSubscriber
                 });
             }
 
-            $active = $channel->threads->freshen()
+            $active = $channel->threads->active()
                 ->then(fn($threads) => MarketplaceTasks::isInChannel($threads, $channel))
                 ->then(fn($threads) => MarketplaceTasks::getRemovableThreads($threads));
 
