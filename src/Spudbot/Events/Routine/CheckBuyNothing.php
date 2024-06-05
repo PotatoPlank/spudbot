@@ -35,7 +35,7 @@ class CheckBuyNothing extends AbstractEventSubscriber
 
     public function getEventName(): string
     {
-        return Events::EVERY_TEN_SECONDS->value;
+        return Events::EVERY_TEN_MINUTES->value;
     }
 
     public function update(): void
