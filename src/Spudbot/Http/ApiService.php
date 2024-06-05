@@ -34,17 +34,34 @@ class ApiService
      */
     public function handle(string $method, string $endpoint, array $options): mixed
     {
+        $params = json_encode($options);
+        $requestDescription = "$method request to $endpoint options: $params";
+
         try {
             $response = $this->client->request($method, $endpoint, $options);
         } catch (GuzzleException $exception) {
+            $message = $exception->getMessage();
             throw new ApiException(
-                "Unable to process $method request to $endpoint options: " . json_encode(
-                    $options
-                ) . " error: " . $exception->getMessage(), 0, $exception
+                message: "Unable to process $requestDescription error: $message",
+                previous: $exception
+            );
+        }
+        $statusCode = $response->getStatusCode();
+        if ($statusCode >= 400) {
+            if ($statusCode >= 500) {
+                throw new InternalServiceError(
+                    message: "Internal Server Error: $requestDescription",
+                    statusCode: $statusCode
+                );
+            }
+            $validation = json_encode((string)$response->getBody());
+            throw new UnprocessableEntity(
+                message: "400 Error: $requestDescription, error: $validation",
+                statusCode: $statusCode
             );
         }
         if ($method === 'delete') {
-            return $response->getStatusCode() === 204;
+            return $statusCode === 204;
         }
         $content = $this->getParsedBody($response);
         //$success = $this->wasSuccessful($content);

@@ -21,7 +21,9 @@ use Spudbot\Exception\InvalidApiResponseException;
 use Spudbot\Helpers\Collection;
 use Spudbot\Http\ApiService;
 use Spudbot\Http\Endpoint;
+use Spudbot\Http\InternalServiceError;
 use Spudbot\Http\Router;
+use Spudbot\Http\UnprocessableEntity;
 use Spudbot\Hydrator\EntityHydrator;
 use Spudbot\Model\AbstractModel;
 use Spudbot\Model\Guild;
@@ -90,8 +92,13 @@ abstract class AbstractRepository
     {
         $endpoint->addVariables($this->endpointVars);
         $this->log($endpoint->getMethod(), "Called $endpoint");
-        return ApiService::new($this->client)
-            ->handle($endpoint->getMethod(), (string)$endpoint, $options);
+        try {
+            return ApiService::new($this->client)
+                ->handle($endpoint->getMethod(), (string)$endpoint, $options);
+        } catch (UnprocessableEntity|InternalServiceError $e) {
+            $this->log($endpoint->getMethod(), "{$e->getCode()} $endpoint - {$e->getMessage()}");
+            throw $e;
+        }
     }
 
     protected function log(string $requestType, string $message): void
