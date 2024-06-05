@@ -44,6 +44,11 @@ class EventService
         }
     }
 
+    public function save(Event $event): Event
+    {
+        return $this->eventRepository->save($event);
+    }
+
     public function findWhereId(string $eventId): ?Event
     {
         try {
