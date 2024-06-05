@@ -8,7 +8,6 @@
 namespace Spudbot\Hydrator;
 
 use Carbon\Carbon;
-use DateTime;
 use Spudbot\Hydrator\Strategy\CarbonStrategy;
 
 class EntityHydrator extends ReflectionHydrator
@@ -19,7 +18,7 @@ class EntityHydrator extends ReflectionHydrator
 
     public function __construct()
     {
-        $format = DateTime::ATOM;
+        $format = 'Y-m-d\TH:i:sP';
         $hydrate = function (mixed $value) use ($format) {
             return Carbon::now();
         };

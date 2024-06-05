@@ -8,7 +8,6 @@
 namespace Spudbot\Hydrator\Strategy;
 
 use Carbon\Carbon;
-use DateTime;
 
 class CarbonStrategy implements StrategyInterface
 {
@@ -16,7 +15,7 @@ class CarbonStrategy implements StrategyInterface
     private $defaultExtractFunc = null;
 
     public function __construct(
-        private $dateFormat = DateTime::ATOM,
+        private $dateFormat = 'Y-m-d\TH:i:sP',
         ?callable $defaultHydrateFunc = null,
         ?callable $defaultExtractFunc = null
     ) {
