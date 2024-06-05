@@ -216,7 +216,7 @@ abstract class AbstractRepository
 
     /**
      * @throws ApiRequestFailure
-     * @throws ApiException
+     * @throws ApiException|InvalidApiResponseException
      */
     public function save(AbstractModel $model): AbstractModel
     {

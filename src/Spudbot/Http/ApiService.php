@@ -9,7 +9,9 @@ namespace Spudbot\Http;
 
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\ServerException;
 use JsonException;
 use Psr\Http\Message\ResponseInterface;
 use Spudbot\Exception\ApiException;
@@ -39,29 +41,33 @@ class ApiService
 
         try {
             $response = $this->client->request($method, $endpoint, $options);
-        } catch (GuzzleException $exception) {
-            $message = $exception->getMessage();
+        } catch (ClientException $e) {
+            try {
+                $message = json_encode((string)$e->getResponse()->getBody(), JSON_THROW_ON_ERROR);
+            } catch (\Exception) {
+                $message = (string)$e->getResponse()->getBody();
+            }
+            throw new UnprocessableEntity(
+                message: "400 Error: $requestDescription, error: $message",
+                previous: $e,
+                statusCode: $e->getCode()
+            );
+        } catch (ServerException $e) {
+            throw new InternalServiceError(
+                message: "Internal Server Error: $requestDescription - $e",
+                previous: $e,
+                statusCode: $e->getCode()
+            );
+        } catch (GuzzleException $e) {
+            $message = $e->getMessage();
             throw new ApiException(
                 message: "Unable to process $requestDescription error: $message",
-                previous: $exception
-            );
-        }
-        $statusCode = $response->getStatusCode();
-        if ($statusCode >= 400) {
-            if ($statusCode >= 500) {
-                throw new InternalServiceError(
-                    message: "Internal Server Error: $requestDescription",
-                    statusCode: $statusCode
-                );
-            }
-            $validation = json_encode((string)$response->getBody());
-            throw new UnprocessableEntity(
-                message: "400 Error: $requestDescription, error: $validation",
-                statusCode: $statusCode
+                code: $e->getCode(),
+                previous: $e
             );
         }
         if ($method === 'delete') {
-            return $statusCode === 204;
+            return $response->getStatusCode() === 204;
         }
         $content = $this->getParsedBody($response);
         //$success = $this->wasSuccessful($content);
