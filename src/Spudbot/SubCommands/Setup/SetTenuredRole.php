@@ -40,7 +40,7 @@ class SetTenuredRole extends AbstractSubCommandSubscriber
         $roleId = $this->options['role_id']->value;
         $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
 
-        $guild->setTenuredMemberRoleId($roleId);
+        $guild->tenuredMemberRoleId = $roleId;
         $this->guildService->save($guild);
 
         $this->spud->interact()

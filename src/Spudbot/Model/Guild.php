@@ -22,21 +22,21 @@ class Guild extends AbstractModel
     public const INTRO_CHANNEL = 'introductions';
     public const MARKETPLACE_CHANNEL = 'marketplace';
     public const VERIFIED_CHANNEL = 'verified';
-    private string $discordId;
-    private ?string $channelAnnounceId = null;
-    private ?string $channelThreadAnnounceId = null;
-    private ?string $channelPublicLogId = null;
-    private ?string $channelThreadPublicLogId = null;
-    private ?string $channelModAlertId = null;
-    private ?string $channelThreadModAlertId = null;
-    private ?string $channelIntroductionId = null;
-    private ?string $channelThreadIntroductionId = null;
-    private ?string $channelMarketplaceId = null;
-    private ?string $channelThreadMarketplaceId = null;
-    private ?string $verifiedMembersChannelId = null;
-    private ?string $verifiedMembersRoleId = null;
-    private ?string $tenuredMemberRoleId = null;
-    private CarbonTimeZone $timeZone;
+    public ?string $verifiedMembersChannelId = null;
+    public ?string $verifiedMembersRoleId = null;
+    public ?string $tenuredMemberRoleId = null;
+    public CarbonTimeZone $timeZone;
+    public string $discordId;
+    public ?string $channelAnnounceId = null;
+    public ?string $channelThreadAnnounceId = null;
+    public ?string $channelPublicLogId = null;
+    public ?string $channelThreadPublicLogId = null;
+    public ?string $channelModAlertId = null;
+    public ?string $channelThreadModAlertId = null;
+    public ?string $channelIntroductionId = null;
+    public ?string $channelThreadIntroductionId = null;
+    public ?string $channelMarketplaceId = null;
+    public ?string $channelThreadMarketplaceId = null;
 
     public function __construct()
     {
@@ -76,81 +76,33 @@ class Guild extends AbstractModel
         $guild->channels->save($channel);
     }
 
-    public function getTenuredMemberRoleId(): ?string
-    {
-        return $this->tenuredMemberRoleId;
-    }
-
-    public function setTenuredMemberRoleId(?string $tenuredMemberRoleId): void
-    {
-        $this->tenuredMemberRoleId = $tenuredMemberRoleId;
-    }
-
-    public function getVerifiedMembersRoleId(): ?string
-    {
-        return $this->verifiedMembersRoleId;
-    }
-
-    public function setVerifiedMembersRoleId(?string $verifiedMembersRoleId): void
-    {
-        $this->verifiedMembersRoleId = $verifiedMembersRoleId;
-    }
-
-    public function getOutputLocationId(): ?string
-    {
-        if (!empty($this->getChannelThreadAnnounceId())) {
-            return $this->getChannelThreadAnnounceId();
-        }
-        return $this->getChannelAnnounceId();
-    }
-
-    public function getChannelThreadAnnounceId(): ?string
-    {
-        return $this->channelThreadAnnounceId;
-    }
-
-    public function setChannelThreadAnnounceId(?string $threadId): void
-    {
-        $this->channelThreadAnnounceId = $threadId;
-    }
-
-    public function getChannelAnnounceId(): ?string
-    {
-        return $this->channelAnnounceId;
-    }
-
-    public function setChannelAnnounceId(?string $channelId): void
-    {
-        $this->channelAnnounceId = $channelId;
-    }
-
     public function getChannelThreadPart(
         string $logType,
         \Discord\Parts\Guild\Guild $guild
     ): Channel|\Discord\Parts\Thread\Thread {
         switch ($logType) {
             case self::BOT_LOG_CHANNEL:
-                $channelId = $this->getChannelAnnounceId();
-                $threadId = $this->getChannelThreadAnnounceId();
+                $channelId = $this->channelAnnounceId;
+                $threadId = $this->channelThreadAnnounceId;
                 break;
             case self::INTRO_CHANNEL:
-                $channelId = $this->getChannelIntroductionId();
-                $threadId = $this->getChannelThreadIntroductionId();
+                $channelId = $this->channelIntroductionId;
+                $threadId = $this->channelThreadIntroductionId;
                 break;
             case self::MARKETPLACE_CHANNEL:
-                $channelId = $this->getChannelMarketplaceId();
-                $threadId = $this->getChannelThreadMarketplaceId();
+                $channelId = $this->channelMarketplaceId;
+                $threadId = $this->channelThreadMarketplaceId;
                 break;
             case self::MOD_ALERT_CHANNEL:
-                $channelId = $this->getChannelModAlertId();
-                $threadId = $this->getChannelThreadModAlertId();
+                $channelId = $this->channelModAlertId;
+                $threadId = $this->channelThreadModAlertId;
                 break;
             case self::PUBLIC_LOG_CHANNEL:
-                $channelId = $this->getChannelPublicLogId();
-                $threadId = $this->getChannelThreadPublicLogId();
+                $channelId = $this->channelPublicLogId;
+                $threadId = $this->channelThreadPublicLogId;
                 break;
             case self::VERIFIED_CHANNEL:
-                $channelId = $this->getVerifiedMembersChannelId();
+                $channelId = $this->verifiedMembersChannelId;
                 $threadId = null;
                 break;
             default:
@@ -174,119 +126,28 @@ class Guild extends AbstractModel
         return $outputPart;
     }
 
-    public function getChannelIntroductionId(): ?string
+    public function hasPublicModLog(): bool
     {
-        return $this->channelIntroductionId;
+        return !empty($this->channelPublicLogId);
     }
 
-    public function setChannelIntroductionId(?string $channelIntroductionId): void
+    public function hasMarketplace(): bool
     {
-        $this->channelIntroductionId = $channelIntroductionId;
+        return !empty($this->channelMarketplaceId);
     }
 
-    public function getChannelThreadIntroductionId(): ?string
+    public function hasIntroductionsChannel(): bool
     {
-        return $this->channelThreadIntroductionId;
+        return !empty($this->channelIntroductionId);
     }
 
-    public function setChannelThreadIntroductionId(?string $channelThreadIntroductionId): void
+    public function hasVerifiedRole(): bool
     {
-        $this->channelThreadIntroductionId = $channelThreadIntroductionId;
-    }
-
-    public function getChannelMarketplaceId(): ?string
-    {
-        return $this->channelMarketplaceId;
-    }
-
-    public function setChannelMarketplaceId(?string $channelMarketplaceId): void
-    {
-        $this->channelMarketplaceId = $channelMarketplaceId;
-    }
-
-    public function getChannelThreadMarketplaceId(): ?string
-    {
-        return $this->channelThreadMarketplaceId;
-    }
-
-    public function setChannelThreadMarketplaceId(?string $channelThreadMarketplaceId): void
-    {
-        $this->channelThreadMarketplaceId = $channelThreadMarketplaceId;
-    }
-
-    public function getChannelModAlertId(): ?string
-    {
-        return $this->channelModAlertId;
-    }
-
-    public function setChannelModAlertId(?string $channelModAlertId): void
-    {
-        $this->channelModAlertId = $channelModAlertId;
-    }
-
-    public function getChannelThreadModAlertId(): ?string
-    {
-        return $this->channelThreadModAlertId;
-    }
-
-    public function setChannelThreadModAlertId(?string $channelThreadModAlertId): void
-    {
-        $this->channelThreadModAlertId = $channelThreadModAlertId;
-    }
-
-    public function getChannelPublicLogId(): ?string
-    {
-        return $this->channelPublicLogId;
-    }
-
-    public function setChannelPublicLogId(?string $channelPublicLogId): void
-    {
-        $this->channelPublicLogId = $channelPublicLogId;
-    }
-
-    public function getChannelThreadPublicLogId(): ?string
-    {
-        return $this->channelThreadPublicLogId;
-    }
-
-    public function setChannelThreadPublicLogId(?string $channelThreadPublicLogId): void
-    {
-        $this->channelThreadPublicLogId = $channelThreadPublicLogId;
-    }
-
-    public function getVerifiedMembersChannelId(): ?string
-    {
-        return $this->verifiedMembersChannelId;
-    }
-
-    public function setVerifiedMembersChannelId(?string $verifiedMembersChannelId): void
-    {
-        $this->verifiedMembersChannelId = $verifiedMembersChannelId;
-    }
-
-    /**
-     * @return CarbonTimeZone
-     */
-    public function getTimeZone(): CarbonTimeZone
-    {
-        return $this->timeZone;
-    }
-
-    /**
-     * @param CarbonTimeZone $timeZone
-     */
-    public function setTimeZone(CarbonTimeZone $timeZone): void
-    {
-        $this->timeZone = $timeZone;
+        return !empty($this->verifiedMembersRoleId);
     }
 
     public function getDiscordId(): string
     {
         return $this->discordId;
-    }
-
-    public function setDiscordId(string $discordId): void
-    {
-        $this->discordId = $discordId;
     }
 }

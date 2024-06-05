@@ -75,8 +75,8 @@ class SetPublicModLog extends AbstractSubCommandSubscriber
 
     protected function save(Guild $guild, ?string $channelId, ?string $threadId = null): void
     {
-        $guild->setChannelPublicLogId($channelId);
-        $guild->setChannelThreadPublicLogId($threadId);
+        $guild->channelPublicLogId = $channelId;
+        $guild->channelThreadPublicLogId = $threadId;
         $this->guildService->save($guild);
     }
 }

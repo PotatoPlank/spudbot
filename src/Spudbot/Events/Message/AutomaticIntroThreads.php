@@ -53,8 +53,8 @@ class AutomaticIntroThreads extends AbstractEventSubscriber
             return false;
         }
         $guild = $this->guildService->findOrCreateWithPart($guildPart);
-        $hasIntroChannel = !empty($guild->getChannelIntroductionId());
-        $isIntroChannel = $message->channel_id === $guild->getChannelIntroductionId();
+        $hasIntroChannel = $guild->hasIntroductionsChannel();
+        $isIntroChannel = $message->channel_id === $guild->channelIntroductionId;
         $isNewMember = ($message->member->joined_at?->diffInDays(Carbon::now()) ?? -99) <= 30;
         return $isNewMember && $hasIntroChannel && $isIntroChannel;
     }

@@ -9,6 +9,7 @@ namespace Spudbot\Bot;
 
 enum Events: string
 {
+    case EVERY_TEN_SECONDS = 'EVERY_TEN_SECONDS';
     case EVERY_HALF_MINUTE = 'EVERY_HALF_MINUTE';
     case EVERY_MINUTE = 'EVERY_MINUTE';
     case EVERY_TEN_MINUTES = 'EVERY_TEN_MINUTES';

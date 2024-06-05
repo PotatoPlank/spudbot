@@ -40,7 +40,7 @@ class SetVerifiedRole extends AbstractSubCommandSubscriber
         $roleId = $this->options['role_id']->value;
         $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
 
-        $guild->setVerifiedMembersRoleId($roleId);
+        $guild->verifiedMembersRoleId = $roleId;
         $this->guildService->save($guild);
 
         $this->spud->interact()

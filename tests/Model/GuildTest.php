@@ -30,7 +30,7 @@ class GuildTest extends TestCase
     {
         $discordId = 'discord id';
 
-        $this->model->setDiscordId($discordId);
+        $this->model->discordId = $discordId;
 
         $this->assertEquals($discordId, $this->model->getDiscordId());
     }
@@ -43,9 +43,9 @@ class GuildTest extends TestCase
     {
         $channelId = 'channel id';
 
-        $this->model->setChannelAnnounceId($channelId);
+        $this->model->channelAnnounceId = $channelId;
 
-        $this->assertEquals($channelId, $this->model->getChannelAnnounceId());
+        $this->assertEquals($channelId, $this->model->channelAnnounceId);
     }
 
     /**
@@ -56,9 +56,9 @@ class GuildTest extends TestCase
     {
         $name = 'thread id';
 
-        $this->model->setChannelThreadAnnounceId($name);
+        $this->model->channelThreadAnnounceId = $name;
 
-        $this->assertEquals($name, $this->model->getChannelThreadAnnounceId());
+        $this->assertEquals($name, $this->model->channelThreadAnnounceId);
     }
 
     /**
@@ -80,8 +80,8 @@ class GuildTest extends TestCase
 
         $this->assertEquals($fields['external_id'], $model->getExternalId());
         $this->assertEquals($fields['discord_id'], $model->getDiscordId());
-        $this->assertEquals($fields['channel_announce_id'], $model->getChannelAnnounceId());
-        $this->assertEquals($fields['channel_thread_announce_id'], $model->getChannelThreadAnnounceId());
+        $this->assertEquals($fields['channel_announce_id'], $model->channelAnnounceId);
+        $this->assertEquals($fields['channel_thread_announce_id'], $model->channelThreadAnnounceId);
         $this->assertEquals($fields['created_at'], $model->getCreatedAt()->format('Y-m-d H:i:s'));
         $this->assertEquals($fields['updated_at'], $model->getUpdatedAt()->format('Y-m-d H:i:s'));
     }

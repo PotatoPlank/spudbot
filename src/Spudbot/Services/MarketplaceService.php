@@ -42,6 +42,19 @@ class MarketplaceService
         }
     }
 
+    public function findWithPart(Thread $thread): ?Marketplace
+    {
+        if ($thread->owner_member === null) {
+            try {
+                return $this->marketplaceRepository->findByDiscordId($thread->id)->first();
+            } catch (OutOfBoundsException $exception) {
+                return null;
+            }
+        }
+
+        return $this->findOrCreateWithPart($thread);
+    }
+
     public function save(Marketplace $marketplace): Marketplace
     {
         return $this->marketplaceRepository->save($marketplace);

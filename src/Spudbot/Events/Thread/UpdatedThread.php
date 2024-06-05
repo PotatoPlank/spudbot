@@ -20,6 +20,7 @@ use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Services\ChannelService;
 use Spudbot\Services\DirectoryService;
 use Spudbot\Services\MarketplaceService;
+use Spudbot\Tasks\MarketplaceTasks;
 
 class UpdatedThread extends AbstractEventSubscriber
 {
@@ -102,7 +103,7 @@ class UpdatedThread extends AbstractEventSubscriber
 
     protected function saveMarketplace(Thread $thread, Guild $guild): void
     {
-        if (empty($guild->getChannelMarketplaceId())) {
+        if (!$guild->hasMarketplace() || !MarketplaceTasks::hasMemberOwner($thread)) {
             return;
         }
         $part = $this->spud->discord->guilds->get('id', $guild->getDiscordId());

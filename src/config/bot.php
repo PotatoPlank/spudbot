@@ -9,6 +9,7 @@
 use Discord\Discord;
 use Discord\WebSockets\Intents;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Spudbot\Bot\Spud;
 use Spudbot\Bot\SpudOptions;
 use Spudbot\Hydrator\EntityHydrator;
@@ -42,5 +43,8 @@ return [
     Spud::class => DI\autowire(),
     DirectoryParser::class => DI\autowire(),
     EntityHydrator::class => DI\autowire(),
+    LoggerInterface::class => function (ContainerInterface $c) {
+        return $c->get(Spud::class)->log();
+    }
 ];
 

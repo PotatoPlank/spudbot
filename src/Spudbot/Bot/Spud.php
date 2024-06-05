@@ -11,6 +11,7 @@ use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\Discord;
 use Psr\Container\ContainerInterface;
+use Psr\Log\LoggerInterface;
 use Spudbot\Builder\CommandBuilder;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Builder\OptionBuilder;
@@ -19,6 +20,7 @@ use Spudbot\Handler\ExceptionQueue;
 use Spudbot\Handler\SentryExceptions;
 use Spudbot\Handler\TerminationHandler;
 use Spudbot\Model\Guild;
+use Spudbot\Services\GuildService;
 use Spudbot\Util\Filesystem;
 use Twig\Environment;
 
@@ -33,6 +35,9 @@ class Spud
     public readonly CommandObserver $commandObserver;
     #[Inject]
     public readonly EventObserver $eventObserver;
+    public readonly Carbon $startedAt;
+    #[Inject]
+    protected GuildService $guildService;
 
     public function __construct(public readonly ?ContainerInterface $container)
     {
@@ -90,6 +95,13 @@ class Spud
 
     public function run(): void
     {
+        if (isset($_ENV['LOG_GUILD'])) {
+            $id = $_ENV['LOG_GUILD'];
+            if (!empty($id)) {
+                $this->logGuild = $this->guildService->findByDiscordId($id);
+            }
+        }
+
         $boot = new Boot($this);
         $boot->hook();
         $this->discord->on(Events::READY->value, function () {
@@ -98,17 +110,18 @@ class Spud
 
 
         $this->discord->run();
+        $this->startedAt = Carbon::now();
 
 
         if (!empty($this->logGuild)) {
-            $guild = $this->discord->guilds->get('id', $this->logGuild->getDiscordId());
+            $guild = $this->discord->guilds->get('id', $this->logGuild->discordId);
             if (!$guild) {
                 return;
             }
             $output = $this->logGuild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $guild);
             $this->interact()
                 ->setTitle('Bot Started')
-                ->setDescription('Bot started at ' . Carbon::now()->toIso8601String())
+                ->setDescription("Bot started at {$this->startedAt->toIso8601String()}")
                 ->sendTo($output);
         }
     }
@@ -121,6 +134,11 @@ class Spud
     public function command(string $name, string $description = CommandBuilder::DEFAULT_DESCRIPTION): CommandBuilder
     {
         return $this->container->injectOn(new CommandBuilder($name, $description));
+    }
+
+    public function log(): LoggerInterface
+    {
+        return $this->discord->getLogger();
     }
 
 

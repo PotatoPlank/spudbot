@@ -44,8 +44,8 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
             ->info("Checking to upgrade the membership of {$message->member->displayname}");
 
         $guild = $this->guildService->findOrCreateWithPart($message->member->guild);
-        $verifiedRole = $guild->getVerifiedMembersRoleId();
-        $tenuredRoleId = $guild->getTenuredMemberRoleId();
+        $verifiedRole = $guild->verifiedMembersRoleId;
+        $tenuredRoleId = $guild->tenuredMemberRoleId;
 
         try {
             $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $message->guild);

@@ -64,4 +64,27 @@ class GuildService
         }
         return $guilds;
     }
+
+
+    public function findByExternalId(string $externalId): ?Guild
+    {
+        try {
+            return $this->guildRepository->findById($externalId);
+        } catch (OutOfBoundsException $exception) {
+            return null;
+        }
+    }
+
+    /**
+     * @throws ApiRequestFailure
+     * @throws ApiException
+     */
+    public function findByDiscordId(string $discordId): ?Guild
+    {
+        try {
+            return $this->guildRepository->findByDiscordId($discordId)->first();
+        } catch (OutOfBoundsException $exception) {
+            return null;
+        }
+    }
 }

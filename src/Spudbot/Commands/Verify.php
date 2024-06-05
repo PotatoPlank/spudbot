@@ -12,6 +12,7 @@ use Discord\Builders\CommandBuilder;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Parts\Interactions\Command\Option;
 use Discord\Parts\Interactions\Interaction;
+use Discord\Parts\User\Member;
 use OutOfBoundsException;
 use Spudbot\Model\Guild;
 use Spudbot\Services\GuildService;
@@ -19,10 +20,14 @@ use Spudbot\Services\MemberService;
 
 class Verify extends AbstractCommandSubscriber
 {
+    protected const INVALID_USER = 'An invalid user was submitted for verification.';
+    protected const SELF_VERIFY = 'You cannot verify yourself.';
+    protected const PERMISSIONS = 'You do not have the required permissions to verify.';
     #[Inject]
     protected GuildService $guildService;
     #[Inject]
     protected MemberService $memberService;
+    protected array $storage = [];
 
     public function update(?Interaction $interaction = null): void
     {
@@ -30,7 +35,11 @@ class Verify extends AbstractCommandSubscriber
             return;
         }
         $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
-        $verifiedId = $guild->getVerifiedMembersRoleId();
+        if (!$guild->hasVerifiedRole()) {
+            return;
+        }
+        $verifiedId = $guild->verifiedMembersRoleId;
+        $this->storage[$guild->discordId] = $verifiedId;
         $botLogChannel = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $interaction->guild);
         $verifiedChannel = $guild->getChannelThreadPart(Guild::VERIFIED_CHANNEL, $interaction->guild);
 
@@ -41,34 +50,24 @@ class Verify extends AbstractCommandSubscriber
         $sourceMemberName = $interaction->member->nick ?? $interaction->member->displayname;
 
         $memberToBeVerified = $interaction->guild->members->get('id', $targetMemberId);
-        $sourceMemberIsVerified = $interaction->member->roles->isset($verifiedId);
 
-        if (!$memberToBeVerified) {
-            $this->spud->interact()
-                ->error('An invalid user was submitted for verification.')
-                ->respondTo($interaction, true);
-            return;
-        }
-
-        if ($interaction->member->id === $memberToBeVerified->id) {
-            $this->spud->interact()
-                ->error('You cannot verify yourself.')
-                ->respondTo($interaction, true);
-            return;
-        }
+        $errorMessage = $this->getError($interaction, $memberToBeVerified);
 
         $context = [
             'sourceMemberId' => $interaction->member->id,
-            'targetMemberId' => $memberToBeVerified->id,
+            'targetMemberId' => $memberToBeVerified?->id,
             'reason' => $verificationReason,
         ];
 
-        if (!$sourceMemberIsVerified) {
-            $builder->error('You do not have the required permissions to verify.')
+        if ($errorMessage !== null) {
+            $this->spud->interact()
+                ->error($errorMessage)
                 ->respondTo($interaction, true);
 
-            $builder->setDescription($this->spud->twig->render('user/verification_error.twig', $context));
-            $builder->sendTo($botLogChannel);
+            if ($errorMessage === self::PERMISSIONS) {
+                $builder->setDescription($this->spud->twig->render('user/verification_error.twig', $context));
+                $builder->sendTo($botLogChannel);
+            }
             return;
         }
 
@@ -87,11 +86,27 @@ class Verify extends AbstractCommandSubscriber
             $builder->setDescription(
                 "Unable to verify <@{$memberToBeVerified->id}>, they haven't made any comments."
             );
+            error_log($exception);
         }
 
         $builder->respondTo($interaction, true);
         $builder->sendTo($botLogChannel);
         $builder->sendTo($verifiedChannel);
+    }
+
+    protected function getError(Interaction $interaction, ?Member $targetMember): ?string
+    {
+        $message = null;
+        if (!$targetMember) {
+            $message = self::INVALID_USER;
+        }
+        if ($interaction->member->id === $targetMember->id) {
+            $message = self::SELF_VERIFY;
+        }
+        if (!$interaction->member->roles->isset($this->storage[$interaction->guild_id])) {
+            $message = self::PERMISSIONS;
+        }
+        return $message;
     }
 
     public function getCommand(): Command

@@ -71,7 +71,7 @@ class AddReminder extends AbstractCommandSubscriber
 
         $channel = $this->channelService->findOrCreateWithPart($interaction->channel);
 
-        $guildTimeZone = $channel->getGuild()->getTimeZone();
+        $guildTimeZone = $channel->getGuild()->timeZone;
         $scheduledAt = Carbon::parse($scheduledAt, $guildTimeZone);
 
         $reminder = new Reminder();

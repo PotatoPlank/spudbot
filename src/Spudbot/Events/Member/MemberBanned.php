@@ -34,10 +34,10 @@ class MemberBanned extends AbstractEventSubscriber
             $this->spud->discord->guilds->get('id', $ban->guild_id)->bans->fetch($ban->user_id)
                 ->done(function (Ban $ban) {
                     $guild = $this->guildService->findOrCreateWithPart($ban->guild);
-                    if (empty($guild->getChannelPublicLogId())) {
+                    if ($guild->hasPublicModLog()) {
                         return;
                     }
-                    $publicModLogChannel = $ban->guild->channels->get('id', $guild->getChannelPublicLogId());
+                    $publicModLogChannel = $ban->guild->channels->get('id', $guild->channelPublicLogId);
                     if (!$publicModLogChannel) {
                         return;
                     }

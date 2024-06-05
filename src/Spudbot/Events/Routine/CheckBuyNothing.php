@@ -8,18 +8,17 @@
 namespace Spudbot\Events\Routine;
 
 
-use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\Helpers\Collection;
 use Discord\Parts\Channel\Channel;
 use Discord\Parts\Thread\Thread;
-use Discord\Repository\Channel\ThreadRepository;
 use Spudbot\Bot\Events;
 use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Model\Guild;
 use Spudbot\Model\Marketplace;
 use Spudbot\Services\GuildService;
 use Spudbot\Services\MarketplaceService;
+use Spudbot\Tasks\MarketplaceTasks;
 
 use function React\Promise\all;
 
@@ -36,13 +35,13 @@ class CheckBuyNothing extends AbstractEventSubscriber
 
     public function getEventName(): string
     {
-        return Events::EVERY_TEN_MINUTES->value;
+        return Events::EVERY_TEN_SECONDS->value;
     }
 
     public function update(): void
     {
         $guilds = $this->guildService->all(function (Guild $guild) {
-            return !empty($guild->getChannelMarketplaceId()) && $guild->getDiscordId() === self::GUILD_TARGET;
+            return $guild->hasMarketplace() && $guild->discordId === self::GUILD_TARGET;
         });
         foreach ($guilds as $guild) {
             $part = $this->spud->discord->guilds->get('id', $guild->getDiscordId());
@@ -61,19 +60,13 @@ class CheckBuyNothing extends AbstractEventSubscriber
             }
 
             $active = $channel->threads->freshen()
-                ->then($this->onlyInMarketplace(...))
-                ->then(function (Collection $threads) {
-                    return $threads->filter(function (Thread $thread) {
-                        return $this->shouldBeRemoved($thread);
-                    });
-                });
+                ->then(fn($threads) => MarketplaceTasks::isInChannel($threads, $channel))
+                ->then(fn($threads) => MarketplaceTasks::getRemovableThreads($threads));
+
             $archived = $channel->threads->archived()
-                ->then($this->onlyInMarketplace(...))
-                ->then(function (Collection $threads) {
-                    return $threads->filter(function (Thread $thread) {
-                        return $this->shouldBeRemoved($thread) || $this->isAged($thread?->archive_timestamp);
-                    });
-                });
+                ->then(fn($threads) => MarketplaceTasks::isInChannel($threads, $channel))
+                ->then(fn($threads) => MarketplaceTasks::getAgedOrRemovableThreads($threads));
+
             all([$active, $archived])->then(function (array $promises) use ($guild, $part, $channel) {
                 $threads = new Collection();
                 /**
@@ -86,19 +79,20 @@ class CheckBuyNothing extends AbstractEventSubscriber
                  * @var Thread[] $threads
                  */
                 foreach ($threads as $thread) {
-                    $shouldBeRemoved = $this->shouldBeRemoved($thread);
-                    $hasAged = $this->isAged($thread?->archive_timestamp);
-                    try {
-                        $marketplace = $this->marketplaceService->findOrCreateWithPart($thread);
-                        $marketplace->lastStatus = Marketplace::makeStatus($thread);
-                        $marketplace->tags = Marketplace::makeTags($thread);
-                        if ($this->shouldBeRemoved($thread)) {
-                            $marketplace->taken();
+                    $shouldBeRemoved = MarketplaceTasks::isThreadRemovable($thread);
+                    $hasAged = MarketplaceTasks::isThreadAged($thread);
+                    if (MarketplaceTasks::hasMemberOwner($thread)) {
+                        $marketplace = $this->marketplaceService->findWithPart($thread);
+                        if ($marketplace) {
+                            $marketplace->lastStatus = Marketplace::makeStatus($thread);
+                            $marketplace->tags = Marketplace::makeTags($thread);
+                            if ($shouldBeRemoved) {
+                                $marketplace->taken();
+                            }
+                            $this->marketplaceService->save($marketplace);
                         }
-                        $this->marketplaceService->save($marketplace);
-                    } catch (\InvalidArgumentException $exception) {
-                        // Saving marketplace without a member owner failed, don't track those.
                     }
+
                     $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $part);
                     $this->spud->interact()->setTitle("Removed $thread->name")
                         ->setDescription(
@@ -120,37 +114,5 @@ class CheckBuyNothing extends AbstractEventSubscriber
             self::$marketplaces[$guild->getDiscordId()] = $channel;
         }
         return self::$marketplaces[$guild->getDiscordId()];
-    }
-
-    protected function shouldBeRemoved(Thread $thread, bool $removeNoTags = false): bool
-    {
-        if ($thread->applied_tags === null) {
-            return $removeNoTags;
-        }
-        foreach ($thread->applied_tags as $tag) {
-            $hasStatus = $this->removableStatuses->find(function ($status) use ($tag) {
-                return $status->id === $tag;
-            });
-            if ($hasStatus !== null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    protected function isAged(?Carbon $archiveTimestamp, bool $removeNullTimestamps = false): bool
-    {
-        if ($archiveTimestamp === null) {
-            return $removeNullTimestamps;
-        }
-        return $archiveTimestamp->diffInDays(Carbon::now()) >= 60;
-    }
-
-    protected function onlyInMarketplace(ThreadRepository|Collection $threads): Collection
-    {
-        $marketplace = self::$marketplaces[$threads->first()->guild_id] ?? -99;
-        return $threads->filter(function ($thread) use ($marketplace) {
-            return $thread?->parent_id === $marketplace->id;
-        });
     }
 }

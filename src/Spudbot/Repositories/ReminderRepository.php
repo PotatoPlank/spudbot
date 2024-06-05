@@ -10,8 +10,10 @@ declare(strict_types=1);
 namespace Spudbot\Repositories;
 
 use Carbon\Carbon;
+use DI\Attribute\Inject;
 use Discord\Parts\Part;
 use OutOfBoundsException;
+use Psr\Log\LoggerInterface;
 use Spudbot\Helpers\Collection;
 use Spudbot\Model\Reminder;
 
@@ -22,6 +24,8 @@ use Spudbot\Model\Reminder;
  */
 class ReminderRepository extends AbstractRepository
 {
+    #[Inject]
+    protected LoggerInterface $logger;
     protected string $model = Reminder::class;
     protected array $endpoints = [
         'default' => 'reminders',

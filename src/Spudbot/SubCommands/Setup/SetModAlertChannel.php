@@ -75,8 +75,8 @@ class SetModAlertChannel extends AbstractSubCommandSubscriber
 
     protected function save(Guild $guild, ?string $channelId, ?string $threadId = null): void
     {
-        $guild->setChannelModAlertId($channelId);
-        $guild->setChannelThreadModAlertId($threadId);
+        $guild->channelModAlertId = $channelId;
+        $guild->channelThreadModAlertId = $threadId;
         $this->guildService->save($guild);
     }
 }

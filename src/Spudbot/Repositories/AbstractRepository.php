@@ -14,6 +14,7 @@ use DI\Attribute\Inject;
 use Discord\Parts\Part;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use Spudbot\Exception\ApiException;
 use Spudbot\Exception\ApiRequestFailure;
 use Spudbot\Exception\InvalidApiResponseException;
@@ -88,8 +89,16 @@ abstract class AbstractRepository
     public function call(Endpoint $endpoint, array $options = []): mixed
     {
         $endpoint->addVariables($this->endpointVars);
+        $this->log($endpoint->getMethod(), "Called $endpoint");
         return ApiService::new($this->client)
             ->handle($endpoint->getMethod(), (string)$endpoint, $options);
+    }
+
+    protected function log(string $requestType, string $message): void
+    {
+        if (isset($this->logger) && $this->logger instanceof LoggerInterface) {
+            $this->logger->info("$requestType REQ: $message");
+        }
     }
 
     public function new(array $fields = [])

@@ -55,7 +55,7 @@ class SetVerifiedChannel extends AbstractSubCommandSubscriber
                 $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
 
                 $channel = $this->channelService->findOrCreateWithPart($channelPart);
-                $guild->setVerifiedMembersChannelId($channel->getDiscordId());
+                $guild->verifiedMembersChannelId = $channel->getDiscordId();
                 $this->guildService->save($guild);
             });
 

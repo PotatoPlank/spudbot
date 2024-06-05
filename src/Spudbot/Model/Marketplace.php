@@ -39,6 +39,9 @@ class Marketplace extends AbstractModel
 
     public static function makeTags(\Discord\Parts\Thread\Thread $thread): string
     {
+        if (!is_array($thread->applied_tags)) {
+            return (string)$thread->applied_tags;
+        }
         return implode(',', $thread->applied_tags);
     }
 

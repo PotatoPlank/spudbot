@@ -15,11 +15,13 @@ use Discord\Parts\Thread\Thread;
 use Discord\WebSockets\Event;
 use OutOfBoundsException;
 use Spudbot\Events\AbstractEventSubscriber;
+use Spudbot\Model\Channel;
 use Spudbot\Model\Guild;
 use Spudbot\Parsers\DirectoryParser;
 use Spudbot\Services\ChannelService;
 use Spudbot\Services\DirectoryService;
 use Spudbot\Services\MarketplaceService;
+use Spudbot\Tasks\MarketplaceTasks;
 
 class AddedThread extends AbstractEventSubscriber
 {
@@ -44,7 +46,31 @@ class AddedThread extends AbstractEventSubscriber
         }
         $forumChannel = $this->channelService->findOrCreateWithPart($threadPart->parent);
         $this->saveMarketplace($threadPart, $forumChannel->getGuild());
+        $this->updateForumDirectory($forumChannel, $threadPart);
+    }
 
+    protected function saveMarketplace(Thread $thread, Guild $guild): void
+    {
+        if (!$guild->hasMarketplace() || !MarketplaceTasks::hasMemberOwner($thread)) {
+            return;
+        }
+        $part = $this->spud->discord->guilds->get('id', $guild->getDiscordId());
+        if ($part === null) {
+            return;
+        }
+        $channel = $guild->getChannelThreadPart(Guild::MARKETPLACE_CHANNEL, $part);
+        if ($channel->id !== $thread->parent_id) {
+            return;
+        }
+        $marketplace = $this->marketplaceService->findOrCreateWithPart($thread);
+        $marketplace->name = $thread->name;
+        $marketplace->lastStatus = $marketplace::makeStatus($thread);
+        $marketplace->tags = $marketplace::makeTags($thread);
+        $this->marketplaceService->save($marketplace);
+    }
+
+    protected function updateForumDirectory(Channel $forumChannel, Thread $threadPart): void
+    {
         try {
             $directory = $this->directoryService
                 ->findWithForumChannel($forumChannel);
@@ -87,26 +113,6 @@ class AddedThread extends AbstractEventSubscriber
              */
             return;
         }
-    }
-
-    protected function saveMarketplace(Thread $thread, Guild $guild): void
-    {
-        if (empty($guild->getChannelMarketplaceId())) {
-            return;
-        }
-        $part = $this->spud->discord->guilds->get('id', $guild->getDiscordId());
-        if ($part === null) {
-            return;
-        }
-        $channel = $guild->getChannelThreadPart(Guild::MARKETPLACE_CHANNEL, $part);
-        if ($channel->id !== $thread->parent_id) {
-            return;
-        }
-        $marketplace = $this->marketplaceService->findOrCreateWithPart($thread);
-        $marketplace->name = $thread->name;
-        $marketplace->lastStatus = $marketplace::makeStatus($thread);
-        $marketplace->tags = $marketplace::makeTags($thread);
-        $this->marketplaceService->save($marketplace);
     }
 
     public function canRun(?Thread $threadPart = null): bool

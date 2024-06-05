@@ -28,7 +28,7 @@ class Reminder extends AbstractModel
 
     public function getLocalScheduledAt(): Carbon
     {
-        return $this->scheduledAt->copy()->setTimezone($this->getGuild()->getTimeZone());
+        return $this->scheduledAt->copy()->setTimezone($this->getGuild()->timeZone);
     }
 
     /**

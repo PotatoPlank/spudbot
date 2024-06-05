@@ -65,18 +65,20 @@ class SetLogChannel extends AbstractSubCommandSubscriber
                     $this->save($guild, $channel->getDiscordId());
                 }
 
+                $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $interaction->guild);
+
                 $this->spud->interact()
                     ->setTitle('Set Log Channel')
                     ->setDescription(
-                        "Set the bot log to <#{$guild->getOutputLocationId()}>."
+                        "Set the bot log to <#{$output->id}>."
                     )->respondTo($interaction, true);
             });
     }
 
     protected function save(Guild $guild, ?string $channelId, ?string $threadId = null): void
     {
-        $guild->setChannelAnnounceId($channelId);
-        $guild->setChannelThreadAnnounceId($threadId);
+        $guild->channelAnnounceId = $channelId;
+        $guild->channelThreadAnnounceId = $threadId;
         $this->guildService->save($guild);
     }
 }

@@ -29,8 +29,8 @@ class UserInformation extends AbstractSubCommandSubscriber
         $title = 'User Information';
         $userId = $this->options['user']->value;
         $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
-        $verifiedId = $guild->getVerifiedMembersRoleId();
-        $tenureRoleId = $guild->getTenuredMemberRoleId();
+        $verifiedId = $guild->verifiedMembersRoleId;
+        $tenureRoleId = $guild->tenuredMemberRoleId;
         $memberPart = $interaction->guild->members->get('id', $userId);
         if (!$memberPart) {
             $this->spud->interact()

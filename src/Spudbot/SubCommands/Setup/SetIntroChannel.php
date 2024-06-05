@@ -75,8 +75,8 @@ class SetIntroChannel extends AbstractSubCommandSubscriber
 
     protected function save(Guild $guild, ?string $channelId, ?string $threadId = null): void
     {
-        $guild->setChannelIntroductionId($channelId);
-        $guild->setChannelThreadIntroductionId($threadId);
+        $guild->channelIntroductionId = $channelId;
+        $guild->channelThreadIntroductionId = $threadId;
         $this->guildService->save($guild);
     }
 }

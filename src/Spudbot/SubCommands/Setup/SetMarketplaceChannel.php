@@ -75,8 +75,8 @@ class SetMarketplaceChannel extends AbstractSubCommandSubscriber
 
     protected function save(Guild $guild, ?string $channelId, ?string $threadId = null): void
     {
-        $guild->setChannelMarketplaceId($channelId);
-        $guild->setChannelThreadMarketplaceId($threadId);
+        $guild->channelMarketplaceId = $channelId;
+        $guild->channelThreadMarketplaceId = $threadId;
         $this->guildService->save($guild);
     }
 }
