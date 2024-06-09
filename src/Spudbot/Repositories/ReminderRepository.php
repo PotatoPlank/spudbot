@@ -30,7 +30,7 @@ class ReminderRepository extends AbstractRepository
     protected array $endpoints = [
         'default' => 'reminders',
         'put' => 'put|reminders/:id',
-        'delete' => 'delete|members/:id',
+        'delete' => 'delete|reminders/:id',
     ];
     protected array $updateFilter = [
         'guild',
