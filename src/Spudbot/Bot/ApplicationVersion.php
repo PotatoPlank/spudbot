@@ -10,8 +10,8 @@ namespace Spudbot\Bot;
 class ApplicationVersion
 {
     public const MAJOR = 4;
-    public const MINOR = 1;
-    public const REVISION = 0;
+    public const MINOR = 2;
+    public const REVISION = 1;
     public static string $buildNumber;
 
     public static function get(): string

@@ -106,6 +106,9 @@ class Verify extends AbstractCommandSubscriber
         if (!$interaction->member->roles->isset($this->storage[$interaction->guild_id])) {
             $message = self::PERMISSIONS;
         }
+        if (!$interaction->member->permissions->manage_roles) {
+            $message = self::PERMISSIONS;
+        }
         return $message;
     }
 
