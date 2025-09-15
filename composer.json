@@ -8,7 +8,7 @@
         }
     ],
     "require": {
-        "team-reflex/discord-php": "v10.0.0-RC6",
+        "team-reflex/discord-php": "10.2",
         "nesbot/carbon": "^2.66",
         "doctrine/dbal": "^3.6",
         "vlucas/phpdotenv": "^5.5",
@@ -36,6 +36,9 @@
     "config": {
         "allow-plugins": {
             "php-http/discovery": true
-        }
+        },
+      "platform": {
+        "php": "8.3"
+      }
     }
 }
