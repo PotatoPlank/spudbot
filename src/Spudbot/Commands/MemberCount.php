@@ -7,11 +7,15 @@
 
 namespace Spudbot\Commands;
 
+use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
 use Spudbot\Model\Guild;
+use Spudbot\Services\GuildService;
 
 class MemberCount extends AbstractCommandSubscriber
 {
+    #[Inject]
+    protected GuildService $guildService;
     public function getCommandName(): string
     {
         return 'counter';
@@ -35,7 +39,27 @@ class MemberCount extends AbstractCommandSubscriber
             return;
         }
 
-        Guild::updateMemberCount($interaction->guild, $this->spud->discord);
+        $this->updateChannel($interaction);
+    }
+
+    private function updateChannel(Interaction $interaction): void
+    {
+        $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
+
+        if(!$guild->memberCountChannelId){
+            $guild->memberCountChannelId = Guild::locateMemberCountChannel($interaction->guild)?->id;
+            $this->guildService->save($guild);
+        }
+
+        try{
+            $guild->setChannelMemberCount($interaction->guild);
+        }catch (\Exception $e){
+            $this->spud->interact()
+                ->setTitle('Exception Encountered')
+                ->setDescription($e->getMessage())
+                ->respondTo($interaction);
+            return;
+        }
 
         $this->spud->interact()
             ->setTitle('Member Counter')

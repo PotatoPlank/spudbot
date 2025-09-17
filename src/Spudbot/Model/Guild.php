@@ -22,9 +22,11 @@ class Guild extends AbstractModel
     public const INTRO_CHANNEL = 'introductions';
     public const MARKETPLACE_CHANNEL = 'marketplace';
     public const VERIFIED_CHANNEL = 'verified';
+    public const string MEMBER_COUNT_CATEGORY_NAME = 'Member Count 📈';
     public ?string $verifiedMembersChannelId = null;
     public ?string $verifiedMembersRoleId = null;
     public ?string $tenuredMemberRoleId = null;
+    public ?string $memberCountChannelId = null;
     public CarbonTimeZone $timeZone;
     public string $discordId;
     public ?string $channelAnnounceId = null;
@@ -43,24 +45,33 @@ class Guild extends AbstractModel
         $this->timeZone = new CarbonTimeZone('America/New_York');
     }
 
-    public static function updateMemberCount(\Discord\Parts\Guild\Guild $guild, Discord $discord): void
+    public static function locateMemberCountCategoryId(\Discord\Parts\Guild\Guild $guild): string
     {
-        $categoryName = 'Member Count 📈';
+        $categoryId = $guild->channels->get('name', static::MEMBER_COUNT_CATEGORY_NAME)?->id;
 
-        $memberCount = $guild->member_count;
-        $category = $guild->channels->get('name', $categoryName);
-        if (!$category) {
-            $category = new Channel($discord);
+        if(!$categoryId){
+            $category = new Channel($guild->getDiscord());
             $category->type = Channel::TYPE_GUILD_CATEGORY;
-            $category->name = $categoryName;
+            $category->name = static::MEMBER_COUNT_CATEGORY_NAME;
             $guild->channels->save($category);
+            $categoryId = $category->id;
         }
-        $channel = $guild->channels->get('parent_id', $category->id);
+        return $categoryId;
+    }
+
+    public static function locateMemberCountChannel(\Discord\Parts\Guild\Guild $guild): Channel
+    {
+        $categoryId = static::locateMemberCountCategoryId($guild);
+
+        $channel = $guild->channels->find(function (Channel $channel) use ($categoryId){
+            return $channel->parent_id === $categoryId && str_contains($channel->name, 'Member Count');
+        });
+
         if (!$channel) {
             $everyoneRole = $guild->roles->get('name', '@everyone');
-            $channel = new Channel($discord);
+            $channel = new Channel($guild->getDiscord());
             $channel->type = Channel::TYPE_GUILD_VOICE;
-            $channel->name = "Member Count: {$memberCount}";
+            $channel->name = static::getMemberCountChannelName($guild->member_count);
             if ($everyoneRole) {
                 $channel->setPermissions($everyoneRole, [
                     'view_channel',
@@ -68,11 +79,24 @@ class Guild extends AbstractModel
                     'connect',
                 ]);
             }
-            $channel->parent_id = $category->id;
-        } else {
-            $channel->name = "Member Count: {$memberCount}";
+            $channel->parent_id = $categoryId;
+            $guild->channels->save($channel);
         }
 
+        return $channel;
+    }
+
+    public function setChannelMemberCount(\Discord\Parts\Guild\Guild $guild): void
+    {
+        if(!$this->memberCountChannelId){
+            throw new \RuntimeException('Member count channel id not set.');
+        }
+
+        $channel = $guild->channels->get('id', $this->memberCountChannelId);
+        if(!$channel){
+            throw new \RuntimeException('Member count channel not found.');
+        }
+        $channel->name = static::getMemberCountChannelName($guild->member_count);
         $guild->channels->save($channel);
     }
 
@@ -149,5 +173,10 @@ class Guild extends AbstractModel
     public function getDiscordId(): string
     {
         return $this->discordId;
+    }
+
+    private static function getMemberCountChannelName(string|int $count = 'x'): string
+    {
+        return "Member Count: $count";
     }
 }
