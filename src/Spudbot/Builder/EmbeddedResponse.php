@@ -16,7 +16,7 @@ use Discord\Parts\Interactions\Interaction;
 use Discord\Parts\Thread\Thread;
 use Discord\Parts\User\Member;
 use Discord\Parts\User\User;
-use React\Promise\ExtendedPromiseInterface;
+use React\Promise\PromiseInterface;
 
 class EmbeddedResponse
 {
@@ -55,14 +55,14 @@ class EmbeddedResponse
         return $this;
     }
 
-    public function acknowledge(Interaction $interaction, bool $ephemeral = false): ExtendedPromiseInterface
+    public function acknowledge(Interaction $interaction, bool $ephemeral = false): PromiseInterface
     {
         $this->acknowledged = true;
 
         return $interaction->acknowledgeWithResponse($ephemeral);
     }
 
-    public function respondTo(Interaction $interaction, bool $ephemeral = false): ExtendedPromiseInterface
+    public function respondTo(Interaction $interaction, bool $ephemeral = false): PromiseInterface
     {
         return $this->acknowledged ?
             $interaction->updateOriginalResponse($this->build()) :
