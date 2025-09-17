@@ -29,7 +29,7 @@ class Setup extends AbstractCommandSubscriber
         if (!$interaction) {
             return;
         }
-        if (!$interaction->member->permissions->manage_guild) {
+        if (!$this->isGuildManager($interaction->member)) {
             $this->spud->interact()
                 ->error('You don\'t have the necessary permissions to run this command.')
                 ->respondTo($interaction);

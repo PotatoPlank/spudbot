@@ -28,7 +28,7 @@ class Restart extends AbstractCommandSubscriber
             return;
         }
 
-        if ($this->spud->discord->application->owner->id !== $interaction->user->id) {
+        if (!$this->isBotOwner($interaction->user)) {
             $this->spud->interact()
                 ->error('You don\'t have the necessary permissions to run this command.')
                 ->respondTo($interaction);

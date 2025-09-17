@@ -7,6 +7,9 @@
 
 namespace Spudbot\Bot;
 
+use Discord\Parts\User\Member;
+use Discord\Parts\User\User;
+
 abstract class AbstractSubscriber
 {
     public function __construct(protected Spud $spud)
@@ -20,5 +23,15 @@ abstract class AbstractSubscriber
     public function canRun(): bool
     {
         return true;
+    }
+
+    public function isGuildManager(?Member $member): bool
+    {
+        return $member?->permissions->manage_guild ?: false;
+    }
+
+    public function isBotOwner(?User $user): bool
+    {
+        return $user && $user->getDiscord()->application->owner->id === $user->id;
     }
 }
