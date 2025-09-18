@@ -95,12 +95,12 @@ class EmbeddedResponse
         return $this;
     }
 
-    public function sendTo(User|Member|Thread|Channel $target): ExtendedPromiseInterface
+    public function sendTo(User|Member|Thread|Channel $target): PromiseInterface
     {
         return $target->sendMessage($this->build());
     }
 
-    public function replyTo(Message $message): ExtendedPromiseInterface
+    public function replyTo(Message $message): PromiseInterface
     {
         return $message->reply($this->build());
     }
