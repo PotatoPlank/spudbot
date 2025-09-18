@@ -20,7 +20,7 @@ class ApplicationVersion
     /**
      * Updates includes non-breaking bugfixes
      */
-    public const int REVISION = 0;
+    public const int REVISION = 1;
     public static string $buildNumber;
 
     public static function get(): string
