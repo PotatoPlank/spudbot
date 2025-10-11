@@ -12,7 +12,7 @@ class ApplicationVersion
     /**
      * Update includes breaking changes
      */
-    public const int MAJOR = 5;
+    public const int MAJOR = 6;
     /**
      * Update includes non-breaking features
      */
@@ -20,15 +20,15 @@ class ApplicationVersion
     /**
      * Updates includes non-breaking bugfixes
      */
-    public const int REVISION = 1;
+    public const int REVISION = 0;
     public static string $buildNumber;
 
     public static function get(): string
     {
         $version = sprintf('v%d.%d.%d', self::MAJOR, self::MINOR, self::REVISION);
         $buildFile = dirname(__DIR__, 3) . '/.build-version';
-
         $jsonFile = dirname(__DIR__, 3) . '/build.json';
+
         if (!file_exists($jsonFile) && !file_exists($buildFile)) {
             return $version;
         }
@@ -36,7 +36,7 @@ class ApplicationVersion
         if (file_exists($buildFile)){
             self::$buildNumber = file_get_contents($buildFile);
         }else{
-            $contents = file_get_contents($buildFile);
+            $contents = file_get_contents($jsonFile);
             $buildDetails = json_decode($contents, false, 512, JSON_THROW_ON_ERROR);
             self::$buildNumber = $buildDetails->date ?? '';
         }
