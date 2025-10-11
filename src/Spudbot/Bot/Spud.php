@@ -16,6 +16,7 @@ use Spudbot\Builder\CommandBuilder;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Builder\OptionBuilder;
 use Spudbot\Exception\BotTerminationException;
+use Spudbot\Handler\ErrorQueue;
 use Spudbot\Handler\ExceptionQueue;
 use Spudbot\Handler\SentryExceptions;
 use Spudbot\Handler\TerminationHandler;
