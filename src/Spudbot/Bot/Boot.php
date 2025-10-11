@@ -40,7 +40,7 @@ class Boot extends AbstractEventSubscriber
 
         $description = 'GitHub: https://github.com/PotatoPlank/spudbot' . PHP_EOL . PHP_EOL;
         $description .= 'Build: ' . ApplicationVersion::get() . PHP_EOL;
-        $description .= 'Started at: ' . Carbon::now('America/New_York')->format('m/d/Y');
+        $description .= 'Started at: ' . Carbon::now('America/New_York')->toIso8601String();
 
         $this->spud->discord->updateCurrentApplication([
             'description' => $description,
