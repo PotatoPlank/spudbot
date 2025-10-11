@@ -1,5 +1,5 @@
 name: scp files
-on: [push]
+on: [ push ]
 jobs:
 
   build:
@@ -13,7 +13,7 @@ jobs:
         run: echo "NOW=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
 
       - name: Write build date
-        uses: "DamianReeves/write-file-action@master"
+        uses: "https://github.com/DamianReeves/write-file-action@master"
         with:
           path: .build-version
           write-mode: overwrite
@@ -21,7 +21,7 @@ jobs:
             ${{ env.NOW }}
 
       - name: Copy repository to server
-        uses: appleboy/scp-action@master
+        uses: https://github.com/appleboy/scp-action@master
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
@@ -31,7 +31,7 @@ jobs:
           target: "/home/docker/spudbot"
 
       - name: Restart SpudBot Service
-        uses: appleboy/ssh-action@v1
+        uses: https://github.com/appleboy/ssh-action@v1
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
