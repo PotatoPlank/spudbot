@@ -1,12 +1,13 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2024-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
 namespace Spudbot\Handler;
 
+use Spudbot\Bot\SpudLogger;
 use Spudbot\Exception\BotTerminationException;
 use Throwable;
 
@@ -27,7 +28,7 @@ class SentryExceptions
         if (!$exception instanceof BotTerminationException || !empty($exception->getMessage())) {
             captureException($exception);
             $details = " {$exception->getFile()}:{$exception->getLine()} {$exception->getMessage()}";
-            print self::CONSOLE_MESSAGE . " $details" . PHP_EOL;
+            SpudLogger::error(self::CONSOLE_MESSAGE . " $details");
         }
     }
 }

@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -24,6 +24,8 @@ use Spudbot\Services\GuildService;
 use Spudbot\Util\Filesystem;
 use Twig\Environment;
 
+use function Sentry\captureLastError;
+
 class Spud
 {
     public readonly ?Guild $logGuild;
@@ -43,10 +45,14 @@ class Spud
     {
         date_default_timezone_set('UTC');
 
+        $errorHandler = new ErrorQueue();
         $exceptionHandler = new ExceptionQueue();
         if (!empty($_ENV['SENTRY_DSN'])) {
             $sentryHandler = new SentryExceptions($_ENV['SENTRY_DSN'], $_ENV['SENTRY_ENV']);
             $exceptionHandler->addHandler([$sentryHandler, 'handler']);
+            $errorHandler->addHandler(function () {
+                captureLastError();
+            });
         }
         $terminationHandler = new TerminationHandler();
         $exceptionHandler->addHandler([$terminationHandler, 'handler']);
@@ -106,11 +112,12 @@ class Spud
         $boot->hook();
         $this->discord->on(Events::READY->value, function () {
             $this->eventObserver->emit(Events::READY->value);
+            SpudLogger::notice('SpudBot started.');
         });
+        SpudLogger::getInstance($this);
 
-
-        $this->discord->run();
         $this->startedAt = Carbon::now();
+        $this->discord->run();
 
 
         if (!empty($this->logGuild)) {
