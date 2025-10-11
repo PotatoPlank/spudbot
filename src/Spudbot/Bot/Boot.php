@@ -7,6 +7,7 @@
 
 namespace Spudbot\Bot;
 
+use Carbon\Carbon;
 use Spudbot\Events\AbstractEventSubscriber;
 use Spudbot\Helpers\Collection;
 
@@ -36,6 +37,17 @@ class Boot extends AbstractEventSubscriber
             $this->spud->discord->getLogger()
                 ->info("Subscribed to '$eventName'.");
         });
+
+        $description = 'GitHub: https://github.com/PotatoPlank/spudbot' . PHP_EOL . PHP_EOL;
+        $description .= 'Build: ' . ApplicationVersion::get() . PHP_EOL;
+        $description .= 'Started at: ' . Carbon::now('America/New_York')->format('m/d/Y');
+
+        $this->spud->discord->updateCurrentApplication([
+            'description' => $description,
+        ])->then(function (){
+            echo 'Updated description.' . PHP_EOL;
+        });
+        //exit;
     }
 
     public function getEventName(): string
