@@ -30,11 +30,11 @@ jobs:
           source: "."
           target: "/home/docker/spudbot"
 
-      - name: Restart SpudBot Service
+      - name: Update Packages and Restart SpudBot Service
         uses: https://github.com/appleboy/ssh-action@v1
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: composer install && systemctl restart spudbot
+          script: cd /home/docker/spudbot && composer install && systemctl restart spudbot
