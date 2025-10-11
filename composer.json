@@ -8,7 +8,7 @@
         }
     ],
     "require": {
-        "team-reflex/discord-php": "10.2",
+        "team-reflex/discord-php": "^10.36",
         "nesbot/carbon": "^2.66",
         "doctrine/dbal": "^3.6",
         "vlucas/phpdotenv": "^5.5",
