@@ -1,13 +1,15 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2024-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
 namespace Spudbot\Hydrator;
 
 use ReflectionClass;
+use ReflectionException;
+use ReflectionProperty;
 
 class ReflectionHydrator extends AbstractHydrator
 {
@@ -32,8 +34,8 @@ class ReflectionHydrator extends AbstractHydrator
 
     /**
      * @param object $input
-     * @return \ReflectionProperty[]
-     * @throws \ReflectionException
+     * @return ReflectionProperty[]
+     * @throws ReflectionException
      */
     protected static function getReflectionProperties(object $input): array
     {

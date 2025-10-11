@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -11,8 +11,9 @@ namespace Spudbot\Model;
 
 use BadMethodCallException;
 use Carbon\CarbonTimeZone;
-use Discord\Discord;
 use Discord\Parts\Channel\Channel;
+use InvalidArgumentException;
+use RuntimeException;
 
 class Guild extends AbstractModel
 {
@@ -45,25 +46,11 @@ class Guild extends AbstractModel
         $this->timeZone = new CarbonTimeZone('America/New_York');
     }
 
-    public static function locateMemberCountCategoryId(\Discord\Parts\Guild\Guild $guild): string
-    {
-        $categoryId = $guild->channels->get('name', static::MEMBER_COUNT_CATEGORY_NAME)?->id;
-
-        if(!$categoryId){
-            $category = new Channel($guild->getDiscord());
-            $category->type = Channel::TYPE_GUILD_CATEGORY;
-            $category->name = static::MEMBER_COUNT_CATEGORY_NAME;
-            $guild->channels->save($category);
-            $categoryId = $category->id;
-        }
-        return $categoryId;
-    }
-
     public static function locateMemberCountChannel(\Discord\Parts\Guild\Guild $guild): Channel
     {
         $categoryId = static::locateMemberCountCategoryId($guild);
 
-        $channel = $guild->channels->find(function (Channel $channel) use ($categoryId){
+        $channel = $guild->channels->find(function (Channel $channel) use ($categoryId) {
             return $channel->parent_id === $categoryId && str_contains($channel->name, 'Member Count');
         });
 
@@ -86,15 +73,34 @@ class Guild extends AbstractModel
         return $channel;
     }
 
+    public static function locateMemberCountCategoryId(\Discord\Parts\Guild\Guild $guild): string
+    {
+        $categoryId = $guild->channels->get('name', static::MEMBER_COUNT_CATEGORY_NAME)?->id;
+
+        if (!$categoryId) {
+            $category = new Channel($guild->getDiscord());
+            $category->type = Channel::TYPE_GUILD_CATEGORY;
+            $category->name = static::MEMBER_COUNT_CATEGORY_NAME;
+            $guild->channels->save($category);
+            $categoryId = $category->id;
+        }
+        return $categoryId;
+    }
+
+    private static function getMemberCountChannelName(string|int $count = 'x'): string
+    {
+        return "Member Count: $count";
+    }
+
     public function setChannelMemberCount(\Discord\Parts\Guild\Guild $guild): void
     {
-        if(!$this->memberCountChannelId){
-            throw new \RuntimeException('Member count channel id not set.');
+        if (!$this->memberCountChannelId) {
+            throw new RuntimeException('Member count channel id not set.');
         }
 
         $channel = $guild->channels->get('id', $this->memberCountChannelId);
-        if(!$channel){
-            throw new \RuntimeException('Member count channel not found.');
+        if (!$channel) {
+            throw new RuntimeException('Member count channel not found.');
         }
         $channel->name = static::getMemberCountChannelName($guild->member_count);
         $guild->channels->save($channel);
@@ -130,7 +136,7 @@ class Guild extends AbstractModel
                 $threadId = null;
                 break;
             default:
-                throw new \InvalidArgumentException("$logType is not a valid channel type.");
+                throw new InvalidArgumentException("$logType is not a valid channel type.");
         }
 
         $outputPart = $guild->channels->get('id', $channelId);
@@ -173,10 +179,5 @@ class Guild extends AbstractModel
     public function getDiscordId(): string
     {
         return $this->discordId;
-    }
-
-    private static function getMemberCountChannelName(string|int $count = 'x'): string
-    {
-        return "Member Count: $count";
     }
 }

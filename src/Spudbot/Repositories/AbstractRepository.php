@@ -2,13 +2,14 @@
 
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2024-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 declare(strict_types=1);
 
 namespace Spudbot\Repositories;
 
+use BadMethodCallException;
 use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\Parts\Part;
@@ -123,7 +124,7 @@ abstract class AbstractRepository
     protected function getModel(): object
     {
         if (!isset($this->model)) {
-            throw new \BadMethodCallException(static::class . " does not have a hydration model specified.");
+            throw new BadMethodCallException(static::class . " does not have a hydration model specified.");
         }
         $model = $this->model;
         return new $model();

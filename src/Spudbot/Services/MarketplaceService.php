@@ -1,13 +1,14 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2024-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
 namespace Spudbot\Services;
 
 use Discord\Parts\Thread\Thread;
+use InvalidArgumentException;
 use OutOfBoundsException;
 use Spudbot\Model\Marketplace;
 use Spudbot\Repositories\MarketplaceRepository;
@@ -30,7 +31,7 @@ class MarketplaceService
             throw new OutOfBoundsException('Does not exist.');
         } catch (OutOfBoundsException $exception) {
             if (!$thread->owner_member) {
-                throw new \InvalidArgumentException('Null owner member provided.');
+                throw new InvalidArgumentException('Null owner member provided.');
             }
             return $this->save($this->marketplaceRepository->new([
                 'discord_id' => $thread->id,

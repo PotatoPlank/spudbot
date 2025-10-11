@@ -1,13 +1,14 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2024-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
 namespace Spudbot\Services;
 
 use Discord\Parts\Guild\ScheduledEvent;
+use Illuminate\Support\Collection;
 use OutOfBoundsException;
 use Spudbot\Model\Event;
 use Spudbot\Repositories\EventAttendanceRepository;
@@ -58,7 +59,7 @@ class EventService
         }
     }
 
-    public function getAttendance(Event $event): \Illuminate\Support\Collection
+    public function getAttendance(Event $event): Collection
     {
         return $this->attendanceRepository->getEventAttendance($event);
     }

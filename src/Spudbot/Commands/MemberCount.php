@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2024-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -9,6 +9,7 @@ namespace Spudbot\Commands;
 
 use DI\Attribute\Inject;
 use Discord\Parts\Interactions\Interaction;
+use Exception;
 use Spudbot\Model\Guild;
 use Spudbot\Services\GuildService;
 
@@ -16,6 +17,7 @@ class MemberCount extends AbstractCommandSubscriber
 {
     #[Inject]
     protected GuildService $guildService;
+
     public function getCommandName(): string
     {
         return 'counter';
@@ -46,14 +48,14 @@ class MemberCount extends AbstractCommandSubscriber
     {
         $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
 
-        if(!$guild->memberCountChannelId){
+        if (!$guild->memberCountChannelId) {
             $guild->memberCountChannelId = Guild::locateMemberCountChannel($interaction->guild)?->id;
             $this->guildService->save($guild);
         }
 
-        try{
+        try {
             $guild->setChannelMemberCount($interaction->guild);
-        }catch (\Exception $e){
+        } catch (Exception $e) {
             $this->spud->interact()
                 ->setTitle('Exception Encountered')
                 ->setDescription($e->getMessage())
