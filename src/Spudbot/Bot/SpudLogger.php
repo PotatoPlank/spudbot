@@ -50,10 +50,10 @@ class SpudLogger
      */
     public static function getInstance(?Spud $spud = null, mixed $guildId = null): static
     {
-        if (!isset(static::$instance)) {
-            static::$instance = new static($spud, $guildId);
+        if (!isset(self::$instance)) {
+            self::$instance = new static($spud, $guildId);
         }
-        return static::$instance;
+        return self::$instance;
     }
 
     protected static function sendChannelMessage(string $title, string $message, bool $emitTerminate = false): void
