@@ -24,14 +24,13 @@ class ErrorQueue
         $this->queue[] = $handler;
     }
 
-    public function notify(int $errorNumber, string $message, string $file, int $line, array $context): void
+    public function notify(int $errorNumber, string $message, string $file, int $line): void
     {
         $dto = new BotErrorDto();
         $dto->number = $errorNumber;
         $dto->message = $message;
         $dto->file = $file;
         $dto->line = $line;
-        $dto->context = $context;
 
         foreach ($this->queue as $handler) {
             $handler($dto);

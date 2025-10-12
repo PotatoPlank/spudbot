@@ -13,5 +13,4 @@ class BotErrorDto
     public string $message;
     public string $file;
     public int $line;
-    public array $context;
 }

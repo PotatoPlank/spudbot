@@ -10,6 +10,7 @@ namespace Spudbot\Events\Ready;
 use Discord\Parts\Interactions\Command\Command;
 use Discord\Repository\Interaction\GlobalCommandRepository;
 use Spudbot\Bot\Events;
+use Spudbot\Bot\SpudLogger;
 use Spudbot\Events\AbstractEventSubscriber;
 
 class FreshenCommands extends AbstractEventSubscriber
@@ -22,12 +23,14 @@ class FreshenCommands extends AbstractEventSubscriber
 
     public function update(): void
     {
+        SpudLogger::debug("Freshen commands called.");
         $this->spud->discord->application->commands->freshen()
             ->then(function (GlobalCommandRepository $commandRepository) {
                 /**
                  * @var Command $command
                  */
                 foreach ($commandRepository as $command) {
+                    SpudLogger::debug("Checking {$command->name}.");
                     $commandRegistered = $this->spud->commandObserver->hasCommand($command->name);
                     if ($commandRegistered) {
                         continue;

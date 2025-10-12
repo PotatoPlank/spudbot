@@ -45,6 +45,7 @@ class Spud
     public function __construct(public readonly ?ContainerInterface $container)
     {
         date_default_timezone_set('UTC');
+        SpudLogger::getInstance($this, $_ENV['LOG_GUILD'] ?? null);
 
         $errorHandler = new ErrorQueue();
         $exceptionHandler = new ExceptionQueue();
@@ -113,7 +114,6 @@ class Spud
         $boot->hook();
         $this->discord->on(Events::READY->value, function () {
             $this->eventObserver->emit(Events::READY->value);
-            SpudLogger::getInstance($this);
             SpudLogger::notice('SpudBot started.');
         });
 

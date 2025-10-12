@@ -16,11 +16,8 @@ class SpudLogger
     protected static self $instance;
     public array $exceptionQueue;
 
-    private function __construct(protected Spud $spud)
+    private function __construct(protected Spud $spud, protected mixed $guildId)
     {
-        $this->spud->discord->getLoop()->addTimer(1, function () {
-            static::$logChannel = $this->spud->discord->getChannel('1426677723413348522');
-        });
         $exceptionConsoleCallable = static function (string $message) {
             static::logger()->emergency($message);
         };
@@ -31,6 +28,9 @@ class SpudLogger
             $exceptionConsoleCallable,
             $exceptionDiscordMessage,
         ];
+        if ($guildId) {
+            static::fetchChannel($guildId);
+        }
     }
 
     /**
@@ -71,10 +71,10 @@ class SpudLogger
      * @param Spud|null $spud
      * @return static
      */
-    public static function getInstance(?Spud $spud = null): static
+    public static function getInstance(?Spud $spud = null, mixed $guildId = null): static
     {
         if (!isset(static::$instance)) {
-            static::$instance = new static($spud);
+            static::$instance = new static($spud, $guildId);
         }
         return static::$instance;
     }
@@ -97,6 +97,22 @@ class SpudLogger
     public static function error(string $message): void
     {
         static::logger()->error($message);
+    }
+
+    public static function fetchChannel(mixed $guildId): void
+    {
+        // Wait for injection
+        if (!isset(static::getInstance()->spud->discord)) {
+            return;
+        }
+        $guild = static::getInstance()->spud->discord->guilds->get('id', $guildId);
+        if (!$guild) {
+            return;
+        }
+        $channel = $guild->channels->get('id', '1426677723413348522');
+        if ($channel) {
+            static::$logChannel = $channel;
+        }
     }
 
     /**
