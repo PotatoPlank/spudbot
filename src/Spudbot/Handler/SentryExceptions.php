@@ -7,7 +7,6 @@
 
 namespace Spudbot\Handler;
 
-use Spudbot\Bot\SpudLogger;
 use Spudbot\Exception\BotTerminationException;
 use Throwable;
 
@@ -27,8 +26,8 @@ class SentryExceptions
     {
         if (!$exception instanceof BotTerminationException || !empty($exception->getMessage())) {
             captureException($exception);
-            $details = " {$exception->getFile()}:{$exception->getLine()} {$exception->getMessage()}";
-            SpudLogger::error(self::CONSOLE_MESSAGE . " $details");
+//            $details = " {$exception->getFile()}:{$exception->getLine()} {$exception->getMessage()}";
+//            SpudLogger::error(self::CONSOLE_MESSAGE . " $details");
         }
     }
 }
