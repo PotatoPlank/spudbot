@@ -8,7 +8,6 @@
 namespace Spudbot\Handler;
 
 use JetBrains\PhpStorm\NoReturn;
-use Spudbot\Bot\SpudLogger;
 
 class TerminationHandler
 {
@@ -17,6 +16,8 @@ class TerminationHandler
     #[NoReturn]
     public function handler(): void
     {
-        SpudLogger::exception(self::BOT_TERMINATION_MESSAGE, true);
+        print self::BOT_TERMINATION_MESSAGE . PHP_EOL;
+        exit;
+        //SpudLogger::exception(self::BOT_TERMINATION_MESSAGE, true);
     }
 }
