@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -42,14 +42,14 @@ class SetMarketplaceChannel extends AbstractSubCommandSubscriber
         }
         $channelId = $this->options['channel_id']->value;
         $interaction->guild->channels->fetch($channelId)
-            ->done(function (Channel $channelPart) use ($interaction) {
+            ->then(function (Channel $channelPart) use ($interaction) {
                 $isThread = ChannelTypes::isThread($channelPart->type);
 
                 $guild = $this->guildService->findOrCreateWithPart($interaction->guild);
 
                 if ($isThread) {
                     $interaction->guild->channels->fetch($channelPart->parent_id)
-                        ->done(function (Channel $parentPart) use ($channelPart, $guild) {
+                        ->then(function (Channel $parentPart) use ($channelPart, $guild) {
                             $channel = $this->channelService->findOrCreateWithPart($parentPart);
                             $thread = $this->threadService->findWithDiscordId(
                                 $channelPart->id,

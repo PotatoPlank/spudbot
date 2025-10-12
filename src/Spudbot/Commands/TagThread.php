@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -43,7 +43,7 @@ class TagThread extends AbstractCommandSubscriber
         $builder = $this->spud->interact()
             ->setTitle('Applied Tag');
 
-        $builder->acknowledge($interaction, true)->done(function () use ($interaction, $builder) {
+        $builder->acknowledge($interaction, true)->then(function () use ($interaction, $builder) {
             $tag = $interaction->data->options['tag']->value;
             $threadId = $interaction->data->options['thread']->value;
 
@@ -104,7 +104,7 @@ class TagThread extends AbstractCommandSubscriber
 
                 $rejected = function () use ($forumDirectoryPart, $embed, $directory) {
                     $embed->sendTo($forumDirectoryPart)
-                        ->done(function (Message $message) use ($directory) {
+                        ->then(function (Message $message) use ($directory) {
                             $directory->setEmbedId($message->id);
 
                             $this->directoryService
@@ -113,7 +113,7 @@ class TagThread extends AbstractCommandSubscriber
                 };
 
                 $forumDirectoryPart->messages
-                    ->fetch($directory->getEmbedId())->done($success, $rejected);
+                    ->fetch($directory->getEmbedId())->then($success, $rejected);
             } catch (OutOfBoundsException $exception) {
                 /**
                  * There is no directory for this channel

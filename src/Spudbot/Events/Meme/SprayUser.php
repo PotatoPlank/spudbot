@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -51,7 +51,7 @@ class SprayUser extends AbstractEventSubscriber
             ->setTitle('We\'ll Be Right Back')
             ->setOptions(['image' => ['url' => $this->refill]])
             ->replyTo($message)
-            ->done(function (Message $responseMessage) use ($message) {
+            ->then(function (Message $responseMessage) use ($message) {
                 $this->spud->discord->getLoop()
                     ->addTimer($this->getDelay(), function () use ($message, $responseMessage) {
                         $message->react($this->reaction);

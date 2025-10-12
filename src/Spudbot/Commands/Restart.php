@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2024-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -39,7 +39,7 @@ class Restart extends AbstractCommandSubscriber
             ->setTitle('Restart')
             ->setDescription('The bot will now restart.')
             ->respondTo($interaction, true)
-            ->done(function () {
+            ->then(function () {
                 $this->spud->terminate();
             });
     }

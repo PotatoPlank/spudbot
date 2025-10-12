@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -77,7 +77,7 @@ class GenerateDirectory extends AbstractCommandSubscriber
 
             $rejected = function () use ($directoryChannelPart, $embed, $directory) {
                 $embed->sendTo($directoryChannelPart)
-                    ->done(function (Message $message) use ($directory) {
+                    ->then(function (Message $message) use ($directory) {
                         $directory->setEmbedId($message->id);
 
                         $this->directoryService
@@ -86,7 +86,7 @@ class GenerateDirectory extends AbstractCommandSubscriber
             };
 
             $forumDirectoryPart->messages->fetch($directory->getEmbedId())
-                ->done($success, $rejected);
+                ->then($success, $rejected);
 
             $response->setDescription('Updated the directory.');
         } catch (OutOfBoundsException $exception) {
@@ -103,7 +103,7 @@ class GenerateDirectory extends AbstractCommandSubscriber
                 ->setTitle($directory->getTitle($forumChannelPart))
                 ->setDescription($directoryMessage)
                 ->sendTo($directoryChannelPart)
-                ->done(function (Message $message) use ($directory) {
+                ->then(function (Message $message) use ($directory) {
                     $directory->setEmbedId($message->id);
 
                     $this->directoryService->save($directory);

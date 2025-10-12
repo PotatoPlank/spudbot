@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2024-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -52,7 +52,7 @@ class AddedUserToNativeSeshEvent extends AbstractEventSubscriber
             ->sendTo($output);
 
         $guildPart->members->fetch($event->user_id)
-            ->done(function (Member $member) use ($eventPart) {
+            ->then(function (Member $member) use ($eventPart) {
                 $message = $this->spud->twig->render('dm/native_event.twig', [
                     'username' => $member->user->username,
                     'eventName' => $eventPart->name,

@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -83,7 +83,7 @@ class UpdatedThread extends AbstractEventSubscriber
 
             $rejected = function () use ($forumDirectoryPart, $embed, $directory) {
                 $embed->sendTo($forumDirectoryPart)
-                    ->done(function (Message $message) use ($directory) {
+                    ->then(function (Message $message) use ($directory) {
                         $directory->setEmbedId($message->id);
 
                         $this->directoryService
@@ -92,7 +92,7 @@ class UpdatedThread extends AbstractEventSubscriber
             };
 
             $forumDirectoryPart->messages->fetch($directory->getEmbedId())
-                ->done($success, $rejected);
+                ->then($success, $rejected);
         } catch (OutOfBoundsException $exception) {
             /**
              * There is no directory for this channel

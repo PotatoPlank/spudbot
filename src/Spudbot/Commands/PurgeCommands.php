@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2024-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -38,14 +38,14 @@ class PurgeCommands extends AbstractCommandSubscriber
             ->setTitle('Purge Commands')
             ->setDescription('Commands are now being purged. The bot will restart when it\'s complete.')
             ->respondTo($interaction)
-            ->done(function () {
+            ->then(function () {
                 $this->spud->discord->application->commands->freshen()->then(function ($commands) {
                     foreach ($commands as $i => $command) {
                         $this->spud->discord->getLogger()->alert("Purging the command: {$command->name}");
                         $exit = $i === (count($commands) - 1) ? function () {
                             $this->spud->terminate();
                         } : null;
-                        $this->spud->discord->application->commands->delete($command)->done($exit);
+                        $this->spud->discord->application->commands->delete($command)->then($exit);
                     }
                 });
             });
