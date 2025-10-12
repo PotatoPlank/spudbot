@@ -39,7 +39,21 @@ class SpudLogger
      */
     public static function logger(): LoggerInterface
     {
-        return static::$instance->spud->log();
+        return static::getInstance()->spud->log();
+    }
+
+    /**
+     * Returns instance of the bot wrapper
+     * @param Spud|null $spud
+     * @param mixed|null $guildId
+     * @return static
+     */
+    public static function getInstance(?Spud $spud = null, mixed $guildId = null): static
+    {
+        if (!isset(static::$instance)) {
+            static::$instance = new static($spud, $guildId);
+        }
+        return static::$instance;
     }
 
     protected static function sendChannelMessage(string $title, string $message, bool $emitTerminate = false): void
@@ -64,20 +78,6 @@ class SpudLogger
                 });
             }
         });
-    }
-
-    /**
-     * Returns instance of the bot wrapper
-     * @param Spud|null $spud
-     * @param mixed|null $guildId
-     * @return static
-     */
-    public static function getInstance(?Spud $spud = null, mixed $guildId = null): static
-    {
-        if (!isset(static::$instance)) {
-            static::$instance = new static($spud, $guildId);
-        }
-        return static::$instance;
     }
 
     /**

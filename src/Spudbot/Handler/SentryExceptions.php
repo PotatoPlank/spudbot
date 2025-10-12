@@ -16,7 +16,7 @@ use function Sentry\init;
 
 class SentryExceptions
 {
-    public const CONSOLE_MESSAGE = "An exception was encountered and the bot stopped:";
+    public const string CONSOLE_MESSAGE = "An exception was encountered and the bot stopped:";
 
     public function __construct(string $dsn, string $environment)
     {
