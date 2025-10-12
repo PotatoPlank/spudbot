@@ -45,7 +45,6 @@ class Spud
     public function __construct(public readonly ?ContainerInterface $container)
     {
         date_default_timezone_set('UTC');
-        SpudLogger::getInstance($this, $_ENV['LOG_GUILD'] ?? null);
 
         $errorHandler = new ErrorQueue();
         $exceptionHandler = new ExceptionQueue();
@@ -103,6 +102,7 @@ class Spud
 
     public function run(): void
     {
+        SpudLogger::getInstance($this, $_ENV['LOG_GUILD'] ?? null);
         if (isset($_ENV['LOG_GUILD'])) {
             $id = $_ENV['LOG_GUILD'];
             if (!empty($id)) {

@@ -69,6 +69,7 @@ class SpudLogger
     /**
      * Returns instance of the bot wrapper
      * @param Spud|null $spud
+     * @param mixed|null $guildId
      * @return static
      */
     public static function getInstance(?Spud $spud = null, mixed $guildId = null): static
