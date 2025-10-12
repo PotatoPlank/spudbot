@@ -25,12 +25,7 @@ class SpudLogger
             static::logger()->emergency($message);
         };
         $exceptionDiscordMessage = static function (string $message) {
-            if (!static::$logChannel) {
-                static::debug("Unable to write exception, channel unknown. $message");
-                return;
-            }
-
-            static::sendChannelMessage('Exeption', $message);
+            static::sendChannelMessage('Exception', $message);
         };
         $this->exceptionQueue = [
             $exceptionConsoleCallable,
@@ -47,22 +42,17 @@ class SpudLogger
         return static::$instance->spud->log();
     }
 
-    /**
-     * Sends debug message to console
-     * @param string $message
-     * @return void
-     */
-    public static function debug(string $message): void
-    {
-        static::logger()->debug($message);
-    }
-
     protected static function sendChannelMessage(string $title, string $message, bool $emitTerminate = false): void
     {
         $builder = static::getInstance()
             ->spud->interact()
             ->setTitle($title)
             ->setDescription($message);
+
+        if (!isset(static::$logChannel)) {
+            static::debug("Unable to send message, channel unknown. $message");
+            return;
+        }
 
         static::$logChannel->sendMessage($builder->build())->then(onRejected: function () {
             static::error('Failed sending discord message.');
@@ -89,6 +79,15 @@ class SpudLogger
         return static::$instance;
     }
 
+    /**
+     * Sends debug message to console
+     * @param string $message
+     * @return void
+     */
+    public static function debug(string $message): void
+    {
+        static::logger()->debug($message);
+    }
 
     /**
      * Sends error to console

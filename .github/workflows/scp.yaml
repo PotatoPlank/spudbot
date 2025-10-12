@@ -37,4 +37,4 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: cd /home/docker/spudbot && composer install && systemctl restart spudbot
+          script: systemctl stop spudbot && cd /home/docker/spudbot && composer update && systemctl start spudbot

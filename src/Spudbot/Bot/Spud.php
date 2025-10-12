@@ -113,9 +113,9 @@ class Spud
         $boot->hook();
         $this->discord->on(Events::READY->value, function () {
             $this->eventObserver->emit(Events::READY->value);
+            SpudLogger::getInstance($this);
             SpudLogger::notice('SpudBot started.');
         });
-        SpudLogger::getInstance($this);
 
         $this->startedAt = Carbon::now();
         $this->discord->run();
