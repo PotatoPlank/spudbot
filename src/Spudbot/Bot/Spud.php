@@ -102,7 +102,7 @@ class Spud
 
     public function run(): void
     {
-        SpudLogger::getInstance($this, $_ENV['LOG_GUILD'] ?? null);
+        //SpudLogger::getInstance($this, $_ENV['LOG_GUILD'] ?? null);
         if (isset($_ENV['LOG_GUILD'])) {
             $id = $_ENV['LOG_GUILD'];
             if (!empty($id)) {
@@ -114,7 +114,7 @@ class Spud
         $boot->hook();
         $this->discord->on(Events::READY->value, function () {
             $this->eventObserver->emit(Events::READY->value);
-            SpudLogger::notice('SpudBot started.');
+            //SpudLogger::notice('SpudBot started.');
         });
 
         $this->startedAt = Carbon::now();

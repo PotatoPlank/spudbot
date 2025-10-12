@@ -55,7 +55,7 @@ class SpudLogger
         $class = static::class;
         if (!isset(self::$instances[$class])) {
             if ($spud === null) {
-                captureException('Spud is null when creating the singleton.');
+                captureException(new \RuntimeException('Spud is null when creating the singleton.'));
                 exit('Spud is null when creating the singleton.');
             }
             self::$instances[$class] = new static($spud, $guildId);
