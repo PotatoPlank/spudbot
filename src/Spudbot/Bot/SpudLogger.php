@@ -10,10 +10,12 @@ namespace Spudbot\Bot;
 use Discord\Parts\Channel\Channel;
 use Psr\Log\LoggerInterface;
 
+use function Sentry\captureException;
+
 class SpudLogger
 {
     public static ?Channel $logChannel;
-    protected static self $instance;
+    private static array $instances = [];
     public array $exceptionQueue;
 
     private function __construct(protected Spud $spud, protected mixed $guildId)
@@ -50,10 +52,15 @@ class SpudLogger
      */
     public static function getInstance(?Spud $spud = null, mixed $guildId = null): static
     {
-        if (!isset(self::$instance)) {
-            self::$instance = new static($spud, $guildId);
+        $class = static::class;
+        if (!isset(self::$instances[$class])) {
+            if ($spud === null) {
+                captureException('Spud is null when creating the singleton.');
+                exit('Spud is null when creating the singleton.');
+            }
+            self::$instances[$class] = new static($spud, $guildId);
         }
-        return self::$instance;
+        return self::$instances[$class];
     }
 
     protected static function sendChannelMessage(string $title, string $message, bool $emitTerminate = false): void
