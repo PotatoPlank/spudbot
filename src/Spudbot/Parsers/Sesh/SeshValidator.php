@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2024-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -15,7 +15,7 @@ class SeshValidator
     public static function isValidEmbed(Message $message): bool
     {
         $isSesh = $message->components->count() > 0 && $message->user_id === '616754792965865495';
-        $isEvent = str_contains($message->components[0]->components[0]->custom_id, 'event_rsvp');
+        $isEvent = str_contains($message->components->first()->components->first()->custom_id, 'event_rsvp');
         return $isSesh && $isEvent;
     }
 
