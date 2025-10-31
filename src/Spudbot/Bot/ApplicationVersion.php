@@ -12,15 +12,15 @@ class ApplicationVersion
     /**
      * Update includes breaking changes
      */
-    public const int MAJOR = 6;
+    public const int MAJOR = 7;
     /**
      * Update includes non-breaking features
      */
-    public const int MINOR = 1;
+    public const int MINOR = 0;
     /**
      * Updates includes non-breaking bugfixes
      */
-    public const int REVISION = 1;
+    public const int REVISION = 0;
     public static string $buildNumber;
 
     public static function get(): string
