@@ -38,9 +38,7 @@ class AddedUserToNativeSeshEvent extends AbstractEventSubscriber
             return;
         }
 
-        $this->spud->discord->getLogger()->info(
-            "A user attempted to RSVP to a native event instead of the Sesh event."
-        );
+        $this->spud->logger->debug('A user attempted to RSVP to a native event, not sesh.', [$event,]);
 
         $guild = $this->guildService->findOrCreateWithPart($guildPart);
         $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $guildPart);

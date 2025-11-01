@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -23,7 +23,7 @@ class Marketplace extends AbstractModel
     public Member $member;
     public string $name;
     public string $lastStatus;
-    public string $tags;
+    public ?string $tags;
 
     public static function makeStatus(\Discord\Parts\Thread\Thread $thread): string
     {

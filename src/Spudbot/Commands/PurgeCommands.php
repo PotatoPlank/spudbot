@@ -41,7 +41,7 @@ class PurgeCommands extends AbstractCommandSubscriber
             ->then(function () {
                 $this->spud->discord->application->commands->freshen()->then(function ($commands) {
                     foreach ($commands as $i => $command) {
-                        $this->spud->discord->getLogger()->alert("Purging the command: {$command->name}");
+                        $this->spud->logger->info('Purging command.', ['command' => $command->name]);
                         $exit = $i === (count($commands) - 1) ? function () {
                             $this->spud->terminate();
                         } : null;

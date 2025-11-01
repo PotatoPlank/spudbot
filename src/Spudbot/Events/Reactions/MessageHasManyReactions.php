@@ -53,8 +53,8 @@ class MessageHasManyReactions extends AbstractEventSubscriber
 
                 $outputChannel = $message->guild->channels->get('id', $_ENV['MOD_ALERT_CHANNEL']);
                 if (!$outputChannel) {
-                    $this->spud->discord->getLogger()
-                        ->error('Unable to access the mod alerts channel.');
+                    $this->spud->logger
+                        ->error('Unable to access the mod alerts channel.', $_ENV['MOD_ALERT_CHANNEL']);
                     return;
                 }
                 $this->reactedCache[$message->id] = 0;

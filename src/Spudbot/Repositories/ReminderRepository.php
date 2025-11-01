@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023-2024. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2025. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -12,8 +12,8 @@ namespace Spudbot\Repositories;
 use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\Parts\Part;
+use Monolog\Logger;
 use OutOfBoundsException;
-use Psr\Log\LoggerInterface;
 use Spudbot\Helpers\Collection;
 use Spudbot\Model\Reminder;
 
@@ -25,7 +25,7 @@ use Spudbot\Model\Reminder;
 class ReminderRepository extends AbstractRepository
 {
     #[Inject]
-    protected LoggerInterface $logger;
+    protected Logger $logger;
     protected string $model = Reminder::class;
     protected array $endpoints = [
         'default' => 'reminders',

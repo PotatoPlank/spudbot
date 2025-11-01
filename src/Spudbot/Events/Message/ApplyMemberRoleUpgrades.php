@@ -40,8 +40,7 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
             return;
         }
 
-        $this->spud->discord->getLogger()
-            ->info("Checking to upgrade the membership of {$message->member->displayname}");
+        $this->spud->logger->notice('Checking eligibility to upgrade user membership.', [$message->member->displayname]);
 
         $guild = $this->guildService->findOrCreateWithPart($message->member->guild);
         $verifiedRole = $guild->verifiedMembersRoleId;
@@ -50,7 +49,7 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
         try {
             $output = $guild->getChannelThreadPart(Guild::BOT_LOG_CHANNEL, $message->guild);
         } catch (Exception $exception) {
-            $this->spud->discord->getLogger()
+            $this->spud->logger
                 ->error($exception->getMessage());
             return;
         }

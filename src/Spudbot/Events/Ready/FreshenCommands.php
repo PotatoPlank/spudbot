@@ -22,20 +22,18 @@ class FreshenCommands extends AbstractEventSubscriber
 
     public function update(): void
     {
-        //SpudLogger::debug("Freshen commands called.");
         $this->spud->discord->application->commands->freshen()
             ->then(function (GlobalCommandRepository $commandRepository) {
                 /**
                  * @var Command $command
                  */
                 foreach ($commandRepository as $command) {
-                    //SpudLogger::debug("Checking {$command->name}.");
+                    $this->spud->logger->info('Confirming command registered.', [$command->name]);
                     $commandRegistered = $this->spud->commandObserver->hasCommand($command->name);
                     if ($commandRegistered) {
                         continue;
                     }
-                    $this->spud->discord->getLogger()
-                        ->notice("Removed command {$command->name}");
+                    $this->spud->logger->notice('Removed registered command.', ['command' => $command->name]);
                     $this->spud->discord->application->commands
                         ->delete($command);
                 }

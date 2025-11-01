@@ -90,7 +90,7 @@ class GenerateDirectory extends AbstractCommandSubscriber
 
             $response->setDescription('Updated the directory.');
         } catch (OutOfBoundsException $exception) {
-            $this->spud->discord->getLogger()->info($exception->getMessage());
+            $this->spud->logger->error($exception->getMessage());
 
             $directory = new Directory();
             $directory->setDirectoryChannel($directoryChannel);

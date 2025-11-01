@@ -10,29 +10,22 @@ namespace Spudbot\Bot;
 use Carbon\Carbon;
 use DI\Attribute\Inject;
 use Discord\Discord;
+use Monolog\Logger;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
 use Spudbot\Builder\CommandBuilder;
 use Spudbot\Builder\EmbeddedResponse;
 use Spudbot\Builder\OptionBuilder;
 use Spudbot\Exception\BotTerminationException;
-use Spudbot\Handler\ErrorQueue;
-use Spudbot\Handler\ExceptionQueue;
-use Spudbot\Handler\SentryExceptions;
-use Spudbot\Handler\TerminationHandler;
 use Spudbot\Model\Guild;
 use Spudbot\Services\GuildService;
 use Spudbot\Util\Filesystem;
 use Twig\Environment;
-
-use function Sentry\captureLastError;
 
 class Spud
 {
     public readonly ?Guild $logGuild;
     #[Inject('spud.twig')]
     public readonly Environment $twig;
-    #[Inject]
     public readonly Discord $discord;
     #[Inject]
     public readonly CommandObserver $commandObserver;
@@ -40,23 +33,39 @@ class Spud
     public readonly EventObserver $eventObserver;
     public readonly Carbon $startedAt;
     #[Inject]
+    public readonly Logger $logger;
+    public ?string $lastErrorMessage = null;
+    #[Inject]
     protected GuildService $guildService;
 
     public function __construct(public readonly ?ContainerInterface $container)
     {
         date_default_timezone_set('UTC');
+        $logDirectory = dirname(__DIR__, 3) . '/logs/';
+        $files = array_reverse(glob($logDirectory . '*.log'));
+        if (!empty($files)) {
+            $this->lastErrorMessage = '';
+            $f = fopen($files[0], 'rb');
+            $cursor = -1;
 
-        $errorHandler = new ErrorQueue();
-        $exceptionHandler = new ExceptionQueue();
-        if (!empty($_ENV['SENTRY_DSN'])) {
-            $sentryHandler = new SentryExceptions($_ENV['SENTRY_DSN'], $_ENV['SENTRY_ENV']);
-            $exceptionHandler->addHandler([$sentryHandler, 'handler']);
-            $errorHandler->addHandler(function () {
-                captureLastError();
-            });
+            fseek($f, $cursor, SEEK_END);
+            $char = fgetc($f);
+
+            while ($char === "\n" || $char === "\r") {
+                fseek($f, $cursor--, SEEK_END);
+                $char = fgetc($f);
+            }
+
+            while ($char !== false && $char !== "\n" && $char !== "\r") {
+                $this->lastErrorMessage = $char . $this->lastErrorMessage;
+                fseek($f, $cursor--, SEEK_END);
+                $char = fgetc($f);
+            }
+            fclose($f);
+            if (!str_contains($this->lastErrorMessage, 'ERROR')) {
+                $this->lastErrorMessage = null;
+            }
         }
-        $terminationHandler = new TerminationHandler();
-        $exceptionHandler->addHandler([$terminationHandler, 'handler']);
     }
 
     public function attachAll(string $directory, array $excluded = []): void
@@ -102,7 +111,7 @@ class Spud
 
     public function run(): void
     {
-        //SpudLogger::getInstance($this, $_ENV['LOG_GUILD'] ?? null);
+        $this->logger->info("Spudbot booting.");
         if (isset($_ENV['LOG_GUILD'])) {
             $id = $_ENV['LOG_GUILD'];
             if (!empty($id)) {
@@ -112,9 +121,14 @@ class Spud
 
         $boot = new Boot($this);
         $boot->hook();
+        $this->discord = $this->container->get(Discord::class);
         $this->discord->on(Events::READY->value, function () {
             $this->eventObserver->emit(Events::READY->value);
-            //SpudLogger::notice('SpudBot started.');
+            if ($this->lastErrorMessage !== null) {
+                $this->discord->application->owner->sendMessage(
+                    $this->interact()->setTitle('Exception')->setDescription($this->lastErrorMessage)->build()
+                );
+            }
         });
 
         $this->startedAt = Carbon::now();
@@ -142,11 +156,6 @@ class Spud
     public function command(string $name, string $description = CommandBuilder::DEFAULT_DESCRIPTION): CommandBuilder
     {
         return $this->container->injectOn(new CommandBuilder($name, $description));
-    }
-
-    public function log(): LoggerInterface
-    {
-        return $this->discord->getLogger();
     }
 
 

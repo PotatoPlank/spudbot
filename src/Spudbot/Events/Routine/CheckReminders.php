@@ -39,13 +39,13 @@ class CheckReminders extends AbstractEventSubscriber
         foreach ($reminders as $reminder) {
             $guild = $this->spud->discord->guilds->get('id', $reminder->getGuild()->discordId);
             if (!$guild) {
-                $this->spud->log()
+                $this->spud->logger
                     ->error("Unable to access the guild {$reminder->getGuild()->discordId}.");
                 continue;
             }
             $channel = $guild->channels->get('id', $reminder->getChannel()->getDiscordId());
             if (!$channel) {
-                $this->spud->log()
+                $this->spud->logger
                     ->error("Unable to access the channel {$reminder->getChannel()->getDiscordId()}.");
                 continue;
             }
@@ -54,7 +54,7 @@ class CheckReminders extends AbstractEventSubscriber
                 ->sendTo($channel)
                 ->then(function () use ($reminder) {
                     if (empty($reminder->getRepeats())) {
-                        $this->spud->log()->notice("Removed one-time Reminder {$reminder->getExternalId()}");
+                        $this->spud->logger->notice("Removed one-time Reminder {$reminder->getExternalId()}");
                         $this->reminderService->remove($reminder);
                         return;
                     }
@@ -64,7 +64,7 @@ class CheckReminders extends AbstractEventSubscriber
                         $scheduled,
                         $interval
                     );
-                    $this->spud->log()->notice(
+                    $this->spud->logger->notice(
                         "Rescheduled {$reminder->getExternalId()} from $scheduled to $nextOccurrence"
                     );
                     $reminder->setScheduledAt($nextOccurrence);

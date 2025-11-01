@@ -15,7 +15,7 @@ use DI\Attribute\Inject;
 use Discord\Parts\Part;
 use GuzzleHttp\Client;
 use InvalidArgumentException;
-use Psr\Log\LoggerInterface;
+use Monolog\Logger;
 use Spudbot\Exception\ApiException;
 use Spudbot\Exception\ApiRequestFailure;
 use Spudbot\Exception\InvalidApiResponseException;
@@ -104,7 +104,7 @@ abstract class AbstractRepository
 
     protected function log(string $requestType, string $message): void
     {
-        if (isset($this->logger) && $this->logger instanceof LoggerInterface) {
+        if (isset($this->logger) && $this->logger instanceof Logger) {
             $this->logger->info("$requestType REQ: $message");
         }
     }
