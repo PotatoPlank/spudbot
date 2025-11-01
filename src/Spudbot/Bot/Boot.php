@@ -19,7 +19,8 @@ class Boot extends AbstractEventSubscriber
             $listeners->forEach(function ($command) use ($commandName) {
                 $this->spud->discord->application->commands->save($command->getCommand());
                 $this->spud->discord->listenCommand($commandName, function (...$args) use ($command, $commandName) {
-                    $this->spud->logger->notice('Command called', ['commandName' => $commandName, 'args' => $args]);
+                    $this->spud->logger->notice('Command called', ['commandName' => $commandName, 'argCount' => count($args)]
+                    );
                     if ($command->canRun(...$args)) {
                         $command->update(...$args);
                     }
