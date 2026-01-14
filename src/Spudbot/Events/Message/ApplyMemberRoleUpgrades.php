@@ -64,7 +64,7 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
         $hasSeriousDiscussion = $message->member->roles->isset('1114365923625816159');
         if ($message->guild->roles->isset('1460802399710089299')) {
             $svd = '1460802399710089299';
-            $hasSdv = $message->guild->roles->isset($svd);
+            $hasSdv = $message->member->roles->isset($svd);
             if (!$hasSdv && $hasSeriousDiscussion && $isAlreadyVerified) {
                 $message->member->addRole($svd);
             } elseif ($hasSdv && (!$hasSeriousDiscussion || !$isAlreadyVerified)) {
