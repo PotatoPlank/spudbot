@@ -62,9 +62,14 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
         $hasEnoughComments = $member->getTotalComments() >= self::MEMBER_COMMENTS_MINIMUM;
         $isAlreadyVerified = $message->member->roles->isset($verifiedRole);
         $hasSeriousDiscussion = $message->member->roles->isset('1114365923625816159');
-
-        if ($hasSeriousDiscussion && $message->guild->roles->isset('1460802399710089299')) {
-            $message->member->addRole('1460802399710089299');
+        if ($message->guild->roles->isset('1460802399710089299')) {
+            $svd = '1460802399710089299';
+            $hasSdv = $message->guild->roles->isset($svd);
+            if (!$hasSdv && $hasSeriousDiscussion && $isAlreadyVerified) {
+                $message->member->addRole($svd);
+            } elseif ($hasSdv) {
+                $message->member->removeRole($svd);
+            }
         }
 
         $isAlreadyUpgraded = $message->member->roles->isset($tenuredRoleId);
