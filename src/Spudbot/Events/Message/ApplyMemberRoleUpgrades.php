@@ -1,7 +1,7 @@
 <?php
 /*
  * This file is a part of the SpudBot Framework.
- * Copyright (c) 2023-2025. PotatoPlank <potatoplank@protonmail.com>
+ * Copyright (c) 2023-2026. PotatoPlank <potatoplank@protonmail.com>
  * The file is subject to the GNU GPLv3 license that is bundled with this source code in LICENSE.md.
  */
 
@@ -60,12 +60,18 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
 
         $hasMetMembershipLength = $memberTenure >= self::MEMBER_TENURE_MINIMUM;
         $hasEnoughComments = $member->getTotalComments() >= self::MEMBER_COMMENTS_MINIMUM;
+        $isAlreadyVerified = $message->member->roles->isset($verifiedRole);
+        $hasSeriousDiscussion = $message->member->roles->isset('1114365923625816159');
+
+        if ($hasSeriousDiscussion && $message->guild->roles->isset('1460802399710089299')) {
+            $message->member->addRole('1460802399710089299');
+        }
 
         $isAlreadyUpgraded = $message->member->roles->isset($tenuredRoleId);
         if ($isAlreadyUpgraded) {
             return;
         }
-        $isAlreadyVerified = $message->member->roles->isset($verifiedRole);
+
         $canModerateMembers = $message->member->getPermissions()->moderate_members;
 
         $meetsRequirements = $hasMetMembershipLength && $hasEnoughComments;
