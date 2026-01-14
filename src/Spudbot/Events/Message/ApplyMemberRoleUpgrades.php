@@ -67,7 +67,7 @@ class ApplyMemberRoleUpgrades extends AbstractEventSubscriber
             $hasSdv = $message->guild->roles->isset($svd);
             if (!$hasSdv && $hasSeriousDiscussion && $isAlreadyVerified) {
                 $message->member->addRole($svd);
-            } elseif ($hasSdv) {
+            } elseif ($hasSdv && (!$hasSeriousDiscussion || !$isAlreadyVerified)) {
                 $message->member->removeRole($svd);
             }
         }
